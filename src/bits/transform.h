@@ -70,7 +70,7 @@ auto transformed(InputContainer &&input, Transform &&transform)
                                            std::forward<Transform>(transform));
 }
 
-template <template <typename> class ResultContainer, typename InputContainer, typename Transform>
+template <template <typename...> class ResultContainer, typename InputContainer, typename Transform>
 #if __cplusplus < 201703L
 using ResultTypeForTransformed =
     ResultContainer<typename std::result_of<Transform(ValueType<InputContainer>)>::type>;
@@ -80,7 +80,7 @@ using ResultTypeForTransformed =
     ResultContainer<std::invoke_result_t<Transform, ValueType<InputContainer>>>;
 #endif
 
-template <template <typename> class ResultContainer, typename InputContainer, typename Transform>
+template <template <typename...> class ResultContainer, typename InputContainer, typename Transform>
 auto transformed(InputContainer &&input, Transform &&transform)
 {
     return detail::transformed<

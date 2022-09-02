@@ -60,6 +60,7 @@ private Q_SLOTS:
     void transformedChangeContainer();
     void transformedSameContainer();
     void transformedChangeContainerAndDataType();
+    void transformedChangeContainerAndDataType2();
     void transformedChangeDataType();
     void transformedWithRValue();
     void transform();
@@ -242,6 +243,15 @@ void TestAlgorithms::transformedChangeContainerAndDataType()
 {
     auto result = KDAlgorithms::transformed<QVector>(intVector, toString);
     QVector<QString> expected{"1", "2", "3", "4"};
+    QCOMPARE(result, expected);
+}
+
+void TestAlgorithms::transformedChangeContainerAndDataType2()
+{
+    QVector<int> vec{1, 2, 3, 4};
+    const auto toString = [](int i) { return QString::number(i); };
+    auto result = KDAlgorithms::transformed<std::vector>(vec, toString);
+    std::vector<QString> expected{"1", "2", "3", "4"};
     QCOMPARE(result, expected);
 }
 
