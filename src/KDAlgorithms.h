@@ -44,13 +44,15 @@ bool any_of(const Container &container, UnaryPredicate &&predicate)
 template <typename Container, typename UnaryPredicate>
 bool all_of(const Container &container, UnaryPredicate &&predicate)
 {
-    return std::all_of(begin(container), end(container), std::forward<UnaryPredicate>(predicate));
+    return std::all_of(container.cbegin(), container.cend(),
+                       std::forward<UnaryPredicate>(predicate));
 }
 
 template <typename Container, typename UnaryPredicate>
 bool none_of(const Container &container, UnaryPredicate &&predicate)
 {
-    return std::none_of(begin(container), end(container), std::forward<UnaryPredicate>(predicate));
+    return std::none_of(container.cbegin(), container.cend(),
+                        std::forward<UnaryPredicate>(predicate));
 }
 
 // -------------------- reverse / reversed --------------------
