@@ -1,7 +1,7 @@
 #pragma once
 
-namespace KDAlgorithms {
-namespace Operators {
+namespace kdalgorithms {
+namespace operators {
     template <typename L, typename R>
     auto operator&&(L l, R r)
     {
@@ -19,5 +19,5 @@ namespace Operators {
     {
         return [expression](auto value) { return !expression(value); };
     }
-} // namespace Compare
-} // namespace KDAlgorithms
+} // namespace operators
+} // namespace kdalgorithms

@@ -1,7 +1,7 @@
 #pragma once
 #include <type_traits>
 
-namespace KDAlgorithms {
+namespace kdalgorithms {
 namespace traits {
 
     namespace detail {
@@ -47,4 +47,4 @@ namespace traits {
     using return_type_of_t = typename return_type_of<
         typename std::remove_const<typename std::remove_reference<T>::type>::type>::result_type;
 } // namespace traits
-} // namespace KDAlgorithms
+} // namespace kdalgorithms

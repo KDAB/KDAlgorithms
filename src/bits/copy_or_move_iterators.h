@@ -3,7 +3,7 @@
 #include <tuple>
 #include <type_traits>
 
-namespace KDAlgorithms {
+namespace kdalgorithms {
 
 namespace detail {
     template <typename Iterator>
@@ -44,4 +44,4 @@ auto copy_or_move_iterators(Container &&container)
         std::forward<Container>(container), typename std::is_lvalue_reference<Container>::type());
 }
 
-} // namespace KDAlgorithms
+} // namespace kdalgorithms

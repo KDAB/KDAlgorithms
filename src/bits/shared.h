@@ -6,7 +6,7 @@
 #include <concepts>
 #endif
 
-namespace KDAlgorithms {
+namespace kdalgorithms {
 // FIXME remove before release - for now I'm fed up with retyping this over and over again :)
 template <typename T>
 struct print_type;
@@ -39,4 +39,4 @@ concept BinaryPredicateOnContainerValues =
 
 #endif
 
-} // namespace KDAlgorithms
+} // namespace kdalgorithms

@@ -6,7 +6,7 @@
 #include <functional>
 #include <iterator>
 
-namespace KDAlgorithms {
+namespace kdalgorithms {
 namespace detail {
     template <typename ResultContainer, typename InputContainer, typename UnaryPredicate>
     ResultContainer filtered(InputContainer &&input, UnaryPredicate &&predicate)
@@ -63,4 +63,4 @@ void filter(Container &input, UnaryPredicate &&predicate)
     input.erase(it, end(input));
 }
 
-} // namespace KDAlgorithms
+} // namespace kdalgorithms

@@ -16,7 +16,7 @@
 #include <optional>
 #endif
 
-namespace KDAlgorithms {
+namespace kdalgorithms {
 
 // -------------------- copy --------------------
 template <typename InputContainer, typename OutputContainer>
@@ -259,12 +259,12 @@ requires UnaryPredicateOnContainerValues<UnaryPredicate, Container>
 }
 
 // -------------------- remove_duplicates --------------------
-enum SortOption { DoSort, DoNotSort };
+enum SortOption { do_sort, do_not_sort };
 template <typename Container>
 void remove_duplicates(Container &container, SortOption sort)
 {
-    if (sort == DoSort)
-        KDAlgorithms::sort(container);
+    if (sort == do_sort)
+        kdalgorithms::sort(container);
     auto it = std::unique(container.begin(), container.end());
     container.erase(it, container.end());
 }
@@ -278,7 +278,7 @@ bool has_duplicates(Container &&container, SortOption sort)
         return pos != container.cend();
     };
 
-    if (sort == DoNotSort || std::is_sorted(container.cbegin(), container.cend()))
+    if (sort == do_not_sort || std::is_sorted(container.cbegin(), container.cend()))
         return hasDuplicates(container);
     else
         return hasDuplicates(sorted(std::forward<Container>(container)));
@@ -306,4 +306,4 @@ void remove_if(Container &container, UnaryPredicate &&predicate)
     container.erase(it, container.end());
 }
 
-} // namespace KDAlgorithms
+} // namespace kdalgorithms
