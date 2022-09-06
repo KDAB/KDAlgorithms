@@ -97,6 +97,7 @@ private Q_SLOTS:
     void has_duplicates_data();
     void remove();
     void remove_if();
+    void combiningTests();
 };
 
 void TestAlgorithms::copy()
@@ -749,6 +750,40 @@ void TestAlgorithms::remove_if()
         KDAlgorithms::remove_if(vec, withKey(42));
         QCOMPARE(vec, expected);
     }
+}
+
+void TestAlgorithms::combiningTests()
+{
+    using namespace KDAlgorithms::Operators;
+    std::vector<int> vec{1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+    const auto isOdd = [](int num) { return num % 2 == 1; };
+    const auto isGreatherThan = [](int num) { return [num](int value) { return value > num; }; };
+    const auto isDividableBy = [](int num) {
+        return [num](int value) { return value % num == 0; };
+    };
+    auto result = KDAlgorithms::filtered(vec, isOdd && isGreatherThan(5));
+    std::vector<int> expected{7, 9};
+    QCOMPARE(result, expected);
+
+    result = KDAlgorithms::filtered(vec, isOdd || isGreatherThan(5));
+    expected = {1, 3, 5, 6, 7, 8, 9, 10};
+    QCOMPARE(result, expected);
+
+    result = KDAlgorithms::filtered(vec, isOdd || !isGreatherThan(5));
+    expected = {1, 2, 3, 4, 5, 7, 9};
+    QCOMPARE(result, expected);
+
+    result = KDAlgorithms::filtered(vec, isOdd || (isGreatherThan(5) && !isDividableBy(3)));
+    expected = {1, 3, 5, 7, 8, 9, 10};
+    QCOMPARE(result, expected);
+
+    result = KDAlgorithms::filtered(vec, isOdd && isGreatherThan(5) && isDividableBy(3));
+    expected = {9};
+    QCOMPARE(result, expected);
+
+    result = KDAlgorithms::filtered(vec, isOdd && !isGreatherThan(5));
+    expected = {1, 3, 5};
+    QCOMPARE(result, expected);
 }
 
 QTEST_MAIN(TestAlgorithms)
