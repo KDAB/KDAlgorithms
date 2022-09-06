@@ -3,6 +3,7 @@
 #include "bits/copy_or_move_iterators.h"
 #include "bits/filter.h"
 #include "bits/has_reserve_trait.h"
+#include "bits/operators.h"
 #include "bits/return_type_trait.h"
 #include "bits/shared.h"
 #include "bits/transform.h"

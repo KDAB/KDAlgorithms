@@ -10,13 +10,15 @@ With C++11 algorithms you might write:
 
 ```
 std::vector<int> result;
-std::copy_if(myList.cbegin(), myList.cend(), std::back_inserter(result), [] (int i) { return i%2 == 1; });
+auto isOdd = [] (int i) {return i % 2 == 1; };
+std::copy_if(myList.cbegin(), myList.cend(), std::back_inserter(result), isOdd);
 ```
 
 With this library you can instead write:
 
 ```
-auto result = KDAlgorithms::filtered(myList, [] (int i) { return i%2 == 1; });
+auto isOdd = [] (int i) {return i % 2 == 1; };
+auto result = KDAlgorithms::filtered(myList, isOdd);
 ```
 
 Observe that it:
@@ -40,6 +42,21 @@ By returning an optional rather than an iterator, you do not need to worry wheth
 intVector.begin() or intVector.cbegin(). It is also more obvious that the value might be non-existent -
 after all, that is what std::optional is all about.
 
+Combining Algorithms
+--------------------
+KDAlgorithms offers <i>and</i>, <i>or</i> and <i>not</i> operators, which makes it possible to write code like this:
+
+```
+using namespace KDAlgorithms::Operators;
+std::vector<int> vec{1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+const auto isOdd = [](int num) { return num % 2 == 1; };
+const auto isGreatherThan = [](int num) { return [num](int value) { return value > num; }; };
+const auto isDividableBy = [](int num) {
+    return [num](int value) { return value % num == 0; };
+};
+
+auto result = KDAlgorithms::filtered(vec, isOdd || (isGreatherThan(5) && !isDividableBy(3)));
+```
 Algorithms
 ==========
 
