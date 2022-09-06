@@ -1,4 +1,4 @@
-#include "CopyObserver.h"
+#include "copy_observer.h"
 
 int CopyObserver::copies = 0;
 int CopyObserver::moves = 0;

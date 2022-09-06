@@ -1,6 +1,6 @@
 #if __cplusplus >= 202002L
 
-#include "../src/KDAlgorithms.h"
+#include "../src/kdalgorithms.h"
 #include <list>
 #include <string>
 #include <vector>
@@ -11,7 +11,7 @@ using namespace std;
 #define FAIL_2_ARG(name, function, arg1, arg2) \
 template <typename T, typename S>\
     void err_##name() { \
-        static_assert(!requires(T t, S s){KDAlgorithms::function(t, s);});\
+        static_assert(!requires(T t, S s){kdalgorithms::function(t, s);});\
 }\
 \
 void test_##name() \
@@ -22,7 +22,7 @@ void test_##name() \
 #define FAIL_3_ARG(name, function, arg1, arg2, arg3) \
 template <typename T, typename S, typename U>\
     void err_##name() { \
-        static_assert(!requires(T t, S s, U u){KDAlgorithms::function(t, s, u);});\
+        static_assert(!requires(T t, S s, U u){kdalgorithms::function(t, s, u);});\
 }\
 \
 void test_##name() \

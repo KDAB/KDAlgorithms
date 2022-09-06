@@ -1,5 +1,5 @@
-Algorithm helpers
-=================
+Algorithm helpers - kdalgorithms
+================================
 
 The purpose of this library is to make it easier to work with algorithms, let's start with a few examples
 
@@ -10,15 +10,15 @@ With C++11 algorithms you might write:
 
 ```
 std::vector<int> result;
-auto isOdd = [] (int i) {return i % 2 == 1; };
-std::copy_if(myList.cbegin(), myList.cend(), std::back_inserter(result), isOdd);
+auto is_odd = [] (int i) {return i % 2 == 1; };
+std::copy_if(my_list.cbegin(), my_list.cend(), std::back_inserter(result), is_odd);
 ```
 
 With this library you can instead write:
 
 ```
-auto isOdd = [] (int i) {return i % 2 == 1; };
-auto result = KDAlgorithms::filtered(myList, isOdd);
+auto is_odd = [] (int i) {return i % 2 == 1; };
+auto result = kdalgorithms::filtered(my_list, is_odd);
 ```
 
 Observe that it:
@@ -35,27 +35,27 @@ a good algorithmic choice is std::upper_bound, or ... is it std::lower_bound, an
 Here is how to do it with this library:
 
 ```
-std::optional<int> result = KDAlgorithms::max_value_less_than(intVector, 4);
+std::optional<int> result = kdalgorithms::max_value_less_than(int_vector, 4);
 ```
 
 By returning an optional rather than an iterator, you do not need to worry whether you should check it against 
-intVector.begin() or intVector.cbegin(). It is also more obvious that the value might be non-existent -
+int_vector.begin() or int_vector.cbegin(). It is also more obvious that the value might be non-existent -
 after all, that is what std::optional is all about.
 
 Combining Algorithms
 --------------------
-KDAlgorithms offers <i>and</i>, <i>or</i> and <i>not</i> operators, which makes it possible to write code like this:
+kdalgorithms offers <i>and</i>, <i>or</i> and <i>not</i> operators, which makes it possible to write code like this:
 
 ```
-using namespace KDAlgorithms::Operators;
+using namespace kdalgorithms::Operators;
 std::vector<int> vec{1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
-const auto isOdd = [](int num) { return num % 2 == 1; };
-const auto isGreatherThan = [](int num) { return [num](int value) { return value > num; }; };
-const auto isDividableBy = [](int num) {
+const auto is_odd = [](int num) { return num % 2 == 1; };
+const auto is_greather_than = [](int num) { return [num](int value) { return value > num; }; };
+const auto is_dividable_by = [](int num) {
     return [num](int value) { return value % num == 0; };
 };
 
-auto result = KDAlgorithms::filtered(vec, isOdd || (isGreatherThan(5) && !isDividableBy(3)));
+auto result = kdalgorithms::filtered(vec, is_odd || (is_greather_than(5) && !is_dividable_by(3)));
 ```
 Algorithms
 ==========
@@ -95,7 +95,7 @@ This algorithm appends the content of one collection to another.
 ```
 std::vector<int> src = ...;
 std::list<int> dest = ...;
-KDAlgorithms::copy(src, dest);
+kdalgorithms::copy(src, dest);
 ```
 
 To only copy some elements, see the algorithms <a href="#filter">filter and filtered</a>
@@ -109,18 +109,18 @@ and returns a new vector, with the elements matching the provided predicate.
 
 >
 ```
-auto isOdd = [] (int i) { return i%2 == 1; };
+auto is_odd = [] (int i) { return i%2 == 1; };
 std::vector<int> ints{1,2,3,4,5};
-auto odds = KDAlgorithms::filtered(ints, isOdd);
+auto odds = kdalgorithms::filtered(ints, is_odd);
 ```
 
 The algorithm may change the container on the fly:
 
 >
 ```
-auto isOdd = [] (int i) { return i%2 == 1; };
+auto is_odd = [] (int i) { return i%2 == 1; };
 std::list<int> ints{1,2,3,4,5};
-auto odds = KDAlgorithms::filtered<std::vector>(ints, isOdd);
+auto odds = kdalgorithms::filtered<std::vector>(ints, is_odd);
 // ods = std::vector<int>{1,3,5}
 ```
 
@@ -129,9 +129,9 @@ There is also a variant, which does a filtering inline (that is the result will 
 
 >
 ```
-auto isOdd = [] (int i) { return i%2 == 1; };
+auto is_odd = [] (int i) { return i%2 == 1; };
 std::vector<int> ints{1,2,3,4,5};
-KDAlgorithms::filter(ints, isOdd);
+kdalgorithms::filter(ints, is_odd);
 // ints = {1, 3, 5}
 ```
 
@@ -148,7 +148,7 @@ The first example has the same container as input and output:
 ```
 std::vector<int> ints{1,2,3};
 auto square = [] (int i) { return i*i; }
-auto result = KDAlgorithms::transformed(ints, square);
+auto result = kdalgorithms::transformed(ints, square);
 ```
 
 The type of container and items may also change during the transformation
@@ -156,7 +156,7 @@ The type of container and items may also change during the transformation
 ```
 std::vector<int> ints{1,2,3};
 auto toString = [] (int i) { return QString::number(i); }
-QVector<QString> result = KDAlgorithms::transformed<QVector>(ints, toString);
+QVector<QString> result = kdalgorithms::transformed<QVector>(ints, toString);
 ```
 
 Finally ther is a version which does an inline transform:
@@ -164,7 +164,7 @@ Finally ther is a version which does an inline transform:
 ```
 std::vector<int> ints{1,2,3};
 auto square = [] (int i) { return i*i; }
-KDAlgorithms::transform(ints, square);
+kdalgorithms::transform(ints, square);
 // ints = {1,4,9}
 ```
 
@@ -175,7 +175,7 @@ See [std::transform](https://en.cppreference.com/w/cpp/algorithm/transform) for 
 
 ```
 std::vector<int> ints{1,2,3};
-auto result = KDAlgorithms::reversed(ints);
+auto result = kdalgorithms::reversed(ints);
 // result = {3,2,1}
 ```
 
@@ -183,7 +183,7 @@ And there is also an inline version:
 
 ```
 std::vector<int> ints{1,2,3};
-KDAlgorithms::reverse(ints);
+kdalgorithms::reverse(ints);
 // ints = {3,2,1}
 ```
 
@@ -197,7 +197,7 @@ it may also take a comparison function.
 
 ```
 std::vector<int> ints{3,1,2};
-auto result = KDAlgorithms::sorted(ints);
+auto result = kdalgorithms::sorted(ints);
 // result = 1,2,3
 ```
 
@@ -205,7 +205,7 @@ Inline:
 
 ```
 std::vector<int> ints{3,1,2};
-KDAlgorithms::sort(ints);
+kdalgorithms::sort(ints);
 // ints = 1,2,3
 ```
 
@@ -213,7 +213,7 @@ Inline and with comparison function
 
 ```
 std::vector<int> ints{3,1,2};
-KDAlgorithms::sort(ints, std::greater<int>());
+kdalgorithms::sort(ints, std::greater<int>());
 // ints = 3,2,1
 ```
 
@@ -224,7 +224,7 @@ See [std::sort](https://en.cppreference.com/w/cpp/algorithm/sort) for the algori
 Tells whether a sequence is sorted. An optional second argument is used for comparison.
 
 ```
-auto result = KDAlgorithms::is_sorted(std::vector<int>{1, 3, 2, 4});
+auto result = kdalgorithms::is_sorted(std::vector<int>{1, 3, 2, 4});
 // result = true
 ```
 
@@ -235,7 +235,7 @@ struct S
     int y;
 };
 std::vector<Struct> unsorted{{2, 3}, {1, 4}, {3, 2}, {4, 1}};
-auto result = KDAlgorithms::is_sorted(unsorted, [](Struct x, Struct y) { return x.key < y.key; });
+auto result = kdalgorithms::is_sorted(unsorted, [](Struct x, Struct y) { return x.key < y.key; });
 // result = false
 ```
 
@@ -246,8 +246,8 @@ See [std::is_sorted](https://en.cppreference.com/w/cpp/algorithm/is_sorted) for 
 ---------------------------------------------------
 ```
 std::vector<int> ints{1,2,3};
-auto isOdd = [] (int i) { return i%2 == 1; };
-bool answer = KDAlgorithms::any_of(ints, isOdd);
+auto is_odd = [] (int i) { return i%2 == 1; };
+bool answer = kdalgorithms::any_of(ints, is_odd);
 ```
 
 See [std::all_of, std::any_of, std:none_of](https://en.cppreference.com/w/cpp/algorithm/all_any_none_of) for the algorithms from the standard.
@@ -258,7 +258,7 @@ The algorithm *contains* is searching for an item, but in contrast to *any_of* i
 
 ```
 std::vector<int> ints{1,2,3};
-bool answer = KDAlgorithms::contains(ints, 4);
+bool answer = kdalgorithms::contains(ints, 4);
 ```
 
 The method is also overloaded with an initializer list, which makes it possible to write code like this:
@@ -295,12 +295,12 @@ This, however only works on C++14 on Microsoft.
 -------------------------------------
 ```
 std::vector<int> vec{1, 2, 1, 3, 2, 1, 5};
-auto result = KDAlgorithms::count(vec, 1);
+auto result = kdalgorithms::count(vec, 1);
 ```
 
 ```
 std::vector<int> vec{1, 2, 1, 3, 2, 1, 5};
-auto result = KDAlgorithms::count_if(vec, [](int i) { return i > 2; });
+auto result = kdalgorithms::count_if(vec, [](int i) { return i > 2; });
 ```
 
 See [std::count](https://en.cppreference.com/w/cpp/algorithm/count) and [std::count_if](https://en.cppreference.com/w/cpp/algorithm/count_if)  for the algorithm from the standard.
@@ -316,11 +316,11 @@ Our version works on general containers and returns a [std::optional](https://en
 
 ```
 std::vector<int> ints{4,1,3,2};
-std::optional<int> item = KDAlgorithms::max_element(ints);
+std::optional<int> item = kdalgorithms::max_element(ints);
 // item.value() = 4
 
 std::vector<int> ints{};
-std::optional<int> item = KDAlgorithms::max_element(ints);
+std::optional<int> item = kdalgorithms::max_element(ints);
 // item.has_value() = false
 ```
 
@@ -328,7 +328,7 @@ It is also possible to provide a comparison function:
 
 ```
 std::vector<int> ints{4,1,3,2};
-auto result = KDAlgorithms::min_element(intVector, std::greater<int>());
+auto result = kdalgorithms::min_element(int_vector, std::greater<int>());
 // result.value() == 4
 ```
 
@@ -348,10 +348,10 @@ Both methods returns a [std::optional](https://en.cppreference.com/w/cpp/utility
 
 ```
 std::vector<int> ints{1,2,3,4};
-std::optional<int> result = KDAlgorithms::max_value_less_than(intVector, 4);
+std::optional<int> result = kdalgorithms::max_value_less_than(int_vector, 4);
 // result.value() = 3
 
-result = KDAlgorithms::max_value_less_than(intVector, -1);
+result = kdalgorithms::max_value_less_than(int_vector, -1);
 // result.has_value() = false
 ```
 
@@ -367,7 +367,7 @@ struct S
 std::vector<S> vec{{1, 4}, {2, 3}, {3, 2}, {4, 1}};
 auto compare = [](const S &v1, const S &v2) { return v1.x < v2.x; };
 
-auto result = KDAlgorithms::max_value_less_than(vec, S{4, 4}, compare);
+auto result = kdalgorithms::max_value_less_than(vec, S{4, 4}, compare);
 // result == S{3,2}
 ```
 
@@ -379,7 +379,7 @@ compiling with C++17 or above.*
 ```
 std::vector<int> x{1,2,3,4}
 std::vector<int> y{4, 1, 3, 2};
-bool b = KDAlgorithms::is_permutation(x,y));
+bool b = kdalgorithms::is_permutation(x,y));
 // b = true
 ```
 
@@ -391,8 +391,8 @@ The simple form of accumulate takes a collection and a mapping function.
 
 ```    
 std::vector<int> ints{1,2,3,4};
-auto sumDoubles = [](int x, int y) { return x + y * y; };
-int result = KDAlgorithms::accumulate(ints, sumDoubles);
+auto sum_doubles = [](int x, int y) { return x + y * y; };
+int result = kdalgorithms::accumulate(ints, sum_doubles);
 // result = 30
 ```
 
@@ -401,8 +401,8 @@ If you need to specify it, you can do so as an optional third parameter:
 
 ```
 std::vector<int> ints{1,2,3,4};
-auto factorial = [](int subTotal, int value) { return subTotal * value; };
-auto result = KDAlgorithms::accumulate(intVector, factorial, 1);
+auto factorial = [](int sub_total, int value) { return sub_total * value; };
+auto result = kdalgorithms::accumulate(int_vector, factorial, 1);
 // result = 24
 ```
 
@@ -411,20 +411,20 @@ This value must, however, be deducable without having to instantiate the type.
 That, for example, isn't the case for this function:
 
 ```
-auto toCommaSeperatedString = [](auto subTotal, int i) {
-    return subTotal + "," + QString::number(i);
+auto to_comma_seperated_string = [](auto sub_total, int i) {
+    return sub_total + "," + QString::number(i);
 };
 ```
 
-Here, the type of the function is the type of calling opertor+ on whatever the type of subTotal is.
+Here, the type of the function is the type of calling opertor+ on whatever the type of sub_total is.
 In such cases, you have to provide an initial value:
 
 ```
 std::vector<int> ints{1,2,3,4};
-auto toCommaSeperatedString = [](auto subTotal, int i) {
-    return subTotal + "," + QString::number(i);
+auto to_comma_seperated_string = [](auto sub_total, int i) {
+    return sub_total + "," + QString::number(i);
 };
-auto result = KDAlgorithms::accumulate(intVector, toCommaSeperatedString, QString("0"));
+auto result = kdalgorithms::accumulate(int_vector, to_comma_seperated_string, QString("0"));
 // result = 24
 ```
 
@@ -447,10 +447,10 @@ struct Struct
 std::vector<Struct> vec { ... };
 
 std::optional<Struct> result1
-   = KDAlgorithms::get_first_match(vec, [] (Struct s) { return s.key == 42; };
+   = kdalgorithms::get_first_match(vec, [] (Struct s) { return s.key == 42; };
 
 Struct result2
-   = KDAlgorithms::get_first_match_or_default(vec, [] (Struct s) { return s.key == 42; };
+   = kdalgorithms::get_first_match_or_default(vec, [] (Struct s) { return s.key == 42; };
 ```
 
 <a name="remove_duplicates">remove_duplicates</a>
@@ -462,13 +462,13 @@ The second parameter tells whether the collection should be sorted first.
 
 ```
 std::vector vec{3, 1, 2, 2, 1};
-KDAlgorithms::remove_duplicates(vec, KDAlgorithms::DoNotSort);
+kdalgorithms::remove_duplicates(vec, kdalgorithms::do_not_sort);
 // vec = {3, 1, 2, 1}
 ```
 
 ```
 std::vector vec{3, 1, 2, 2, 1};
-KDAlgorithms::remove_duplicates(vec, KDAlgorithms::DoSort);
+kdalgorithms::remove_duplicates(vec, kdalgorithms::do_sort);
 // vec = {1, 2, 3}
 ```
 
@@ -480,7 +480,7 @@ See [std::unique](https://en.cppreference.com/w/cpp/algorithm/unique) for the al
 
 ```
 std::vector vec{3, 1, 2, 1};
-auto result = KDAlgorithms::has_duplicates(vec, KDAlgorithms::DoSort);
+auto result = kdalgorithms::has_duplicates(vec, kdalgorithms::do_sort);
 // result = true
 ```
 
@@ -490,7 +490,7 @@ auto result = KDAlgorithms::has_duplicates(vec, KDAlgorithms::DoSort);
 
 ```
 std::vector<int> vec{1, 2, 1, 3};
-KDAlgorithms::remove(vec, 1);
+kdalgorithms::remove(vec, 1);
 // vec = {2,3}
 ```
 
@@ -500,10 +500,10 @@ struct Struct
     int key;
     int value;
 };
-auto withKey = [](int key) { return [key](const Struct &s) { return s.key == key; }; };
+auto with_key = [](int key) { return [key](const Struct &s) { return s.key == key; }; };
 
 std::vector<Struct> vec{{2, 3}, {1, 4}, {2, 2}, {4, 1}};
-KDAlgorithms::remove_if(vec, withKey(2));
+kdalgorithms::remove_if(vec, with_key(2));
 // vec = {{1,4}, {4,1}}
 ```
 

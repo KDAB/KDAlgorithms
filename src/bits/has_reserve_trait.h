@@ -2,7 +2,7 @@
 
 #include <type_traits>
 
-namespace KDAlgorithms {
+namespace kdalgorithms {
 namespace traits {
 
     template <typename... Ts>
@@ -28,4 +28,4 @@ namespace traits {
     constexpr bool has_reserve_method_v = has_reserve_method<T>::value;
 
 } // namespace traits
-} // namespace KDAlgorithms
+} // namespace kdalgorithms

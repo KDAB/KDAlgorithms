@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.9)
-project(KDAlgorithms)
+project(kdalgorithms)
 
-add_library(KDAlgorithms INTERFACE)
-target_include_directories(KDAlgorithms INTERFACE src/)
+add_library(kdalgorithms INTERFACE)
+target_include_directories(kdalgorithms INTERFACE src/)
 
 include(CTest)
 
@@ -10,7 +10,7 @@ if (CMAKE_SOURCE_DIR STREQUAL PROJECT_SOURCE_DIR)
   set(MAIN_PROJECT ON)
 endif()
 
-option(KDALGORITHMS_BUILD_TEST "Build the KDAlgorithms unit tests when BUILD_TESTING is enabled." ${MAIN_PROJECT})
+option(KDALGORITHMS_BUILD_TEST "Build the kdalgorithms unit tests when BUILD_TESTING is enabled." ${MAIN_PROJECT})
 
 if(BUILD_TESTING AND ${KDALGORITHMS_BUILD_TEST})
 
@@ -40,8 +40,8 @@ if(BUILD_TESTING AND ${KDALGORITHMS_BUILD_TEST})
     set(CMAKE_AUTOMOC TRUE)
 
     enable_testing()
-    add_executable(tst_KDAlgorithms
-        src/KDAlgorithms.h
+    add_executable(tst_kdalgorithms
+        src/kdalgorithms.h
 
         src/bits/copy_or_move_iterators.h
         src/bits/filter.h
@@ -51,13 +51,14 @@ if(BUILD_TESTING AND ${KDALGORITHMS_BUILD_TEST})
         src/bits/shared.h
         src/bits/transform.h
 
-        tests/tst_KDAlgorithms.cpp
+        tests/tst_kdalgorithms.cpp
         tests/tst_constraints.cpp
-        tests/CopyObserver.cpp
+        tests/copy_observer.h
+        tests/copy_observer.cpp
     )
 
-    add_test(NAME tst_KDAlgorithms COMMAND tst_KDAlgorithms)
-    target_link_libraries(tst_KDAlgorithms Qt${QT_VERSION_MAJOR}::Test)
+    add_test(NAME tst_kdalgorithms COMMAND tst_kdalgorithms)
+    target_link_libraries(tst_kdalgorithms Qt${QT_VERSION_MAJOR}::Test)
 
     add_executable(tst_return_type_traits tests/tst_return_type_traits.cpp)
 

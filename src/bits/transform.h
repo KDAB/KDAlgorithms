@@ -3,7 +3,7 @@
 #include "shared.h"
 #include <algorithm>
 
-namespace KDAlgorithms {
+namespace kdalgorithms {
 namespace detail {
     // Utility function used for meta type programming.
     // See TransformedType for details.
@@ -96,4 +96,4 @@ void transform(Container &input, UnaryPredicate &&predicate)
                    std::forward<UnaryPredicate>(predicate));
 }
 
-} // namespace KDAlgorithms
+} // namespace kdalgorithms
