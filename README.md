@@ -57,6 +57,30 @@ const auto is_dividable_by = [](int num) {
 
 auto result = kdalgorithms::filtered(vec, is_odd || (is_greather_than(5) && !is_dividable_by(3)));
 ```
+
+Using member functions as predicates
+------------------------------------
+Throughout the documentation we will used lambda expressions for predicates and comparison methods
+given to algorithms. It is, however, also possible to use pointer to member functions:
+
+```
+struct S
+{
+    int x;
+    int y;
+    bool hasEqualKeyValuePair() const { return x == y; }
+};
+std::vector<Struct> vec{{2, 3}, {1, 1}, {2, 2}, {4, 1}};
+kdalgorithms::remove_if(vec, &Struct::hasEqualKeyValuePair);
+```
+
+Be aware though that the method must be const.
+
+Lots of Examples
+----------------
+In this document you will find lots of examples. More, however, may be found in the 
+unit tests.
+
 Algorithms
 ==========
 

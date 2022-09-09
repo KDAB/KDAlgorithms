@@ -46,9 +46,11 @@ if(BUILD_TESTING AND ${KDALGORITHMS_BUILD_TEST})
         src/bits/copy_or_move_iterators.h
         src/bits/filter.h
         src/bits/has_reserve_trait.h
+        src/bits/is_const_method.h
         src/bits/operators.h
         src/bits/return_type_trait.h
         src/bits/shared.h
+        src/bits/to_function_object.h
         src/bits/transform.h
 
         tests/tst_kdalgorithms.cpp

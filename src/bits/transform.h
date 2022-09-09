@@ -1,5 +1,6 @@
 #pragma once
 
+#include "has_reserve_trait.h"
 #include "shared.h"
 #include <algorithm>
 
@@ -33,7 +34,11 @@ namespace detail {
     ResultContainer transformed(InputContainer &&input, Transform &&transform, std::true_type)
     {
         ResultContainer result;
-        result.reserve(input.size());
+#if __cplusplus >= 201703L
+        if constexpr (traits::has_reserve_method_v<ResultContainer>) {
+            result.reserve(input.size());
+        }
+#endif
         std::transform(input.cbegin(), input.cend(), std::back_inserter(result),
                        std::forward<Transform>(transform));
         return result;
@@ -66,8 +71,9 @@ auto transformed(InputContainer &&input, Transform &&transform)
 
 {
     using ResultType = detail::TransformedType<InputContainer, Transform>;
-    return detail::transformed<ResultType>(std::forward<InputContainer>(input),
-                                           std::forward<Transform>(transform));
+    return detail::transformed<ResultType>(
+        std::forward<InputContainer>(input),
+        detail::to_function_object(std::forward<Transform>(transform)));
 }
 
 template <template <typename...> class ResultContainer, typename InputContainer, typename Transform>
@@ -85,7 +91,8 @@ auto transformed(InputContainer &&input, Transform &&transform)
 {
     return detail::transformed<
         ResultTypeForTransformed<ResultContainer, InputContainer, Transform>>(
-        std::forward<InputContainer>(input), std::forward<Transform>(transform));
+        std::forward<InputContainer>(input),
+        detail::to_function_object(std::forward<Transform>(transform)));
 }
 
 // -------------------- transform --------------------

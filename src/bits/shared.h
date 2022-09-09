@@ -36,7 +36,6 @@ concept UnaryPredicateOnContainerValues =
 template <typename BinaryPredicate, typename Container>
 concept BinaryPredicateOnContainerValues =
     std::is_invocable_r_v<bool, BinaryPredicate, ValueType<Container>, ValueType<Container>>;
-
 #endif
 
 } // namespace kdalgorithms
