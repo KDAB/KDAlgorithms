@@ -41,9 +41,21 @@ struct Struct
     int key;
     int value;
     bool operator==(const Struct &other) const { return key == other.key && value == other.value; }
+    bool isKeyGreaterThanValue() const { return key > value; }
+    bool lessThanByXY(const Struct &other) const
+    {
+        if (key != other.key)
+            return key < other.key;
+        else
+            return value < other.value;
+    }
+    bool hasEqualKeys(const Struct &other) const { return key == other.key; }
+    bool hasEqualValues(const Struct &other) const { return value == other.value; }
+    bool hasEqualKeyValuePair() const { return key == value; }
+    int sumPairs() const { return key + value; }
 };
 
-std::vector<Struct> structVec{{1, 4}, {2, 3}, {3, 2}, {4, 1}};
+const std::vector<Struct> structVec{{1, 4}, {2, 3}, {3, 2}, {4, 1}};
 
 } // namespace
 class TestAlgorithms : public QObject
@@ -56,6 +68,7 @@ private Q_SLOTS:
     void filteredChangeContainer();
     void filteredSameContainer();
     void filteredAsMove();
+    void filterWithMemberFunction();
     void filter();
     void transformedChangeContainer();
     void transformedSameContainer();
@@ -63,6 +76,7 @@ private Q_SLOTS:
     void transformedChangeContainerAndDataType2();
     void transformedChangeDataType();
     void transformedWithRValue();
+    void transformMemberFunction();
     void transform();
     void anyOf();
     void allOf();
@@ -85,6 +99,7 @@ private Q_SLOTS:
     void maxValueLessThan();
     void maxValueLessThanCustomComparisor();
     void minValueGreaterThan();
+    void minValueGreaterThanCustomComparisor();
     void isPermutation();
     void accumulate();
     void accumulateWithInitialValue();
@@ -210,6 +225,22 @@ void TestAlgorithms::filteredAsMove()
     }
 }
 
+void TestAlgorithms::filterWithMemberFunction()
+{
+    std::vector<Struct> vec{{1, 2}, {2, 1}, {3, 3}, {4, 4}};
+    {
+        auto result = kdalgorithms::filtered(vec, &Struct::hasEqualKeyValuePair);
+        std::vector<Struct> expected{{3, 3}, {4, 4}};
+        QCOMPARE(result, expected);
+    }
+
+    {
+        auto result = kdalgorithms::filtered<std::list>(vec, &Struct::hasEqualKeyValuePair);
+        std::list<Struct> expected{{3, 3}, {4, 4}};
+        QCOMPARE(result, expected);
+    }
+}
+
 void TestAlgorithms::filter()
 {
     std::vector<int> vec{1, 2, 3, 4};
@@ -304,8 +335,23 @@ void TestAlgorithms::transformedWithRValue()
         QCOMPARE(result.at(0), 1);
         QCOMPARE(result.at(1), 4);
         QCOMPARE(result.at(2), 9);
-        // We obviously wont create a new ContainerObserver, but a QVector instead, so this is just
-        // to test that that code path works too.
+        // We obviously wont create a new ContainerObserver, but a QVector instead, so this is
+        // just to test that that code path works too.
+    }
+}
+
+void TestAlgorithms::transformMemberFunction()
+{
+    {
+        auto result = kdalgorithms::transformed(structVec, &Struct::sumPairs);
+        std::vector<int> expected{5, 5, 5, 5};
+        QCOMPARE(result, expected);
+    }
+
+    {
+        auto result = kdalgorithms::transformed<std::list>(structVec, &Struct::sumPairs);
+        std::list<int> expected{5, 5, 5, 5};
+        QCOMPARE(result, expected);
     }
 }
 
@@ -327,6 +373,13 @@ void TestAlgorithms::anyOf()
 
     res = kdalgorithms::any_of(emptyIntVector, greaterThan(3));
     QCOMPARE(res, false);
+
+    res = kdalgorithms::any_of(structVec, &Struct::isKeyGreaterThanValue);
+    QCOMPARE(res, true);
+
+    std::vector<Struct> vec{{1, 3}, {2, 4}, {3, 5}, {4, 6}};
+    res = kdalgorithms::any_of(vec, &Struct::isKeyGreaterThanValue);
+    QCOMPARE(res, false);
 }
 
 void TestAlgorithms::allOf()
@@ -339,6 +392,13 @@ void TestAlgorithms::allOf()
 
     res = kdalgorithms::all_of(emptyIntVector, greaterThan(3));
     QCOMPARE(res, true);
+
+    res = kdalgorithms::all_of(structVec, &Struct::isKeyGreaterThanValue);
+    QCOMPARE(res, false);
+
+    std::vector<Struct> vec{{3, 1}, {2, 1}, {3, 2}, {4, 1}};
+    res = kdalgorithms::all_of(vec, &Struct::isKeyGreaterThanValue);
+    QCOMPARE(res, true);
 }
 
 void TestAlgorithms::noneOf()
@@ -350,6 +410,13 @@ void TestAlgorithms::noneOf()
     QCOMPARE(res, true);
 
     res = kdalgorithms::none_of(emptyIntVector, greaterThan(3));
+    QCOMPARE(res, true);
+
+    res = kdalgorithms::none_of(structVec, &Struct::isKeyGreaterThanValue);
+    QCOMPARE(res, false);
+
+    std::vector<Struct> vec{{1, 3}, {2, 4}, {3, 5}, {4, 6}};
+    res = kdalgorithms::none_of(vec, &Struct::isKeyGreaterThanValue);
     QCOMPARE(res, true);
 }
 
@@ -397,18 +464,36 @@ void TestAlgorithms::sorted()
 
 void TestAlgorithms::sortWithCompare()
 {
-    std::vector<int> vec{3, 2, 4, 1};
-    kdalgorithms::sort(vec, std::greater<int>());
-    std::vector<int> expected{4, 3, 2, 1};
-    QCOMPARE(vec, expected);
+    {
+        std::vector<int> vec{3, 2, 4, 1};
+        kdalgorithms::sort(vec, std::greater<int>());
+        std::vector<int> expected{4, 3, 2, 1};
+        QCOMPARE(vec, expected);
+    }
+
+    {
+        std::vector<Struct> structVec{{1, 3}, {3, 4}, {3, 2}, {1, 2}};
+        kdalgorithms::sort(structVec, &Struct::lessThanByXY);
+        std::vector<Struct> expected{{1, 2}, {1, 3}, {3, 2}, {3, 4}};
+        QCOMPARE(structVec, expected);
+    }
 }
 
 void TestAlgorithms::sortedWithCompare()
 {
-    const std::vector<int> vec{3, 2, 4, 1};
-    auto result = kdalgorithms::sorted(vec, std::greater<int>());
-    std::vector<int> expected{4, 3, 2, 1};
-    QCOMPARE(result, expected);
+    {
+        const std::vector<int> vec{3, 2, 4, 1};
+        auto result = kdalgorithms::sorted(vec, std::greater<int>());
+        std::vector<int> expected{4, 3, 2, 1};
+        QCOMPARE(result, expected);
+    }
+
+    {
+        std::vector<Struct> structVec{{1, 3}, {3, 4}, {3, 2}, {1, 2}};
+        auto result = kdalgorithms::sorted(structVec, &Struct::lessThanByXY);
+        std::vector<Struct> expected{{1, 2}, {1, 3}, {3, 2}, {3, 4}};
+        QCOMPARE(result, expected);
+    }
 }
 
 void TestAlgorithms::sortedEnsureMoveOnly()
@@ -421,13 +506,27 @@ void TestAlgorithms::sortedEnsureMoveOnly()
 
 void TestAlgorithms::is_sorted()
 {
-    auto byKey = [](const Struct &x, const Struct &y) { return x.key < y.key; };
-    QCOMPARE(kdalgorithms::is_sorted(intVector), true);
-    QCOMPARE(kdalgorithms::is_sorted(std::vector<int>{1, 3, 2, 4}), false);
-    QCOMPARE(kdalgorithms::is_sorted(structVec, byKey), true);
+    {
+        QCOMPARE(kdalgorithms::is_sorted(intVector), true);
+        QCOMPARE(kdalgorithms::is_sorted(std::vector<int>{1, 3, 2, 4}), false);
+    }
 
-    std::vector<Struct> unsorted{{2, 3}, {1, 4}, {3, 2}, {4, 1}};
-    QCOMPARE(kdalgorithms::is_sorted(unsorted, byKey), false);
+    {
+        auto byKey = [](const Struct &x, const Struct &y) { return x.key < y.key; };
+        QCOMPARE(kdalgorithms::is_sorted(structVec, byKey), true);
+        std::vector<Struct> unsorted{{2, 3}, {1, 4}, {3, 2}, {4, 1}};
+        QCOMPARE(kdalgorithms::is_sorted(unsorted, byKey), false);
+    }
+
+    {
+        std::vector<Struct> sorted{{1, 2}, {1, 3}, {3, 2}, {3, 4}};
+        QCOMPARE(kdalgorithms::is_sorted(sorted, &Struct::lessThanByXY), true);
+    }
+
+    {
+        std::vector<Struct> sorted{{1, 4}, {1, 3}, {3, 2}, {3, 4}};
+        QCOMPARE(kdalgorithms::is_sorted(sorted, &Struct::lessThanByXY), false);
+    }
 }
 
 void TestAlgorithms::lvalue()
@@ -473,40 +572,60 @@ void TestAlgorithms::count_if()
     std::vector<int> vec{1, 2, 1, 3, 2, 1, 5};
     auto result = kdalgorithms::count_if(vec, [](int i) { return i > 2; });
     QCOMPARE(result, 2);
+
+    result = kdalgorithms::count_if(structVec, &Struct::isKeyGreaterThanValue);
+    QCOMPARE(result, 2);
 }
 
 void TestAlgorithms::max()
 {
 #if __cplusplus >= 201703L
-    std::vector<int> unsortedIts{4, 1, 3, 2};
-    auto result = kdalgorithms::max_element(unsortedIts, std::less<int>());
-    QCOMPARE(result.value(), 4);
+    {
+        std::vector<int> unsortedIts{4, 1, 3, 2};
+        auto result = kdalgorithms::max_element(unsortedIts, std::less<int>());
+        QCOMPARE(result.value(), 4);
 
-    result = kdalgorithms::max_element(unsortedIts, std::greater<int>());
-    QCOMPARE(result.value(), 1);
+        result = kdalgorithms::max_element(unsortedIts, std::greater<int>());
+        QCOMPARE(result.value(), 1);
 
-    result = kdalgorithms::max_element(emptyIntVector, std::less<int>());
-    QVERIFY(!result.has_value());
+        result = kdalgorithms::max_element(emptyIntVector, std::less<int>());
+        QVERIFY(!result.has_value());
 
-    result = kdalgorithms::max_element(unsortedIts);
-    QCOMPARE(result.value(), 4);
+        result = kdalgorithms::max_element(unsortedIts);
+        QCOMPARE(result.value(), 4);
+    }
+
+    {
+        auto result = kdalgorithms::max_element(structVec, &Struct::lessThanByXY);
+        Struct expected{4, 1};
+        QCOMPARE(*result, expected);
+    }
 #endif
 }
 
 void TestAlgorithms::min()
 {
 #if __cplusplus >= 201703L
-    auto result = kdalgorithms::min_element(intVector, std::less<int>());
-    QCOMPARE(result.value(), 1);
+    {
+        auto result = kdalgorithms::min_element(intVector, std::less<int>());
+        QCOMPARE(result.value(), 1);
 
-    result = kdalgorithms::min_element(intVector, std::greater<int>());
-    QCOMPARE(result.value(), 4);
+        result = kdalgorithms::min_element(intVector, std::greater<int>());
+        QCOMPARE(result.value(), 4);
 
-    result = kdalgorithms::min_element(emptyIntVector, std::less<int>());
-    QVERIFY(!result.has_value());
+        result = kdalgorithms::min_element(emptyIntVector, std::less<int>());
+        QVERIFY(!result.has_value());
 
-    result = kdalgorithms::min_element(intVector);
-    QCOMPARE(result.value(), 1);
+        result = kdalgorithms::min_element(intVector);
+        QCOMPARE(result.value(), 1);
+    }
+
+    {
+        auto result = kdalgorithms::min_element(structVec, &Struct::lessThanByXY);
+        Struct expected{1, 4};
+        QCOMPARE(*result, expected);
+    }
+
 #endif
 }
 
@@ -535,6 +654,10 @@ void TestAlgorithms::maxValueLessThanCustomComparisor()
     auto result = kdalgorithms::max_value_less_than(structVec, Struct{4, 4}, compare);
     Struct expected{3, 2};
     QCOMPARE(result.value(), expected);
+
+    result = kdalgorithms::max_value_less_than(structVec, Struct{4, 4}, &Struct::lessThanByXY);
+    expected = {4, 1};
+    QCOMPARE(result.value(), expected);
 #endif
 }
 
@@ -552,6 +675,21 @@ void TestAlgorithms::minValueGreaterThan()
 
     result = kdalgorithms::min_value_greater_than(emptyIntVector, 10);
     QVERIFY(!result.has_value());
+#endif
+}
+
+void TestAlgorithms::minValueGreaterThanCustomComparisor()
+{
+#if __cplusplus >= 201703L
+    auto compare = [](const Struct &v1, const Struct &v2) { return v1.key < v2.key; };
+
+    auto result = kdalgorithms::min_value_greater_than(structVec, Struct{2, 1}, compare);
+    Struct expected{3, 2};
+    QCOMPARE(result.value(), expected);
+
+    result = kdalgorithms::min_value_greater_than(structVec, Struct{2, 1}, &Struct::lessThanByXY);
+    expected = {2, 3};
+    QCOMPARE(result.value(), expected);
 #endif
 }
 
@@ -574,6 +712,9 @@ void TestAlgorithms::isPermutation()
 
     std::vector<double> permutedDoubleVector{4.0, 1.0, 3.0, 2.0};
     QVERIFY(kdalgorithms::is_permutation(intVector, permutedDoubleVector));
+
+    QVERIFY(kdalgorithms::is_permutation(v1, v2, &Struct::hasEqualKeys));
+    QVERIFY(!kdalgorithms::is_permutation(v1, v2, &Struct::hasEqualValues));
 }
 
 void TestAlgorithms::accumulate()
@@ -627,14 +768,23 @@ void TestAlgorithms::accumulateWithAuto()
 void TestAlgorithms::get_first_match()
 {
 #if __cplusplus >= 201703L
-    auto wihtKey = [](int key) { return [key](const Struct &s) { return s.key == key; }; };
+    {
+        auto wihtKey = [](int key) { return [key](const Struct &s) { return s.key == key; }; };
 
-    auto value = kdalgorithms::get_first_match(structVec, wihtKey(2));
-    Struct expected{2, 3};
-    QCOMPARE(value.value(), expected);
+        auto value = kdalgorithms::get_first_match(structVec, wihtKey(2));
+        Struct expected{2, 3};
+        QCOMPARE(value.value(), expected);
 
-    value = kdalgorithms::get_first_match(structVec, wihtKey(-1));
-    QVERIFY(!value.has_value());
+        value = kdalgorithms::get_first_match(structVec, wihtKey(-1));
+        QVERIFY(!value.has_value());
+    }
+
+    {
+        std::vector<Struct> vec{{1, 2}, {2, 1}, {3, 3}, {4, 1}};
+        auto value = kdalgorithms::get_first_match(vec, &Struct::hasEqualKeyValuePair);
+        Struct expected{3, 3};
+        QCOMPARE(value.value(), expected);
+    }
 #endif
 }
 
@@ -651,6 +801,10 @@ void TestAlgorithms::get_first_match_or_default()
 
     Struct defaultValue{42, -42};
     value = kdalgorithms::get_first_match_or_default(structVec, withKey(-1), defaultValue);
+    QCOMPARE(value, defaultValue);
+
+    value = kdalgorithms::get_first_match_or_default(structVec, &Struct::hasEqualKeyValuePair,
+                                                     defaultValue);
     QCOMPARE(value, defaultValue);
 }
 
@@ -748,6 +902,13 @@ void TestAlgorithms::remove_if()
         std::vector<Struct> vec{{2, 3}, {1, 4}, {2, 2}, {4, 1}};
         auto expected = vec;
         kdalgorithms::remove_if(vec, withKey(42));
+        QCOMPARE(vec, expected);
+    }
+
+    {
+        std::vector<Struct> vec{{2, 3}, {1, 1}, {2, 2}, {4, 1}};
+        std::vector<Struct> expected = {{2, 3}, {4, 1}};
+        kdalgorithms::remove_if(vec, &Struct::hasEqualKeyValuePair);
         QCOMPARE(vec, expected);
     }
 }

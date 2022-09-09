@@ -2,6 +2,7 @@
 
 #include "has_reserve_trait.h"
 #include "shared.h"
+#include "to_function_object.h"
 #include <algorithm>
 #include <functional>
 #include <iterator>
@@ -30,8 +31,9 @@ auto filtered(Container &&input, UnaryPredicate &&predicate)
     requires UnaryPredicateOnContainerValues<UnaryPredicate, Container>
 #endif
 {
-    return detail::filtered<remove_cvref_t<Container>>(std::forward<Container>(input),
-                                                       std::forward<UnaryPredicate>(predicate));
+    return detail::filtered<remove_cvref_t<Container>>(
+        std::forward<Container>(input),
+        detail::to_function_object(std::forward<UnaryPredicate>(predicate)));
 }
 
 template <template <typename...> class ResultContainer, typename InputContainer,
@@ -43,7 +45,8 @@ ResultContainer<ValueType<InputContainer>> filtered(InputContainer &&input,
 #endif
 {
     return detail::filtered<ResultContainer<ValueType<InputContainer>>>(
-        std::forward<InputContainer>(input), std::forward<UnaryPredicate>(predicate));
+        std::forward<InputContainer>(input),
+        detail::to_function_object(std::forward<UnaryPredicate>(predicate)));
 }
 
 // -------------------- filter --------------------
