@@ -1,4 +1,5 @@
 #pragma once
+#include "method_tests.h"
 #include <iterator>
 #include <tuple>
 #include <type_traits>
@@ -21,27 +22,35 @@ namespace detail {
 
     // used for l-value containers
     template <typename Container>
-    auto copy_or_move_iterators_helper(const Container &container, std::true_type)
+    auto read_iterator_wrapper_helper(const Container &container, std::true_type, std::false_type)
     {
         return make_iteratorPair(container.cbegin(), container.cend());
     }
 
     // used for r-value containers
     template <typename Container>
-    auto copy_or_move_iterators_helper(Container &&container, std::false_type)
+    auto read_iterator_wrapper_helper(Container &&container, std::false_type, std::false_type)
     {
         return make_iteratorPair(std::make_move_iterator(container.begin()),
                                  std::make_move_iterator(container.end()));
+    }
+
+    // Used for QHash and QMap containers
+    template <typename Container, typename T>
+    auto read_iterator_wrapper_helper(Container &&container, T, std::true_type)
+    {
+        return make_iteratorPair(container.constKeyValueBegin(), container.constKeyValueEnd());
     }
 }
 
 // Depending on the value type of container - either l-value or r-value
 // return iterators that either copy elements out or that move elements out.
 template <typename Container>
-auto copy_or_move_iterators(Container &&container)
+auto read_iterator_wrapper(Container &&container)
 {
-    return detail::copy_or_move_iterators_helper(
-        std::forward<Container>(container), typename std::is_lvalue_reference<Container>::type());
+    return detail::read_iterator_wrapper_helper(
+        std::forward<Container>(container), typename std::is_lvalue_reference<Container>::type(),
+        detail::has_keyValueBegin<Container>());
 }
 
 } // namespace kdalgorithms

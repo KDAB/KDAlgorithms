@@ -1,9 +1,10 @@
 #pragma once
 
-#include "bits/copy_or_move_iterators.h"
 #include "bits/filter.h"
-#include "bits/has_reserve_trait.h"
+#include "bits/insert_wrapper.h"
+#include "bits/method_tests.h"
 #include "bits/operators.h"
+#include "bits/read_iterator_wrapper.h"
 #include "bits/return_type_trait.h"
 #include "bits/shared.h"
 #include "bits/to_function_object.h"
@@ -27,33 +28,36 @@ requires ContainerOfType<OutputContainer, ValueType<InputContainer>>
 void copy(InputContainer &&input, OutputContainer &output)
 {
 #if __cplusplus >= 201703L
-    if constexpr (traits::has_reserve_method_v<OutputContainer>) {
+    if constexpr (detail::has_reserve_method_v<OutputContainer>) {
         output.reserve(input.size() + output.size());
     }
 #endif
-    auto range = copy_or_move_iterators(std::forward<InputContainer>(input));
-    std::copy(range.begin, range.end, std::back_inserter(output));
+    auto range = read_iterator_wrapper(std::forward<InputContainer>(input));
+    std::copy(range.begin, range.end, detail::insert_wrapper(output));
 }
 
 // -------------------- all_of / any_of / none_of --------------------
 template <typename Container, typename UnaryPredicate>
 bool any_of(const Container &container, UnaryPredicate &&predicate)
 {
-    return std::any_of(container.cbegin(), container.cend(),
+    auto range = read_iterator_wrapper(container);
+    return std::any_of(range.begin, range.end,
                        detail::to_function_object(std::forward<UnaryPredicate>(predicate)));
 }
 
 template <typename Container, typename UnaryPredicate>
 bool all_of(const Container &container, UnaryPredicate &&predicate)
 {
-    return std::all_of(container.cbegin(), container.cend(),
+    auto range = read_iterator_wrapper(container);
+    return std::all_of(range.begin, range.end,
                        detail::to_function_object(std::forward<UnaryPredicate>(predicate)));
 }
 
 template <typename Container, typename UnaryPredicate>
 bool none_of(const Container &container, UnaryPredicate &&predicate)
 {
-    return std::none_of(container.cbegin(), container.cend(),
+    auto range = read_iterator_wrapper(container);
+    return std::none_of(range.begin, range.end,
                         detail::to_function_object(std::forward<UnaryPredicate>(predicate)));
 }
 
@@ -134,7 +138,8 @@ requires UnaryPredicateOnContainerValues<UnaryPredicate, Container>
 #endif
 int count_if(const Container &container, UnaryPredicate &&predicate)
 {
-    return std::count_if(container.cbegin(), container.cend(),
+    auto range = read_iterator_wrapper(container);
+    return std::count_if(range.begin, range.end,
                          detail::to_function_object(std::forward<UnaryPredicate>(predicate)));
 }
 
@@ -149,6 +154,7 @@ requires BinaryPredicateOnContainerValues<Compare, Container>
 {
     if (container.empty())
         return {};
+
     return *std::max_element(container.cbegin(), container.cend(),
                              detail::to_function_object(std::forward<Compare>(compare)));
 }
@@ -225,7 +231,8 @@ requires std::is_invocable_r_v<ReturnType, BinaryOperation, ReturnType, ValueTyp
     ReturnType accumulate(const Container &container, BinaryOperation &&accumulateFunction,
                           ReturnType initialValue = {})
 {
-    return std::accumulate(container.cbegin(), container.cend(), initialValue,
+    auto range = read_iterator_wrapper(container);
+    return std::accumulate(range.begin, range.end, initialValue,
                            std::forward<BinaryOperation>(accumulateFunction));
 }
 
