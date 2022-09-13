@@ -1,6 +1,8 @@
 #pragma once
 
-#include "has_reserve_trait.h"
+#include "insert_wrapper.h"
+#include "method_tests.h"
+#include "read_iterator_wrapper.h"
 #include "shared.h"
 #include "to_function_object.h"
 #include <algorithm>
@@ -14,12 +16,12 @@ namespace detail {
     {
         ResultContainer result;
 #if __cplusplus >= 201703L
-        if constexpr (traits::has_reserve_method_v<ResultContainer>) {
+        if constexpr (detail::has_reserve_method_v<ResultContainer>) {
             result.reserve(input.size());
         }
 #endif
-        auto range = copy_or_move_iterators(std::forward<InputContainer>(input));
-        std::copy_if(range.begin, range.end, std::back_inserter(result),
+        auto range = read_iterator_wrapper(std::forward<InputContainer>(input));
+        std::copy_if(range.begin, range.end, detail::insert_wrapper(result),
                      std::forward<UnaryPredicate>(predicate));
         return result;
     }

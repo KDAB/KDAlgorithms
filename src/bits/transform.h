@@ -1,7 +1,9 @@
 #pragma once
 
-#include "has_reserve_trait.h"
+#include "insert_wrapper.h"
+#include "method_tests.h"
 #include "shared.h"
+#include "to_function_object.h"
 #include <algorithm>
 
 namespace kdalgorithms {
@@ -35,11 +37,12 @@ namespace detail {
     {
         ResultContainer result;
 #if __cplusplus >= 201703L
-        if constexpr (traits::has_reserve_method_v<ResultContainer>) {
+        if constexpr (detail::has_reserve_method_v<ResultContainer>) {
             result.reserve(input.size());
         }
 #endif
-        std::transform(input.cbegin(), input.cend(), std::back_inserter(result),
+        auto range = read_iterator_wrapper(std::forward<InputContainer>(input));
+        std::transform(range.begin, range.end, detail::insert_wrapper(result),
                        std::forward<Transform>(transform));
         return result;
     }
@@ -64,7 +67,7 @@ namespace detail {
             std::is_lvalue_reference<InputContainer>::value
                 || !std::is_same<ResultContainer, InputContainer>::value > ());
     }
-}
+} // namespace detail
 
 template <typename InputContainer, typename Transform>
 auto transformed(InputContainer &&input, Transform &&transform)
@@ -93,6 +96,23 @@ auto transformed(InputContainer &&input, Transform &&transform)
         ResultTypeForTransformed<ResultContainer, InputContainer, Transform>>(
         std::forward<InputContainer>(input),
         detail::to_function_object(std::forward<Transform>(transform)));
+}
+
+template <typename InputContainer, typename Transform>
+auto transformed_to_same_container(InputContainer &&input, Transform &&transform)
+
+{
+    return detail::transformed<remove_cvref_t<InputContainer>, InputContainer, Transform>(
+        std::forward<InputContainer>(input),
+        detail::to_function_object(std::forward<Transform>(transform)));
+}
+
+template <typename ReturnType, typename InputContainer, typename Transform>
+auto transformed_with_new_return_type(InputContainer &&input, Transform &&transform)
+
+{
+    return detail::transformed<ReturnType>(std::forward<InputContainer>(input),
+                                           std::forward<Transform>(transform));
 }
 
 // -------------------- transform --------------------

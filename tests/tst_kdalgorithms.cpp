@@ -5,6 +5,12 @@
 #include <QTest>
 #include <QVector>
 #include <algorithm>
+#include <deque>
+#include <forward_list>
+#include <set>
+#include <unordered_map>
+#include <unordered_set>
+#include <utility>
 #include <vector>
 
 namespace {
@@ -69,6 +75,7 @@ private Q_SLOTS:
     void filteredSameContainer();
     void filteredAsMove();
     void filterWithMemberFunction();
+    void filterOtherContainers();
     void filter();
     void transformedChangeContainer();
     void transformedSameContainer();
@@ -77,10 +84,12 @@ private Q_SLOTS:
     void transformedChangeDataType();
     void transformedWithRValue();
     void transformMemberFunction();
+    void transformOtherContainers();
     void transform();
     void anyOf();
     void allOf();
     void noneOf();
+    void anyAllNoneOtherContainers();
     void reverse();
     void reversed();
     void reversedEnsureMoveOnly();
@@ -105,6 +114,7 @@ private Q_SLOTS:
     void accumulateWithInitialValue();
     void accumulateDifferentReturnType();
     void accumulateWithAuto();
+    void accumulateWithMap();
     void get_first_match();
     void get_first_match_or_default();
     void remove_duplicates();
@@ -133,15 +143,109 @@ void TestAlgorithms::copy()
         QCOMPARE(list, expected);
     }
 
-#if 0 // Doesn't compile on mac
-    // This is the equivalent when using std::ranges
+    // deque
     {
-        QVector<int> result;
-        std::ranges::copy(intVector, std::back_inserter(result));
-        QVector<int> expected{1, 2, 3, 4};
-        QCOMPARE(result, expected);
+        std::deque<int> from{1, 2, 3, 4};
+        std::deque<int> to;
+        kdalgorithms::copy(from, to);
+        QCOMPARE(from, to);
     }
-#endif
+
+    // set
+    {
+        std::set<int> from{1, 2, 3, 4, 1, 3};
+        std::set<int> to;
+        kdalgorithms::copy(from, to);
+        QCOMPARE(from, to);
+    }
+
+    // unordered_set
+    {
+        std::unordered_set<int> from{1, 2, 3, 4, 1, 3};
+        std::unordered_set<int> to;
+        kdalgorithms::copy(from, to);
+        QCOMPARE(from, to);
+    }
+
+    // multiset
+    {
+        std::multiset<int> from{1, 2, 3, 4, 1, 3};
+        std::multiset<int> to;
+        kdalgorithms::copy(from, to);
+        QCOMPARE(from, to);
+    }
+
+    // unordered_multiset
+    {
+        std::unordered_multiset<int> from{1, 2, 3, 4, 1, 3};
+        std::unordered_multiset<int> to;
+        kdalgorithms::copy(from, to);
+        QCOMPARE(from, to);
+    }
+
+    // map
+    {
+        std::map<int, int> from{{1, 2}, {2, 3}, {4, 5}};
+        std::map<int, int> to;
+        kdalgorithms::copy(from, to);
+        QCOMPARE(from, to);
+    }
+
+    // multimap
+    {
+        std::multimap<int, int> from{{1, 2}, {2, 3}, {1, 3}, {4, 5}};
+        std::multimap<int, int> to;
+        kdalgorithms::copy(from, to);
+        QCOMPARE(from, to);
+    }
+
+    // unordered_map
+    {
+        std::unordered_map<int, int> from{{1, 2}, {2, 3}, {4, 5}};
+        std::unordered_map<int, int> to;
+        kdalgorithms::copy(from, to);
+        QCOMPARE(from, to);
+    }
+
+    // unordered_multimap
+    {
+        std::unordered_multimap<int, int> from{{1, 2}, {2, 3}, {1, 3}, {4, 5}};
+        std::unordered_multimap<int, int> to;
+        kdalgorithms::copy(from, to);
+        QCOMPARE(from, to);
+    }
+
+    // std::vector to std::set
+    {
+        std::set<int> set;
+        kdalgorithms::copy(intVector, set);
+        std::set<int> expected{1, 2, 3, 4};
+        QCOMPARE(set, expected);
+    }
+
+    // QSet
+    {
+        QSet<int> from{1, 2, 3, 4, 1, 3};
+        QSet<int> to;
+        kdalgorithms::copy(from, to);
+        QCOMPARE(from, to);
+    }
+
+    // QMap
+    {
+        QMap<int, int> from{{1, 2}, {2, 3}, {4, 5}};
+        QMap<int, int> to;
+        kdalgorithms::copy(from, to);
+        QCOMPARE(from, to);
+    }
+
+    // QHash
+    {
+        QHash<int, int> from{{1, 2}, {2, 3}, {4, 5}};
+        QHash<int, int> to;
+        kdalgorithms::copy(from, to);
+        QCOMPARE(from, to);
+    }
 }
 
 std::vector<CopyObserver> getObserverVector()
@@ -237,6 +341,37 @@ void TestAlgorithms::filterWithMemberFunction()
     {
         auto result = kdalgorithms::filtered<std::list>(vec, &Struct::hasEqualKeyValuePair);
         std::list<Struct> expected{{3, 3}, {4, 4}};
+        QCOMPARE(result, expected);
+    }
+}
+
+void TestAlgorithms::filterOtherContainers()
+{
+    {
+        auto result = kdalgorithms::filtered<std::set>(intVector, isOdd);
+        std::set<int> expected{1, 3};
+        QCOMPARE(result, expected);
+    }
+
+    {
+        auto result = kdalgorithms::filtered<QSet>(intVector, isOdd);
+        QSet<int> expected{1, 3};
+        QCOMPARE(result, expected);
+    }
+
+    {
+        std::map<int, std::string> map{{1, "abc"}, {2, "def"}, {3, "hij"}, {4, "klm"}};
+        auto hasOddKey = [](auto item) { return item.first % 2 == 1; };
+        auto result = kdalgorithms::filtered(map, hasOddKey);
+        std::map<int, std::string> expected{{1, "abc"}, {3, "hij"}};
+        QCOMPARE(result, expected);
+    }
+
+    {
+        QMap<int, std::string> map{{1, "abc"}, {2, "def"}, {3, "hij"}, {4, "klm"}};
+        auto hasOddKey = [](auto item) { return item.first % 2 == 1; };
+        auto result = kdalgorithms::filtered(map, hasOddKey);
+        QMap<int, std::string> expected{{1, "abc"}, {3, "hij"}};
         QCOMPARE(result, expected);
     }
 }
@@ -355,6 +490,87 @@ void TestAlgorithms::transformMemberFunction()
     }
 }
 
+void TestAlgorithms::transformOtherContainers()
+{
+    {
+        auto result = kdalgorithms::transformed<std::set>(intVector, toString);
+        std::set<QString> expected{"1", "2", "3", "4"};
+        QCOMPARE(result, expected);
+    }
+
+    {
+        auto result = kdalgorithms::transformed<QSet>(intVector, toString);
+        QSet<QString> expected{"1", "2", "3", "4"};
+        QCOMPARE(result, expected);
+    }
+
+    // This unfortunately doesn't work as I have no way to deduce the result type of the transform
+    // to match a container We would end up with std::vector<std::map<std::pair<int,string>>
+    // instead we now have kdalgorithms::transformed_to_same_container
+    /*
+    {
+        std::map<int, std::string> map{{1, "abc"}, {2, "def"}, {3, "hij"}, {4, "klm"}};
+        auto doubleKeys = [](const std::pair<int, std::string> &item) {
+            return std::pair(item.first * 2, item.second);
+        };
+        auto result = kdalgorithms::transformed(map, doubleKeys);
+        std::map<int, std::string> expected{{1, "abc"}, {4, "def"}, {6, "hij"}, {8, "klm"}};
+        QCOMPARE(result, expected);
+    }
+    */
+    {
+        std::map<int, std::string> map{{1, "abc"}, {2, "def"}, {3, "hij"}, {4, "klm"}};
+        auto doubleKeys = [](const auto &item) {
+            return std::make_pair(item.first * 2, item.second);
+        };
+        auto result = kdalgorithms::transformed_to_same_container(map, doubleKeys);
+        std::map<int, std::string> expected{{2, "abc"}, {4, "def"}, {6, "hij"}, {8, "klm"}};
+        QCOMPARE(result, expected);
+    }
+
+    {
+        QMap<int, std::string> map{{1, "abc"}, {2, "def"}, {3, "hij"}, {4, "klm"}};
+        auto doubleKeys = [](const auto &item) {
+            return std::make_pair(item.first * 2, item.second);
+        };
+        auto result = kdalgorithms::transformed_to_same_container(map, doubleKeys);
+        QMap<int, std::string> expected{{2, "abc"}, {4, "def"}, {6, "hij"}, {8, "klm"}};
+        QCOMPARE(result, expected);
+    }
+
+    {
+        auto squareItem = [](int i) { return i * i; };
+        auto result = kdalgorithms::transformed_to_same_container(intVector, squareItem);
+        std::vector<int> expected{1, 4, 9, 16};
+        QCOMPARE(result, expected);
+    }
+
+    {
+        std::map<int, std::string> map{{1, "abc"}, {2, "def"}, {3, "hij"}, {4, "klm"}};
+        auto result = kdalgorithms::transformed_with_new_return_type<std::map<std::string, int>>(
+            map, [](const auto &item) { return std::make_pair(item.second, item.first); });
+        std::map<std::string, int> expected{{"abc", 1}, {"def", 2}, {"hij", 3}, {"klm", 4}};
+        QCOMPARE(result, expected);
+    }
+
+    {
+        QMap<int, std::string> map{{1, "abc"}, {2, "def"}, {3, "hij"}, {4, "klm"}};
+        auto result = kdalgorithms::transformed_with_new_return_type<QMap<std::string, int>>(
+            map, [](const auto &item) { return std::make_pair(item.second, item.first); });
+        QMap<std::string, int> expected{{"abc", 1}, {"def", 2}, {"hij", 3}, {"klm", 4}};
+        QCOMPARE(result, expected);
+    }
+
+    {
+        std::map<int, std::string> map{{1, "abc"}, {2, "abc"}, {3, "hij"}, {4, "klm"}};
+        auto result =
+            kdalgorithms::transformed_with_new_return_type<std::multimap<std::string, int>>(
+                map, [](const auto &item) { return std::make_pair(item.second, item.first); });
+        std::multimap<std::string, int> expected{{"abc", 1}, {"abc", 2}, {"hij", 3}, {"klm", 4}};
+        QCOMPARE(result, expected);
+    }
+}
+
 void TestAlgorithms::transform()
 {
     std::vector<int> vec{1, 2, 3, 4};
@@ -418,6 +634,29 @@ void TestAlgorithms::noneOf()
     std::vector<Struct> vec{{1, 3}, {2, 4}, {3, 5}, {4, 6}};
     res = kdalgorithms::none_of(vec, &Struct::isKeyGreaterThanValue);
     QCOMPARE(res, true);
+}
+
+void TestAlgorithms::anyAllNoneOtherContainers()
+{
+    auto has_key = [](int value) { return [value](auto item) { return item.first == value; }; };
+
+    {
+        std::map<int, std::string> map{{1, "abc"}, {2, "def"}, {3, "hij"}, {4, "klm"}};
+        QVERIFY(kdalgorithms::any_of(map, has_key(2)));
+        QVERIFY(!kdalgorithms::any_of(map, has_key(42)));
+        QVERIFY(!kdalgorithms::all_of(map, has_key(2)));
+        QVERIFY(kdalgorithms::none_of(map, has_key(42)));
+        QVERIFY(!kdalgorithms::none_of(map, has_key(2)));
+    }
+
+    {
+        QMap<int, std::string> map{{1, "abc"}, {2, "def"}, {3, "hij"}, {4, "klm"}};
+        QVERIFY(kdalgorithms::any_of(map, has_key(2)));
+        QVERIFY(!kdalgorithms::any_of(map, has_key(42)));
+        QVERIFY(!kdalgorithms::all_of(map, has_key(2)));
+        QVERIFY(kdalgorithms::none_of(map, has_key(42)));
+        QVERIFY(!kdalgorithms::none_of(map, has_key(2)));
+    }
 }
 
 void TestAlgorithms::reverse()
@@ -569,12 +808,26 @@ void TestAlgorithms::count()
 
 void TestAlgorithms::count_if()
 {
-    std::vector<int> vec{1, 2, 1, 3, 2, 1, 5};
-    auto result = kdalgorithms::count_if(vec, [](int i) { return i > 2; });
-    QCOMPARE(result, 2);
+    {
+        std::vector<int> vec{1, 2, 1, 3, 2, 1, 5};
+        auto result = kdalgorithms::count_if(vec, [](int i) { return i > 2; });
+        QCOMPARE(result, 2);
 
-    result = kdalgorithms::count_if(structVec, &Struct::isKeyGreaterThanValue);
-    QCOMPARE(result, 2);
+        result = kdalgorithms::count_if(structVec, &Struct::isKeyGreaterThanValue);
+        QCOMPARE(result, 2);
+    }
+
+    {
+        std::map<int, std::string> map{{2, "abc"}, {4, "def"}, {6, "hij"}, {8, "klm"}};
+        auto result = kdalgorithms::count_if(map, [](auto item) { return item.first > 5; });
+        QCOMPARE(result, 2);
+    }
+
+    {
+        QMap<int, std::string> map{{2, "abc"}, {4, "def"}, {6, "hij"}, {8, "klm"}};
+        auto result = kdalgorithms::count_if(map, [](auto item) { return item.first > 5; });
+        QCOMPARE(result, 2);
+    }
 }
 
 void TestAlgorithms::max()
@@ -598,6 +851,14 @@ void TestAlgorithms::max()
     {
         auto result = kdalgorithms::max_element(structVec, &Struct::lessThanByXY);
         Struct expected{4, 1};
+        QCOMPARE(*result, expected);
+    }
+
+    {
+        std::map<int, int> map{{1, 1}, {2, 3}, {4, 2}};
+        auto lessthan = [](auto x, auto y) { return x.second < y.second; };
+        auto result = kdalgorithms::max_element(map, lessthan);
+        std::pair<const int, int> expected{2, 3};
         QCOMPARE(*result, expected);
     }
 #endif
@@ -643,6 +904,10 @@ void TestAlgorithms::maxValueLessThan()
 
     result = kdalgorithms::max_value_less_than(emptyIntVector, 10);
     QVERIFY(!result.has_value());
+
+    std::set<int> set{1, 12, 3, 4, -23};
+    result = kdalgorithms::max_value_less_than(set, 4);
+    QCOMPARE(*result, 3);
 #endif
 }
 
@@ -675,6 +940,10 @@ void TestAlgorithms::minValueGreaterThan()
 
     result = kdalgorithms::min_value_greater_than(emptyIntVector, 10);
     QVERIFY(!result.has_value());
+
+    std::set<int> set{1, 12, 3, 4, -23};
+    result = kdalgorithms::min_value_greater_than(set, 3);
+    QCOMPARE(*result, 4);
 #endif
 }
 
@@ -765,6 +1034,26 @@ void TestAlgorithms::accumulateWithAuto()
     QCOMPARE(stringResult, "0,1,2,3,4");
 }
 
+void TestAlgorithms::accumulateWithMap()
+{
+    QMap<int, std::string> map{{1, "abc"}, {2, "def"}, {3, "hij"}};
+    {
+        auto sum = [](int subResult, const std::pair<int, std::string> &pair) {
+            return subResult + pair.first;
+        };
+        auto result = kdalgorithms::accumulate(map, sum);
+        QCOMPARE(result, 6);
+    }
+    {
+        auto concatenate = [](const std::string &subResult,
+                              const std::pair<int, std::string> &pair) {
+            return subResult + "/" + pair.second;
+        };
+        auto result = kdalgorithms::accumulate(map, concatenate);
+        QCOMPARE(result, "/abc/def/hij");
+    }
+}
+
 void TestAlgorithms::get_first_match()
 {
 #if __cplusplus >= 201703L
@@ -783,6 +1072,14 @@ void TestAlgorithms::get_first_match()
         std::vector<Struct> vec{{1, 2}, {2, 1}, {3, 3}, {4, 1}};
         auto value = kdalgorithms::get_first_match(vec, &Struct::hasEqualKeyValuePair);
         Struct expected{3, 3};
+        QCOMPARE(value.value(), expected);
+    }
+
+    {
+        std::map<int, int> map{{1, 2}, {2, 1}, {3, 3}, {4, 1}};
+        auto valueEqualToKey = [](const auto &pair) { return pair.first == pair.second; };
+        auto value = kdalgorithms::get_first_match(map, valueEqualToKey);
+        std::pair<const int, int> expected{3, 3};
         QCOMPARE(value.value(), expected);
     }
 #endif
@@ -806,6 +1103,14 @@ void TestAlgorithms::get_first_match_or_default()
     value = kdalgorithms::get_first_match_or_default(structVec, &Struct::hasEqualKeyValuePair,
                                                      defaultValue);
     QCOMPARE(value, defaultValue);
+
+    {
+        std::map<int, int> map{{1, 2}, {2, 1}, {13, 3}, {4, 1}};
+        auto valueEqualToKey = [](const auto &pair) { return pair.first == pair.second; };
+        auto value = kdalgorithms::get_first_match_or_default(map, valueEqualToKey);
+        std::pair<const int, int> expected{0, 0};
+        QCOMPARE(value, expected);
+    }
 }
 
 void TestAlgorithms::remove_duplicates()

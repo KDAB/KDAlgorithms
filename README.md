@@ -81,6 +81,12 @@ Lots of Examples
 In this document you will find lots of examples. More, however, may be found in the 
 unit tests.
 
+Qt data types
+-------------
+A few of the functions (copy, filtered, and transform) need additional support for Qt 
+data types. Therefore, to us kdalgorithms together with Qt, you must include kdalgorithms_qt.h
+rather than kdalgorithms.h
+
 Algorithms
 ==========
 
@@ -183,13 +189,36 @@ auto toString = [] (int i) { return QString::number(i); }
 QVector<QString> result = kdalgorithms::transformed<QVector>(ints, toString);
 ```
 
-Finally ther is a version which does an inline transform:
+Finally there is a version which does an inline transform:
 
 ```
 std::vector<int> ints{1,2,3};
 auto square = [] (int i) { return i*i; }
 kdalgorithms::transform(ints, square);
 // ints = {1,4,9}
+```
+
+transformed on maps
+-------------------
+The transform methods can unfortunately not automatically deduce the
+type of the result container - even when it is just the same type as the input container,
+therefore two additional methods are provided:
+
+```
+std::map<int, std::string> map{{1, "abc"}, {2, "def"}, {3, "hij"}, {4, "klm"}};
+auto doubleKeys = [](const auto& item) {
+    return std::make_pair(item.first * 2, item.second);
+};
+auto result = kdalgorithms::transformed_to_same_container(map, doubleKeys);
+// result = {2, "abc"}, {4, "def"}, {6, "hij"}, {8, "klm"}
+```
+
+
+```
+std::map<int, std::string> map{{1, "abc"}, {2, "def"}, {3, "hij"}, {4, "klm"}};
+auto result = kdalgorithms::transformed_with_new_return_type<std::map<std::string, int>>(
+    map, [](auto item) { return std::make_pair(item.second, item.first); });
+// result = {{"abc", 1}, {"def", 2}, {"hij", 3}, {"klm", 4}};
 ```
 
 See [std::transform](https://en.cppreference.com/w/cpp/algorithm/transform) for the algorithm from the standard.

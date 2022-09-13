@@ -28,7 +28,7 @@ namespace detail {
     }
 
     template <typename F>
-    auto to_function_object(F &&f)
+    decltype(auto) to_function_object(F &&f)
     {
         return detail::to_function_object_helper(std::forward<F>(f),
                                                  typename std::is_member_pointer<F>::type{});

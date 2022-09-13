@@ -43,10 +43,12 @@ if(BUILD_TESTING AND ${KDALGORITHMS_BUILD_TEST})
     add_executable(tst_kdalgorithms
         src/kdalgorithms.h
 
-        src/bits/copy_or_move_iterators.h
+        src/bits/read_iterator_wrapper.h
         src/bits/filter.h
-        src/bits/has_reserve_trait.h
+        src/bits/insert_wrapper.h
         src/bits/is_const_method.h
+        src/bits/is_detected.h
+        src/bits/method_tests.h
         src/bits/operators.h
         src/bits/return_type_trait.h
         src/bits/shared.h
