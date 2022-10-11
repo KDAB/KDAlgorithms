@@ -130,8 +130,8 @@ private Q_SLOTS:
     void remove_duplicates();
     void has_duplicates();
     void has_duplicates_data();
-    void remove();
-    void remove_if();
+    void erase();
+    void erase_if();
     void combiningTests();
 };
 
@@ -1138,24 +1138,27 @@ void TestAlgorithms::remove_duplicates()
     {
         std::vector<int> vec{3, 1, 2, 4};
         auto expected = vec;
-        kdalgorithms::remove_duplicates(vec, kdalgorithms::do_not_sort);
+        auto count = kdalgorithms::remove_duplicates(vec, kdalgorithms::do_not_sort);
         QCOMPARE(vec, expected);
+        QCOMPARE(count, 0);
     }
 
     // Do not sort, so like std::unique
     {
         std::vector<int> vec{3, 1, 2, 2, 1};
-        kdalgorithms::remove_duplicates(vec, kdalgorithms::do_not_sort);
+        auto count = kdalgorithms::remove_duplicates(vec, kdalgorithms::do_not_sort);
         std::vector<int> expected{3, 1, 2, 1};
         QCOMPARE(vec, expected);
+        QCOMPARE(count, 1);
     }
 
     // Sort first
     {
         std::vector<int> vec{3, 1, 2, 2, 1};
-        kdalgorithms::remove_duplicates(vec, kdalgorithms::do_sort);
+        auto count = kdalgorithms::remove_duplicates(vec, kdalgorithms::do_sort);
         std::vector<int> expected{1, 2, 3};
         QCOMPARE(vec, expected);
+        QCOMPARE(count, 2);
     }
 }
 
@@ -1182,49 +1185,54 @@ void TestAlgorithms::has_duplicates_data()
     QTest::newRow("unsorted not unique") << std::vector<int>{3, 1, 3, 4} << true << true;
 }
 
-void TestAlgorithms::remove()
+void TestAlgorithms::erase()
 {
     // several duplicates to remove
     {
         std::vector<int> vec{1, 2, 1, 3};
-        kdalgorithms::remove(vec, 1);
+        auto count = kdalgorithms::erase(vec, 1);
         std::vector<int> expected{2, 3};
         QCOMPARE(vec, expected);
+        QCOMPARE(count, 2);
     }
 
     // Nothing to remove
     {
         std::vector<int> vec{1, 2, 1, 3};
-        kdalgorithms::remove(vec, 42);
+        auto count = kdalgorithms::erase(vec, 42);
         std::vector<int> expected{1, 2, 1, 3};
         QCOMPARE(vec, expected);
+        QCOMPARE(count, 0);
     }
 }
 
-void TestAlgorithms::remove_if()
+void TestAlgorithms::erase_if()
 {
     auto withKey = [](int key) { return [key](const Struct &s) { return s.key == key; }; };
     // several duplicates to remove
     {
         std::vector<Struct> vec{{2, 3}, {1, 4}, {2, 2}, {4, 1}};
-        kdalgorithms::remove_if(vec, withKey(2));
+        auto count = kdalgorithms::erase_if(vec, withKey(2));
         std::vector<Struct> expected{{1, 4}, {4, 1}};
         QCOMPARE(vec, expected);
+        QCOMPARE(count, 2);
     }
 
     // Nothing to remove
     {
         std::vector<Struct> vec{{2, 3}, {1, 4}, {2, 2}, {4, 1}};
         auto expected = vec;
-        kdalgorithms::remove_if(vec, withKey(42));
+        auto count = kdalgorithms::erase_if(vec, withKey(42));
         QCOMPARE(vec, expected);
+        QCOMPARE(count, 0);
     }
 
     {
         std::vector<Struct> vec{{2, 3}, {1, 1}, {2, 2}, {4, 1}};
         std::vector<Struct> expected = {{2, 3}, {4, 1}};
-        kdalgorithms::remove_if(vec, &Struct::hasEqualKeyValuePair);
+        auto count = kdalgorithms::erase_if(vec, &Struct::hasEqualKeyValuePair);
         QCOMPARE(vec, expected);
+        QCOMPARE(count, 2);
     }
 }
 

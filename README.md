@@ -71,7 +71,7 @@ struct S
     bool hasEqualKeyValuePair() const { return x == y; }
 };
 std::vector<Struct> vec{{2, 3}, {1, 1}, {2, 2}, {4, 1}};
-kdalgorithms::remove_if(vec, &Struct::hasEqualKeyValuePair);
+kdalgorithms::erase_if(vec, &Struct::hasEqualKeyValuePair);
 ```
 
 Be aware though that the method must be const.
@@ -98,7 +98,7 @@ Modifying algorithms
 - <a href="#reverse">reverse</a>
 - <a href="#sort">sort</a>
 - <a href="#remove_duplicates">remove_duplicates</a>
-- <a href="#remove">remove / remove_if</a>
+- <a href="#erase">erase / erase_if</a>
 
 Queries
 
@@ -537,13 +537,13 @@ auto result = kdalgorithms::has_duplicates(vec, kdalgorithms::do_sort);
 // result = true
 ```
 
-<a name="remove">remove / remove_if</a>
+<a name="erase">erase / erase_if</a>
 ---------------------------------------
-**remove** removes all instances of a given value, while **remove_if** remove all instances matching a predicate.
+**erase** removes all instances of a given value, while **erase_if** remove all instances matching a predicate.
 
 ```
 std::vector<int> vec{1, 2, 1, 3};
-kdalgorithms::remove(vec, 1);
+kdalgorithms::erase(vec, 1);
 // vec = {2,3}
 ```
 
@@ -556,7 +556,7 @@ struct Struct
 auto with_key = [](int key) { return [key](const Struct &s) { return s.key == key; }; };
 
 std::vector<Struct> vec{{2, 3}, {1, 4}, {2, 2}, {4, 1}};
-kdalgorithms::remove_if(vec, with_key(2));
+kdalgorithms::erase_if(vec, with_key(2));
 // vec = {{1,4}, {4,1}}
 ```
 
