@@ -284,12 +284,14 @@ requires UnaryPredicateOnContainerValues<UnaryPredicate, Container>
 // -------------------- remove_duplicates --------------------
 enum SortOption { do_sort, do_not_sort };
 template <typename Container>
-void remove_duplicates(Container &container, SortOption sort)
+auto remove_duplicates(Container &container, SortOption sort)
 {
     if (sort == do_sort)
         kdalgorithms::sort(container);
     auto it = std::unique(container.begin(), container.end());
+    auto count = std::distance(it, container.end());
     container.erase(it, container.end());
+    return count;
 }
 
 // -------------------- has_duplicates --------------------
@@ -307,26 +309,30 @@ bool has_duplicates(Container &&container, SortOption sort)
         return hasDuplicates(sorted(std::forward<Container>(container)));
 }
 
-// -------------------- remove / remove_if --------------------
+// -------------------- erase / erase_if --------------------
 template <typename Container, typename Value>
 #if __cplusplus >= 202002L
 requires ContainerOfType<Container, Value>
 #endif
-void remove(Container &container, Value &&value)
+auto erase(Container &container, Value &&value)
 {
     auto it = std::remove(container.begin(), container.end(), std::forward<Value>(value));
+    auto count = std::distance(it, container.end());
     container.erase(it, container.end());
+    return count;
 }
 
 template <typename Container, typename UnaryPredicate>
 #if __cplusplus >= 202002L
 requires UnaryPredicateOnContainerValues<UnaryPredicate, Container>
 #endif
-void remove_if(Container &container, UnaryPredicate &&predicate)
+auto erase_if(Container &container, UnaryPredicate &&predicate)
 {
     auto it = std::remove_if(container.begin(), container.end(),
                              detail::to_function_object(std::forward<UnaryPredicate>(predicate)));
+    auto count = std::distance(it, container.end());
     container.erase(it, container.end());
+    return count;
 }
 
 } // namespace kdalgorithms
