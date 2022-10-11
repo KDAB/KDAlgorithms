@@ -1,3 +1,13 @@
+/****************************************************************************
+**
+** This file is part of the KDAlgorithms
+**
+** SPDX-FileCopyrightText: 2022 Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
+**
+** SPDX-License-Identifier: MIT
+**
+****************************************************************************/
+
 #if __cplusplus >= 202002L
 
 #include "../src/kdalgorithms.h"
