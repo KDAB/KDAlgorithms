@@ -111,6 +111,7 @@ private Q_SLOTS:
     void is_sorted();
     void lvalue();
     void contains();
+    void value_in();
     void count();
     void count_if();
     void max();
@@ -804,8 +805,18 @@ void TestAlgorithms::contains()
 
     result = kdalgorithms::contains({1, 2, 3, 4}, 3);
     QCOMPARE(result, true);
+}
 
-    result = kdalgorithms::value_in(3, {1, 2, 3, 4});
+void TestAlgorithms::value_in()
+{
+    auto result = kdalgorithms::value_in(3, {1, 2, 3, 4});
+    QCOMPARE(result, true);
+
+    int val = 3;
+    result = kdalgorithms::value_in(val, {1, 2, 3, 4});
+    QCOMPARE(result, true);
+
+    result = kdalgorithms::value_in(QString("abc"), {"abc", "def", "hij"});
     QCOMPARE(result, true);
 }
 

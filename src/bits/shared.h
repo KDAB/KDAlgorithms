@@ -17,10 +17,6 @@
 #endif
 
 namespace kdalgorithms {
-// FIXME remove before release - for now I'm fed up with retyping this over and over again :)
-template <typename T>
-struct print_type;
-
 // ----- helper functions for older C++ versions -----
 #if __cplusplus >= 202002L
 template <typename T>
