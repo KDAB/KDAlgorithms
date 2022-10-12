@@ -34,15 +34,15 @@ namespace detail {
     template <typename Container>
     auto read_iterator_wrapper_helper(const Container &container, std::true_type, std::false_type)
     {
-        return make_iteratorPair(container.cbegin(), container.cend());
+        return make_iteratorPair(std::cbegin(container), std::cend(container));
     }
 
     // used for r-value containers
     template <typename Container>
     auto read_iterator_wrapper_helper(Container &&container, std::false_type, std::false_type)
     {
-        return make_iteratorPair(std::make_move_iterator(container.begin()),
-                                 std::make_move_iterator(container.end()));
+        return make_iteratorPair(std::make_move_iterator(std::begin(container)),
+                                 std::make_move_iterator(std::end(container)));
     }
 
     // Used for QHash and QMap containers

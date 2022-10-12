@@ -75,7 +75,7 @@ bool none_of(const Container &container, UnaryPredicate &&predicate)
 template <typename Container>
 void reverse(Container &container)
 {
-    std::reverse(container.begin(), container.end());
+    std::reverse(std::begin(container), std::end(container));
 }
 
 template <typename Container>
@@ -89,7 +89,7 @@ Container reversed(Container container)
 template <typename Container, typename Compare = std::less<ValueType<Container>>>
 void sort(Container &container, Compare &&compare = {})
 {
-    std::sort(container.begin(), container.end(),
+    std::sort(std::begin(container), std::end(container),
               detail::to_function_object(std::forward<Compare>(compare)));
 }
 
@@ -104,7 +104,7 @@ Container sorted(Container container, Compare &&compare = {})
 template <typename Container, typename Compare = std::less<ValueType<Container>>>
 bool is_sorted(const Container &container, Compare &&compare = {})
 {
-    return std::is_sorted(container.cbegin(), container.cend(),
+    return std::is_sorted(std::cbegin(container), std::cend(container),
                           detail::to_function_object(std::forward<Compare>(compare)));
 }
 
@@ -125,8 +125,9 @@ requires std::equality_comparable_with<ContainerValue, Value>
 #endif
 bool contains(std::initializer_list<ContainerValue> container, Value &&value)
 {
-    const auto it = std::find(container.begin(), container.end(), std::forward<Value>(value));
-    return it != container.end();
+    const auto it =
+        std::find(std::begin(container), std::end(container), std::forward<Value>(value));
+    return it != std::cend(container);
 }
 
 template <typename Value, typename ContainerValue>
@@ -145,7 +146,7 @@ requires ContainerOfType<Container, Value>
 #endif
 int count(const Container &container, Value &&value)
 {
-    return std::count(container.cbegin(), container.cend(), std::forward<Value>(value));
+    return std::count(std::cbegin(container), std::cend(container), std::forward<Value>(value));
 }
 
 template <typename Container, typename UnaryPredicate>
@@ -171,7 +172,7 @@ requires BinaryPredicateOnContainerValues<Compare, Container>
     if (container.empty())
         return {};
 
-    return *std::max_element(container.cbegin(), container.cend(),
+    return *std::max_element(std::cbegin(container), std::cend(container),
                              detail::to_function_object(std::forward<Compare>(compare)));
 }
 
@@ -184,7 +185,7 @@ requires BinaryPredicateOnContainerValues<Compare, Container>
 {
     if (container.empty())
         return {};
-    return *std::min_element(container.cbegin(), container.cend(),
+    return *std::min_element(std::cbegin(container), std::cend(container),
                              detail::to_function_object(std::forward<Compare>(compare)));
 }
 #endif
@@ -198,10 +199,11 @@ requires BinaryPredicateOnContainerValues<Compare, Container> && ContainerOfType
     std::optional<Item> max_value_less_than(const Container &container, Item &&needle,
                                             Compare &&compare = {})
 {
-    auto it = std::lower_bound(container.cbegin(), container.cend(), std::forward<Item>(needle),
-                               detail::to_function_object(std::forward<Compare>(compare)));
+    auto it =
+        std::lower_bound(std::cbegin(container), std::cend(container), std::forward<Item>(needle),
+                         detail::to_function_object(std::forward<Compare>(compare)));
 
-    if (it == container.cbegin())
+    if (it == std::cbegin(container))
         return {};
     --it;
     return *it;
@@ -214,9 +216,10 @@ requires BinaryPredicateOnContainerValues<Compare, Container> && ContainerOfType
     std::optional<Item> min_value_greater_than(const Container &container, Item &&needle,
                                                Compare &&compare = {})
 {
-    auto it = std::upper_bound(container.cbegin(), container.cend(), std::forward<Item>(needle),
-                               detail::to_function_object(std::forward<Compare>(compare)));
-    if (it == container.cend())
+    auto it =
+        std::upper_bound(std::cbegin(container), std::cend(container), std::forward<Item>(needle),
+                         detail::to_function_object(std::forward<Compare>(compare)));
+    if (it == std::cend(container))
         return {};
 
     return *it;
@@ -233,8 +236,8 @@ requires BinaryPredicateOnContainerValues<Compare, Container1> && BinaryPredicat
 bool is_permutation(const Container1 &container1, const Container2 &container2,
                     Compare &&compare = {})
 {
-    return std::is_permutation(container1.cbegin(), container1.cend(), container2.cbegin(),
-                               container2.cend(),
+    return std::is_permutation(std::cbegin(container1), std::cend(container1),
+                               std::cbegin(container2), std::cend(container2),
                                detail::to_function_object(std::forward<Compare>(compare)));
 }
 
@@ -261,9 +264,9 @@ requires UnaryPredicateOnContainerValues<UnaryPredicate, Container>
     std::optional<ValueType<Container>> get_first_match(const Container &container,
                                                         UnaryPredicate &&predicate)
 {
-    auto it = std::find_if(container.cbegin(), container.cend(),
+    auto it = std::find_if(std::cbegin(container), std::cend(container),
                            detail::to_function_object(std::forward<UnaryPredicate>(predicate)));
-    if (it == container.cend())
+    if (it == std::cend(container))
         return {};
     else
         return *it;
@@ -279,9 +282,9 @@ requires UnaryPredicateOnContainerValues<UnaryPredicate, Container>
                                                     UnaryPredicate &&predicate,
                                                     const ValueType<Container> &defaultValue = {})
 {
-    auto it = std::find_if(container.cbegin(), container.cend(),
+    auto it = std::find_if(std::cbegin(container), std::cend(container),
                            detail::to_function_object(std::forward<UnaryPredicate>(predicate)));
-    if (it == container.cend())
+    if (it == std::cend(container))
         return defaultValue;
     else
         return *it;
@@ -294,9 +297,9 @@ auto remove_duplicates(Container &container, SortOption sort)
 {
     if (sort == do_sort)
         kdalgorithms::sort(container);
-    auto it = std::unique(container.begin(), container.end());
-    auto count = std::distance(it, container.end());
-    container.erase(it, container.end());
+    auto it = std::unique(std::begin(container), std::end(container));
+    auto count = std::distance(it, std::end(container));
+    container.erase(it, std::end(container));
     return count;
 }
 
@@ -305,11 +308,11 @@ template <typename Container>
 bool has_duplicates(Container &&container, SortOption sort)
 {
     auto hasDuplicates = [](const remove_cvref_t<Container> &container) {
-        auto pos = std::adjacent_find(container.cbegin(), container.cend());
-        return pos != container.cend();
+        auto pos = std::adjacent_find(std::cbegin(container), std::cend(container));
+        return pos != std::cend(container);
     };
 
-    if (sort == do_not_sort || std::is_sorted(container.cbegin(), container.cend()))
+    if (sort == do_not_sort || std::is_sorted(std::cbegin(container), std::cend(container)))
         return hasDuplicates(container);
     else
         return hasDuplicates(sorted(std::forward<Container>(container)));
@@ -322,9 +325,9 @@ requires ContainerOfType<Container, Value>
 #endif
 auto erase(Container &container, Value &&value)
 {
-    auto it = std::remove(container.begin(), container.end(), std::forward<Value>(value));
-    auto count = std::distance(it, container.end());
-    container.erase(it, container.end());
+    auto it = std::remove(std::begin(container), std::end(container), std::forward<Value>(value));
+    auto count = std::distance(it, std::end(container));
+    container.erase(it, std::end(container));
     return count;
 }
 
@@ -334,10 +337,10 @@ requires UnaryPredicateOnContainerValues<UnaryPredicate, Container>
 #endif
 auto erase_if(Container &container, UnaryPredicate &&predicate)
 {
-    auto it = std::remove_if(container.begin(), container.end(),
+    auto it = std::remove_if(std::begin(container), std::end(container),
                              detail::to_function_object(std::forward<UnaryPredicate>(predicate)));
-    auto count = std::distance(it, container.end());
-    container.erase(it, container.end());
+    auto count = std::distance(it, std::end(container));
+    container.erase(it, std::end(container));
     return count;
 }
 

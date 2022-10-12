@@ -63,7 +63,7 @@ namespace detail {
     ResultContainer transformed(InputContainer &&input, Transform &&transform,
                                 std::false_type /* r-value and same containers */)
     {
-        std::transform(input.begin(), input.end(), input.begin(),
+        std::transform(std::begin(input), std::end(input), std::begin(input),
                        std::forward<Transform>(transform));
         return input;
     }
