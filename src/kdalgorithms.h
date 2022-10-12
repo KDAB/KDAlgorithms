@@ -111,23 +111,29 @@ bool is_sorted(const Container &container, Compare &&compare = {})
 // -------------------- contains / value_in --------------------
 template <typename Container, typename Value>
 #if __cplusplus >= 202002L
-requires ContainerOfType<Container, Value>
+requires std::equality_comparable_with<ValueType<Container>, Value>
 #endif
 bool contains(const Container &container, Value &&value)
 {
-    return std::find(container.cbegin(), container.cend(), std::forward<Value>(value))
-        != std::end(container);
+    return std::find(std::cbegin(container), std::cend(container), std::forward<Value>(value))
+        != std::cend(container);
 }
 
-template <typename Value>
-bool contains(std::initializer_list<Value> container, Value &&value)
+template <typename Value, typename ContainerValue>
+#if __cplusplus >= 202002L
+requires std::equality_comparable_with<ContainerValue, Value>
+#endif
+bool contains(std::initializer_list<ContainerValue> container, Value &&value)
 {
     const auto it = std::find(container.begin(), container.end(), std::forward<Value>(value));
     return it != container.end();
 }
 
-template <typename Value>
-bool value_in(Value &&value, std::initializer_list<Value> container)
+template <typename Value, typename ContainerValue>
+#if __cplusplus >= 202002L
+requires std::equality_comparable_with<ContainerValue, Value>
+#endif
+bool value_in(Value &&value, std::initializer_list<ContainerValue> container)
 {
     return contains(container, std::forward<Value>(value));
 }
