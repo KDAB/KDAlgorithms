@@ -108,6 +108,14 @@ auto transformed(InputContainer &&input, Transform &&transform)
         detail::to_function_object(std::forward<Transform>(transform)));
 }
 
+template <typename ResultContainer, typename InputContainer, typename Transform>
+auto transformed(InputContainer &&input, Transform &&transform)
+{
+    return detail::transformed<ResultContainer>(
+        std::forward<InputContainer>(input),
+        detail::to_function_object(std::forward<Transform>(transform)));
+}
+
 template <typename InputContainer, typename Transform>
 auto transformed_to_same_container(InputContainer &&input, Transform &&transform)
 
