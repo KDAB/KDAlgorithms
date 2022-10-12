@@ -81,12 +81,6 @@ Lots of Examples
 In this document you will find lots of examples. More, however, may be found in the 
 unit tests.
 
-Qt data types
--------------
-A few of the functions (copy, filtered, and transform) need additional support for Qt 
-data types. Therefore, to us kdalgorithms together with Qt, you must include kdalgorithms_qt.h
-rather than kdalgorithms.h
-
 Algorithms
 ==========
 
