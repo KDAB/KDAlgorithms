@@ -89,6 +89,7 @@ private Q_SLOTS:
     void filter();
     void transformedChangeContainer();
     void transformedSameContainer();
+    void transformedFullContainerTypeSpecified();
     void transformedChangeContainerAndDataType();
     void transformedChangeContainerAndDataType2();
     void transformedChangeDataType();
@@ -415,6 +416,21 @@ void TestAlgorithms::transformedSameContainer()
     // r-value
     result = kdalgorithms::transformed(getIntVector(), squareItem);
     QCOMPARE(result, expected);
+}
+
+void TestAlgorithms::transformedFullContainerTypeSpecified()
+{
+    {
+        auto result = kdalgorithms::transformed<QStringList>(intVector, toString);
+        QStringList expected{"1", "2", "3", "4"};
+        QCOMPARE(result, expected);
+    }
+
+    {
+        auto result = kdalgorithms::transformed<std::list<int>>(structVec, &Struct::sumPairs);
+        std::list<int> expected{5, 5, 5, 5};
+        QCOMPARE(result, expected);
+    }
 }
 
 void TestAlgorithms::transformedChangeContainerAndDataType()
