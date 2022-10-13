@@ -104,6 +104,7 @@ Queries
 - <a href="#minMaxWithPivot">min_value_greater_than / max_value_less_than</a> (C++17)
 - <a href="#isPermutation">is_permutation</a>
 - <a href="#get_first_match">get_first_match (C++17) / get_first_match_or_default</a>
+- <a href="#index_of_match">index_of_match</a>
 - <a href="#has_duplicates">has_duplicates</a>
 - <a href="#is_sorted">is_sorted</a>
 
@@ -194,9 +195,9 @@ kdalgorithms::transform(ints, square);
 
 transformed on maps
 -------------------
-The transform methods can unfortunately not automatically deduce the
+The transform functions can unfortunately not automatically deduce the
 type of the result container - even when it is just the same type as the input container,
-therefore two additional methods are provided:
+therefore two additional functions are provided:
 
 ```
 std::map<int, std::string> map{{1, "abc"}, {2, "def"}, {3, "hij"}, {4, "klm"}};
@@ -308,7 +309,7 @@ std::vector<int> ints{1,2,3};
 bool answer = kdalgorithms::contains(ints, 4);
 ```
 
-The method is also overloaded with an initializer list, which makes it possible to write code like this:
+The function is also overloaded with an initializer list, which makes it possible to write code like this:
 
 ```
 enum Column {ColumnA, ColumnB, ColumnC, ColumnD, ColumnD};
@@ -391,7 +392,7 @@ less than a specific item, the algorithms lower_bound and upper_bound comes into
 
 They can, however, be hard to wrap your head around, which is why this library provides the two
 most common use cases above.
-Both methods returns a [std::optional](https://en.cppreference.com/w/cpp/utility/optional).
+Both functions returns a [std::optional](https://en.cppreference.com/w/cpp/utility/optional).
 
 ```
 std::vector<int> ints{1,2,3,4};
@@ -481,7 +482,7 @@ See [std::accumulate](https://en.cppreference.com/w/cpp/algorithm/accumulate) fo
 
 <a name="get_first_match">get_first_match (C++17) / get_first_match_or_default</a>
 -------------------------------------------------
-This methods exist in two variants, they differ on what they do in case the item searched for
+This function exist in two variants, they differ on what they do in case the item searched for
 doesn't exist in the collection. **get_first_match** returns an optional (and thus requires C++17),
 while **get_first_match_or_default** returns a default constructed item.
 
@@ -498,6 +499,16 @@ std::optional<Struct> result1
 
 Struct result2
    = kdalgorithms::get_first_match_or_default(vec, [] (Struct s) { return s.key == 42; };
+```
+
+<a name="index_of_match">index_of_match</a>
+-------------------------------------------
+This function returns the index of the first match in the given container
+
+```
+std::vector<Struct> vec{{1, 2}, {2, 1}, {3, 3}, {4, 4}};
+result = kdalgorithms::index_of_match(vec, &Struct::hasEqualKeyValuePair);
+// result = 2
 ```
 
 <a name="remove_duplicates">remove_duplicates</a>
