@@ -344,4 +344,14 @@ auto erase_if(Container &container, UnaryPredicate &&predicate)
     return count;
 }
 
+// -------------------- index_of_match --------------------
+template <typename Container, typename UnaryPredicate>
+auto index_of_match(const Container &container, UnaryPredicate &&predicate)
+{
+    auto range = read_iterator_wrapper(container);
+    auto it = std::find_if(range.begin, range.end,
+                           detail::to_function_object(std::forward<UnaryPredicate>(predicate)));
+    return it == range.end ? -1 : (std::distance(range.begin, it));
+}
+
 } // namespace kdalgorithms

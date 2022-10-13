@@ -135,6 +135,7 @@ private Q_SLOTS:
     void erase();
     void erase_if();
     void combiningTests();
+    void index_of_match();
 };
 
 void TestAlgorithms::copy()
@@ -1295,6 +1296,29 @@ void TestAlgorithms::combiningTests()
     result = kdalgorithms::filtered(vec, isOdd && !isGreatherThan(5));
     expected = {1, 3, 5};
     QCOMPARE(result, expected);
+}
+
+void TestAlgorithms::index_of_match()
+{
+    auto result = kdalgorithms::index_of_match(intVector, isOdd);
+    QCOMPARE(result, 0);
+
+    result = kdalgorithms::index_of_match(structVec, &Struct::hasEqualKeyValuePair);
+    QCOMPARE(result, -1);
+
+    std::vector<Struct> vec{{1, 2}, {2, 1}, {3, 3}, {4, 4}};
+    result = kdalgorithms::index_of_match(vec, &Struct::hasEqualKeyValuePair);
+    QCOMPARE(result, 2);
+
+    std::map<int, int> map{{1, 2}, {3, 2}, {4, 5}};
+    result = kdalgorithms::index_of_match(
+        map, [](const auto &pair) { return pair.first > pair.second; });
+    QCOMPARE(result, 1);
+
+    QMap<int, int> qmap{{1, 2}, {3, 2}, {4, 5}};
+    result = kdalgorithms::index_of_match(
+        qmap, [](const auto &pair) { return pair.first > pair.second; });
+    QCOMPARE(result, 1);
 }
 
 QTEST_MAIN(TestAlgorithms)
