@@ -47,8 +47,8 @@ FAIL_2_ARG(filtered2, filtered<list>, vector<int>, function<string(string)>)
 FAIL_2_ARG(filter, filter, vector<int>, function<string(string)>)
 FAIL_2_ARG(contains, contains, vector<int>, string)
 FAIL_2_ARG(count, count, vector<int>, string)
-FAIL_2_ARG(get_first_match, get_first_match, vector<int>, function<bool(string)>)
-FAIL_2_ARG(get_first_match_or_default, get_first_match_or_default, vector<int>,
+FAIL_2_ARG(get_first_match, get_match, vector<int>, function<bool(string)>)
+FAIL_2_ARG(get_first_match_or_default, get_match_or_default, vector<int>,
            function<bool(string)>)
 FAIL_2_ARG(count_if_wong_type, count_if, vector<int>, std::function<bool(string)>)
 FAIL_2_ARG(count_if_no_return, count_if, vector<int>, std::function<void(int)>)

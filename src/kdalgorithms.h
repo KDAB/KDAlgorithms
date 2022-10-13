@@ -261,7 +261,7 @@ template <typename Container, typename UnaryPredicate>
 #if __cplusplus >= 202002L
 requires UnaryPredicateOnContainerValues<UnaryPredicate, Container>
 #endif
-    std::optional<ValueType<Container>> get_first_match(const Container &container,
+    std::optional<ValueType<Container>> get_match(const Container &container,
                                                         UnaryPredicate &&predicate)
 {
     auto it = std::find_if(std::cbegin(container), std::cend(container),
@@ -278,7 +278,7 @@ template <typename Container, typename UnaryPredicate>
 #if __cplusplus >= 202002L
 requires UnaryPredicateOnContainerValues<UnaryPredicate, Container>
 #endif
-    ValueType<Container> get_first_match_or_default(const Container &container,
+    ValueType<Container> get_match_or_default(const Container &container,
                                                     UnaryPredicate &&predicate,
                                                     const ValueType<Container> &defaultValue = {})
 {

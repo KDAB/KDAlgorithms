@@ -127,8 +127,8 @@ private Q_SLOTS:
     void accumulateDifferentReturnType();
     void accumulateWithAuto();
     void accumulateWithMap();
-    void get_first_match();
-    void get_first_match_or_default();
+    void get_match();
+    void get_match_or_default();
     void remove_duplicates();
     void has_duplicates();
     void has_duplicates_data();
@@ -1092,23 +1092,23 @@ void TestAlgorithms::accumulateWithMap()
     }
 }
 
-void TestAlgorithms::get_first_match()
+void TestAlgorithms::get_match()
 {
 #if __cplusplus >= 201703L
     {
         auto wihtKey = [](int key) { return [key](const Struct &s) { return s.key == key; }; };
 
-        auto value = kdalgorithms::get_first_match(structVec, wihtKey(2));
+        auto value = kdalgorithms::get_match(structVec, wihtKey(2));
         Struct expected{2, 3};
         QCOMPARE(value.value(), expected);
 
-        value = kdalgorithms::get_first_match(structVec, wihtKey(-1));
+        value = kdalgorithms::get_match(structVec, wihtKey(-1));
         QVERIFY(!value.has_value());
     }
 
     {
         std::vector<Struct> vec{{1, 2}, {2, 1}, {3, 3}, {4, 1}};
-        auto value = kdalgorithms::get_first_match(vec, &Struct::hasEqualKeyValuePair);
+        auto value = kdalgorithms::get_match(vec, &Struct::hasEqualKeyValuePair);
         Struct expected{3, 3};
         QCOMPARE(value.value(), expected);
     }
@@ -1116,36 +1116,36 @@ void TestAlgorithms::get_first_match()
     {
         std::map<int, int> map{{1, 2}, {2, 1}, {3, 3}, {4, 1}};
         auto valueEqualToKey = [](const auto &pair) { return pair.first == pair.second; };
-        auto value = kdalgorithms::get_first_match(map, valueEqualToKey);
+        auto value = kdalgorithms::get_match(map, valueEqualToKey);
         std::pair<const int, int> expected{3, 3};
         QCOMPARE(value.value(), expected);
     }
 #endif
 }
 
-void TestAlgorithms::get_first_match_or_default()
+void TestAlgorithms::get_match_or_default()
 {
     auto withKey = [](int key) { return [key](const Struct &s) { return s.key == key; }; };
 
-    auto value = kdalgorithms::get_first_match_or_default(structVec, withKey(2));
+    auto value = kdalgorithms::get_match_or_default(structVec, withKey(2));
     Struct expected{2, 3};
     QCOMPARE(value, expected);
 
-    value = kdalgorithms::get_first_match_or_default(structVec, withKey(-1));
+    value = kdalgorithms::get_match_or_default(structVec, withKey(-1));
     QCOMPARE(value, Struct{});
 
     Struct defaultValue{42, -42};
-    value = kdalgorithms::get_first_match_or_default(structVec, withKey(-1), defaultValue);
+    value = kdalgorithms::get_match_or_default(structVec, withKey(-1), defaultValue);
     QCOMPARE(value, defaultValue);
 
-    value = kdalgorithms::get_first_match_or_default(structVec, &Struct::hasEqualKeyValuePair,
+    value = kdalgorithms::get_match_or_default(structVec, &Struct::hasEqualKeyValuePair,
                                                      defaultValue);
     QCOMPARE(value, defaultValue);
 
     {
         std::map<int, int> map{{1, 2}, {2, 1}, {13, 3}, {4, 1}};
         auto valueEqualToKey = [](const auto &pair) { return pair.first == pair.second; };
-        auto value = kdalgorithms::get_first_match_or_default(map, valueEqualToKey);
+        auto value = kdalgorithms::get_match_or_default(map, valueEqualToKey);
         std::pair<const int, int> expected{0, 0};
         QCOMPARE(value, expected);
     }
