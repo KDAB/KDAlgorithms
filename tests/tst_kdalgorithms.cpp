@@ -136,6 +136,7 @@ private Q_SLOTS:
     void erase_if();
     void combiningTests();
     void index_of_match();
+    void find_if();
 };
 
 void TestAlgorithms::copy()
@@ -1138,8 +1139,8 @@ void TestAlgorithms::get_match_or_default()
     value = kdalgorithms::get_match_or_default(structVec, withKey(-1), defaultValue);
     QCOMPARE(value, defaultValue);
 
-    value = kdalgorithms::get_match_or_default(structVec, &Struct::hasEqualKeyValuePair,
-                                                     defaultValue);
+    value =
+        kdalgorithms::get_match_or_default(structVec, &Struct::hasEqualKeyValuePair, defaultValue);
     QCOMPARE(value, defaultValue);
 
     {
@@ -1319,6 +1320,118 @@ void TestAlgorithms::index_of_match()
     result = kdalgorithms::index_of_match(
         qmap, [](const auto &pair) { return pair.first > pair.second; });
     QCOMPARE(result, 1);
+}
+
+void TestAlgorithms::find_if()
+{
+    { // Non-mutable
+        auto result = kdalgorithms::find_if(intVector, [](int i) { return i > 2; });
+        QCOMPARE(*result, 3);
+        //        *result = 42; Doesn't work by design
+
+        result = kdalgorithms::find_if(intVector, [](int i) { return i == 43; });
+        QVERIFY(!result);
+    }
+
+    { // Mutable updating the found item
+        std::vector<int> vec{1, 2, 3, 4, 5};
+        auto result = kdalgorithms::mutable_find_if(vec, [](int i) { return i > 2; });
+        QCOMPARE(*result, 3);
+
+        *result = 42;
+        std::vector<int> expected{1, 2, 42, 4, 5};
+        QCOMPARE(vec, expected);
+
+        result = kdalgorithms::mutable_find_if(vec, [](int i) { return i == 43; });
+        QVERIFY(!result);
+    }
+
+    { // Access to the iterator
+        struct Person
+        {
+            int age;
+            bool isDeveloper;
+            bool operator==(const Person &other) const
+            {
+                return age == other.age && isDeveloper == other.isDeveloper;
+            }
+        };
+
+        std::vector<Person> vec{{20, true}, {21, false}, {30, true}, {35, false}, {35, true}};
+        auto result =
+            kdalgorithms::mutable_find_if(vec, [](const auto &person) { return person.age > 30; });
+
+        std::partition(result.begin, result.iterator,
+                       [](const auto &person) { return person.isDeveloper; });
+
+        QCOMPARE(std::distance(result.begin, result.iterator), 3);
+        Person p{20, true};
+        QCOMPARE(vec.at(0), p);
+        p = {30, true};
+        QCOMPARE(vec.at(1), p);
+        p = {21, false};
+        QCOMPARE(vec.at(2), p);
+    }
+
+    { // non-mutable on a std::map
+        std::map<int, int> map{{1, 30}, {2, 20}, {3, 10}};
+        auto result = kdalgorithms::find_if(map, [](const auto &pair) { return pair.second < 20; });
+        QCOMPARE((*result).first, 3);
+        QCOMPARE((*result).second, 10);
+    }
+
+    { // non-mutable on a QMape
+        QMap<int, int> map{{1, 30}, {2, 20}, {3, 10}};
+        auto result = kdalgorithms::find_if(map, [](const auto &pair) { return pair.second < 20; });
+        QCOMPARE((*result).first, 3);
+        QCOMPARE((*result).second, 10);
+    }
+
+    { // accessing the iterators on a QMultiMap
+        QMultiMap<int, bool> map{{30, true}, {20, true}, {35, true}, {21, false}, {35, false}};
+        auto result =
+            kdalgorithms::mutable_find_if(map, [](const auto &item) { return item.first > 30; });
+
+        int dist = std::distance(result.begin, result.iterator);
+        QCOMPARE(dist, 3);
+        dist = std::distance(result.iterator, result.end);
+        QCOMPARE(dist, 2);
+    }
+
+    { // using pointer to member function
+        auto result = kdalgorithms::find_if(structVec, &Struct::hasEqualKeyValuePair);
+        QVERIFY(!result.has_result());
+
+        std::vector<Struct> vec{{1, 2}, {2, 1}, {3, 3}, {4, 4}};
+        result = kdalgorithms::find_if(vec, &Struct::hasEqualKeyValuePair);
+        QVERIFY(result.has_result());
+        Struct expected{3, 3};
+        QCOMPARE(*result, expected);
+    }
+
+    { // non-mutable QHash
+        QHash<int, int> map{{1, 30}, {2, 20}, {3, 10}};
+        auto result = kdalgorithms::find_if(map, [](const auto &pair) { return pair.second < 20; });
+        QCOMPARE((*result).first, 3);
+        QCOMPARE((*result).second, 10);
+    }
+
+    { // non-mutable QHash
+        const QHash<int, int> map{{1, 30}, {2, 20}, {3, 10}};
+        auto result = kdalgorithms::find_if(map, [](const auto &pair) { return pair.second < 20; });
+        QCOMPARE((*result).first, 3);
+        QCOMPARE((*result).second, 10);
+    }
+
+    { // mutable QHash
+        QHash<int, int> map{{1, 30}, {2, 20}, {3, 10}};
+        auto result =
+            kdalgorithms::mutable_find_if(map, [](const auto &pair) { return pair.second < 20; });
+
+        result->second = 42;
+        (void)result;
+        QCOMPARE(map[3], 42);
+    }
 }
 
 QTEST_MAIN(TestAlgorithms)

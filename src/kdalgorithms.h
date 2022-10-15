@@ -11,6 +11,7 @@
 #pragma once
 
 #include "bits/filter.h"
+#include "bits/find_if.h"
 #include "bits/insert_wrapper.h"
 #include "bits/method_tests.h"
 #include "bits/operators.h"
@@ -262,14 +263,13 @@ template <typename Container, typename UnaryPredicate>
 requires UnaryPredicateOnContainerValues<UnaryPredicate, Container>
 #endif
     std::optional<ValueType<Container>> get_match(const Container &container,
-                                                        UnaryPredicate &&predicate)
+                                                  UnaryPredicate &&predicate)
 {
-    auto it = std::find_if(std::cbegin(container), std::cend(container),
-                           detail::to_function_object(std::forward<UnaryPredicate>(predicate)));
-    if (it == std::cend(container))
-        return {};
+    auto result = kdalgorithms::find_if(container, std::forward<UnaryPredicate>(predicate));
+    if (result)
+        return *result;
     else
-        return *it;
+        return {};
 }
 #endif
 
@@ -279,15 +279,14 @@ template <typename Container, typename UnaryPredicate>
 requires UnaryPredicateOnContainerValues<UnaryPredicate, Container>
 #endif
     ValueType<Container> get_match_or_default(const Container &container,
-                                                    UnaryPredicate &&predicate,
-                                                    const ValueType<Container> &defaultValue = {})
+                                              UnaryPredicate &&predicate,
+                                              const ValueType<Container> &defaultValue = {})
 {
-    auto it = std::find_if(std::cbegin(container), std::cend(container),
-                           detail::to_function_object(std::forward<UnaryPredicate>(predicate)));
-    if (it == std::cend(container))
-        return defaultValue;
+    auto result = kdalgorithms::find_if(container, std::forward<UnaryPredicate>(predicate));
+    if (result)
+        return *result;
     else
-        return *it;
+        return defaultValue;
 }
 
 // -------------------- remove_duplicates --------------------
@@ -348,10 +347,8 @@ auto erase_if(Container &container, UnaryPredicate &&predicate)
 template <typename Container, typename UnaryPredicate>
 auto index_of_match(const Container &container, UnaryPredicate &&predicate)
 {
-    auto range = read_iterator_wrapper(container);
-    auto it = std::find_if(range.begin, range.end,
-                           detail::to_function_object(std::forward<UnaryPredicate>(predicate)));
-    return it == range.end ? -1 : (std::distance(range.begin, it));
+    auto result = kdalgorithms::find_if(container, std::forward<UnaryPredicate>(predicate));
+    return result.has_result() ? std::distance(result.begin, result.iterator) : -1;
 }
 
 } // namespace kdalgorithms

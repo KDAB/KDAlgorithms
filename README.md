@@ -99,6 +99,7 @@ Queries
 - <a href="#allAnyNone">all_of / any_of / none_of</a>
 - <a href="#contains">contains</a>
 - <a href="#valueIn">value_in</a>
+- <a href="#find_if">find_if / mutable_find_if</a>
 - <a href="#count">count</a>
 - <a href="#minMaxElement">min_element / max_element</a> (C++17)
 - <a href="#minMaxWithPivot">min_value_greater_than / max_value_less_than</a> (C++17)
@@ -336,8 +337,63 @@ if (Algortihms::value_in(column, {ColumnA, ColumnC, ColumnE}))
 }
 ```
 
-This, however only works on C++14 on Microsoft.
+<a name="find_if">find_if / mutable_find_if</a>
+----------------------------------------------
+KDAlgorithms' version of find_if, takes a complete collection rather than two iterators. 
+This, however, poses the problem of which iterator to use when testing for <i>no result</i>. We've
+solved that by returns a proxy object wiht a simple boolean test method on.
 
+```
+    std::vector<int> vec{1, 2, 3, 4, 5};
+    auto result = kdalgorihms::find_if(vec, [](int i) { return i > 2; });
+    if (result)
+       std::cout << *result << std::endl;
+    else
+       std::cout << "ahh nothing, right\n";
+    
+    // prints: 3
+```
+
+If you want to modify the result of find_if, then you explictly need to ask for a mutable version:
+
+```
+    std::vector<int> vec{1, 2, 3, 4, 5};
+    auto result = kdalgorithms::mutable_find_if(vec, [](int i) { return i > 2; });
+    assert(result.has_result());
+    *result = 42;
+    for (auto i : vec)
+        std::cout << i << ",";
+    std::cout << std::endl;
+
+    // prints: 1,2,42,4,5,
+```
+
+It is possible to get to the underlying iterator from the result. You, however, need to ensure to use the **begin** and **end** iterators found in the result object.
+
+```
+    struct Person
+    {
+        int age;
+        bool isDeveloper;
+    };
+    
+    std::vector<Person> vec{{20, true}, {21, false}, {30, true}, {35, false}, {35, true}};
+    auto result =
+        kdalgorithms::mutable_find_if(vec, [](const auto &person) { return person.age > 30; });
+    
+    // Observe we use result.begin and result.iterator
+    std::partition(result.begin, result.iterator,
+                   [](const auto &person) { return person.isDeveloper; });
+    
+    std::for_each(result.begin, result.iterator(), [](const auto &person) {
+        std::cout << std::boolalpha << "(" << person.age << "," << person.isDeveloper << ") ";
+    });
+    std::cout << std::endl;
+    
+    // prints: (20,true) (30,true) (21,false) 
+```
+
+see [std::find_if](https://en.cppreference.com/w/cpp/algorithm/find_if) for the algorithm from the standard.
 
 <a name="count">count / count_if</a>
 -------------------------------------
