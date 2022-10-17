@@ -137,6 +137,7 @@ private Q_SLOTS:
     void combiningTests();
     void index_of_match();
     void find_if();
+    void find_if_not();
 };
 
 void TestAlgorithms::copy()
@@ -1431,6 +1432,31 @@ void TestAlgorithms::find_if()
         result->second = 42;
         (void)result;
         QCOMPARE(map[3], 42);
+    }
+}
+
+void TestAlgorithms::find_if_not()
+{
+    { // Non-mutable
+        auto result = kdalgorithms::find_if_not(intVector, [](int i) { return i <= 2; });
+        QCOMPARE(*result, 3);
+        //        *result = 42; Doesn't work by design
+
+        result = kdalgorithms::find_if_not(intVector, [](int) { return true; });
+        QVERIFY(!result);
+    }
+
+    { // Mutable updating the found item
+        std::vector<int> vec{1, 2, 3, 4, 5};
+        auto result = kdalgorithms::mutable_find_if_not(vec, [](int i) { return i <= 2; });
+        QCOMPARE(*result, 3);
+
+        *result = 42;
+        std::vector<int> expected{1, 2, 42, 4, 5};
+        QCOMPARE(vec, expected);
+
+        result = kdalgorithms::mutable_find_if_not(vec, [](int) { return true; });
+        QVERIFY(!result);
     }
 }
 
