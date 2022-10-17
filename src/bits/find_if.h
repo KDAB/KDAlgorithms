@@ -11,6 +11,7 @@
 #pragma once
 
 #include "method_tests.h"
+#include "operators.h"
 #include "read_iterator_wrapper.h"
 #include "shared.h"
 #include "to_function_object.h"
@@ -105,4 +106,22 @@ auto mutable_find_if(Container &container, Predicate &&predicate)
     using Iterator = decltype(range.begin);
     return iterator_result<Iterator>(it, range.begin, range.end);
 }
+
+template <typename Container, typename UnaryPredicate>
+#if __cplusplus >= 202002L
+requires UnaryPredicateOnContainerValues<UnaryPredicate, Container>
+#endif
+auto find_if_not(const Container &container, UnaryPredicate &&predicate)
+{
+    using namespace kdalgorithms::operators;
+    return find_if(container, !predicate);
+}
+
+template <typename Container, typename Predicate>
+auto mutable_find_if_not(Container &container, Predicate &&predicate)
+{
+    using namespace kdalgorithms::operators;
+    return mutable_find_if(container, !predicate);
+}
+
 }
