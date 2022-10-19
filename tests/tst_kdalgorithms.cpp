@@ -1029,21 +1029,31 @@ void TestAlgorithms::isPermutation()
 void TestAlgorithms::accumulate()
 {
     // Simple int function
-    auto sumDoubles = [](int x, int y) { return x + y * y; };
-    int result = kdalgorithms::accumulate(intVector, sumDoubles);
-    QCOMPARE(result, 30);
+    {
+        auto sumDoubles = [](int x, int y) { return x + y * y; };
+        int result = kdalgorithms::accumulate(intVector, sumDoubles);
+        QCOMPARE(result, 30);
+    }
 
     // simple string function
-    auto slashBetween = [](const QString &x, const QString &y) {
-        if (x.isEmpty())
-            return y;
-        else
-            return x + "/" + y;
-    };
+    {
+        auto slashBetween = [](const QString &x, const QString &y) {
+            if (x.isEmpty())
+                return y;
+            else
+                return x + "/" + y;
+        };
 
-    QStringList list{"abc", "def", "hij"};
-    QString stringResult = kdalgorithms::accumulate(list, slashBetween);
-    QCOMPARE(stringResult, "abc/def/hij");
+        QStringList list{"abc", "def", "hij"};
+        QString stringResult = kdalgorithms::accumulate(list, slashBetween);
+        QCOMPARE(stringResult, "abc/def/hij");
+    }
+
+    // No function provided
+    {
+        auto result = kdalgorithms::accumulate(intVector);
+        QCOMPARE(result, 10);
+    }
 }
 
 void TestAlgorithms::accumulateWithInitialValue()

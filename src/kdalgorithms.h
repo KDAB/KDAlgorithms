@@ -243,12 +243,12 @@ bool is_permutation(const Container1 &container1, const Container2 &container2,
 }
 
 // -------------------- accumulate --------------------
-template <typename Container, typename BinaryOperation,
+template <typename Container, typename BinaryOperation = std::plus<ValueType<Container>>,
           typename ReturnType = remove_cvref_t<traits::return_type_of_t<BinaryOperation>>>
 #if __cplusplus >= 202002L
 requires std::is_invocable_r_v<ReturnType, BinaryOperation, ReturnType, ValueType<Container>>
 #endif
-    ReturnType accumulate(const Container &container, BinaryOperation &&accumulateFunction,
+    ReturnType accumulate(const Container &container, BinaryOperation &&accumulateFunction = {},
                           ReturnType initialValue = {})
 {
     auto range = read_iterator_wrapper(container);
