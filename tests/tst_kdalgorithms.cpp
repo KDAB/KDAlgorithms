@@ -1028,6 +1028,12 @@ void TestAlgorithms::isPermutation()
 
 void TestAlgorithms::accumulate()
 {
+    // No function provided
+    {
+        auto result = kdalgorithms::accumulate(intVector);
+        QCOMPARE(result, 10);
+    }
+
     // Simple int function
     {
         auto sumDoubles = [](int x, int y) { return x + y * y; };
@@ -1049,10 +1055,58 @@ void TestAlgorithms::accumulate()
         QCOMPARE(stringResult, "abc/def/hij");
     }
 
-    // No function provided
+    // std::map
     {
-        auto result = kdalgorithms::accumulate(intVector);
-        QCOMPARE(result, 10);
+        std::map<int, int> map{{1, 10}, {2, 20}, {3, 30}, {4, 40}};
+        int result =
+            kdalgorithms::accumulate(map, [](int res, const std::pair<const int, int> &pair) {
+                return res + pair.first * pair.second;
+            });
+        QCOMPARE(result, 10 + 40 + 90 + 160);
+    }
+
+    // std::map -specifying the default instead of the lambda type explicitly
+    {
+        std::map<int, int> map{{1, 10}, {2, 20}, {3, 30}, {4, 40}};
+        int result = kdalgorithms::accumulate(
+            map, [](int res, const auto &pair) { return res + pair.first * pair.second; }, 0);
+        QCOMPARE(result, 10 + 40 + 90 + 160);
+    }
+
+    // QMap
+    {
+        QMap<int, int> map{{1, 10}, {2, 20}, {3, 30}, {4, 40}};
+        int result =
+            kdalgorithms::accumulate(map, [](int res, const std::pair<const int, int> &pair) {
+                return res + pair.first * pair.second;
+            });
+        QCOMPARE(result, 10 + 40 + 90 + 160);
+    }
+
+    // QMap
+    {
+        QMap<int, int> map{{1, 10}, {2, 20}, {3, 30}, {4, 40}};
+        int result = kdalgorithms::accumulate(
+            map, [](int res, const auto &pair) { return res + pair.first * pair.second; }, 0);
+        QCOMPARE(result, 10 + 40 + 90 + 160);
+    }
+
+    // QHash
+    {
+        QHash<int, int> map{{1, 10}, {2, 20}, {3, 30}, {4, 40}};
+        int result =
+            kdalgorithms::accumulate(map, [](int res, const std::pair<const int, int> &pair) {
+                return res + pair.first * pair.second;
+            });
+        QCOMPARE(result, 10 + 40 + 90 + 160);
+    }
+
+    // QHash
+    {
+        QHash<int, int> map{{1, 10}, {2, 20}, {3, 30}, {4, 40}};
+        int result = kdalgorithms::accumulate(
+            map, [](int res, const auto &pair) { return res + pair.first * pair.second; }, 0);
+        QCOMPARE(result, 10 + 40 + 90 + 160);
     }
 }
 

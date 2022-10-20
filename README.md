@@ -491,13 +491,21 @@ See [std::is_permutation](https://en.cppreference.com/w/cpp/algorithm/is_permuta
 
 <a name="accumulate">accumulate</a>
 -----------------------------------
-The simple form of accumulate takes a collection and a mapping function.
+The simplest form of accumulate takes a collection, and applies *plus* on the items:
+
+```
+std::vector<int> ints{1,2,3,4};
+auto result = kdalgorithms::accumulate(ints);
+// result = 10
+```
+
+A much more common usage is to specify a mapping function:
 
 ```    
 std::vector<int> ints{1,2,3,4};
-auto sum_doubles = [](int x, int y) { return x + y * y; };
+auto sum_doubles = [](int subResult, int x) { return subResult + x * x; };
 int result = kdalgorithms::accumulate(ints, sum_doubles);
-// result = 30
+// result = 1*1 + 2*2 + 3*3 + 4*4
 ```
 
 Observe that the initial value doesn't need to be provided in the above.
@@ -507,11 +515,11 @@ If you need to specify it, you can do so as an optional third parameter:
 std::vector<int> ints{1,2,3,4};
 auto factorial = [](int sub_total, int value) { return sub_total * value; };
 auto result = kdalgorithms::accumulate(int_vector, factorial, 1);
-// result = 24
+// result = 1*1*2*3*4
 ```
 
 The initial value is the default value for the return type of the mapping function.
-This value must, however, be deducable without having to instantiate the type.
+This value must, however, be deducable without having to instantiate the arguments to the lambda expression.
 That, for example, isn't the case for this function:
 
 ```
@@ -521,7 +529,7 @@ auto to_comma_seperated_string = [](auto sub_total, int i) {
 ```
 
 Here, the type of the function is the type of calling opertor+ on whatever the type of sub_total is.
-In such cases, you have to provide an initial value:
+In such cases, where you are using auto in the lambda expression, you have to provide an initial value:
 
 ```
 std::vector<int> ints{1,2,3,4};
@@ -529,7 +537,29 @@ auto to_comma_seperated_string = [](auto sub_total, int i) {
     return sub_total + "," + QString::number(i);
 };
 auto result = kdalgorithms::accumulate(int_vector, to_comma_seperated_string, QString("0"));
-// result = 24
+// result = "0,1,2,3,4"
+```
+
+### Accumulate and maps
+
+It is also possible to use accumulate with maps as this example shows:
+
+```
+std::map<int, int> map{{1, 10}, {2, 20}, {3, 30}, {4, 40}};
+int result =
+    kdalgorithms::accumulate(map, [](int res, const std::pair<const int, int> &pair) {
+        return res + pair.first * pair.second;
+    });
+// result = 1*10 + 2*20 + 3*30 + 4*40
+```
+
+Notice, however, that you in the above need to explicitly specify the type of the second parameter to the lambda expression, 
+which admittedly is a bit cumbersome, so in those cases, it is easier to simply specify the initial value:
+
+```
+std::map<int, int> map{{1, 10}, {2, 20}, {3, 30}, {4, 40}};
+int result = kdalgorithms::accumulate(
+    map, [](int res, const auto &pair) { return res + pair.first * pair.second; }, 0);
 ```
 
 See [std::accumulate](https://en.cppreference.com/w/cpp/algorithm/accumulate) for the algorithm from the standard.
