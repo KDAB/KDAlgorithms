@@ -20,9 +20,6 @@ namespace detail {
 
         template <typename Container>
         using has_keyValueBegin = decltype(std::declval<Container &>().keyValueBegin());
-
-        template <typename Container>
-        using has_keyValueBegin = decltype(std::declval<Container &>().keyValueBegin());
     }
 
     template <typename Container>
