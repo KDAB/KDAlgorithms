@@ -20,8 +20,8 @@ skip_tags: false
 # Build worker image
 image:
   - Ubuntu2004
-  - Visual Studio 2019
-  - macos
+#  - macos
+#  - Visual Studio 2019
 
 # scripts that are called at very beginning, before repo cloning
 init:
@@ -41,6 +41,7 @@ configuration:
   - Debug
 
 install:
+  - sh: if [ "`uname -s`" = "Darwin" ]; then brew install ninja; fi
 
 before_build:
   - cmd: call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
@@ -48,7 +49,7 @@ before_build:
 build_script:
   - mkdir build
   - cd build
-  - cmake -G Ninja --preset=cpp14 ..
+  - cmake -G Ninja -DCMAKE_BUILD_TYPE=%CONFIGURATION% --preset=cpp14 ..
   - cmake --build .
   - ctest --test-dir .
 
