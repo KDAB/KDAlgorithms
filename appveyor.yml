@@ -20,8 +20,8 @@ skip_tags: false
 # Build worker image
 image:
   - Ubuntu2004
-#  - macos
-#  - Visual Studio 2019
+  - macos
+  - Visual Studio 2019
 
 # scripts that are called at very beginning, before repo cloning
 init:
