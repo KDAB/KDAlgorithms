@@ -43,7 +43,7 @@ configuration:
 install:
 
 before_build:
-  - cmd: call scripts\set_compiler_env.bat
+  - cmd: call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
 
 build_script:
   - mkdir build
