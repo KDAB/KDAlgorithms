@@ -23,7 +23,7 @@ namespace detail {
     public:
         using value_type = typename T::value_type;
         single_arg_inserter(T &set)
-            : m_set(set)
+            : m_set(&set)
         {
         }
 
@@ -31,12 +31,12 @@ namespace detail {
         single_arg_inserter &operator*() { return *this; }
         single_arg_inserter &operator=(const value_type &value)
         {
-            m_set.insert(value);
+            m_set->insert(value);
             return *this;
         }
 
     private:
-        T &m_set;
+        T *m_set;
     };
 
     template <class Container, typename T>
