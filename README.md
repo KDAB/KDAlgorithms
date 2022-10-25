@@ -81,6 +81,10 @@ Lots of Examples
 In this document you will find lots of examples. More, however, may be found in the 
 unit tests.
 
+Qt
+--
+kdalgorihms supports all of Qt's containers, with the exception that with Qt5 QSet isn't supported.
+
 Algorithms
 ==========
 

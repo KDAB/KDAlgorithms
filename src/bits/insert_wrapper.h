@@ -16,34 +16,11 @@
 
 namespace kdalgorithms {
 namespace detail {
-    // similar to std::inserter, but calls insert with just one argument - required for QSet in Qt5
-    template <typename T>
-    class single_arg_inserter
-    {
-    public:
-        using value_type = typename T::value_type;
-        single_arg_inserter(T &set)
-            : m_set(&set)
-        {
-        }
-
-        single_arg_inserter &operator++() { return *this; }
-        single_arg_inserter &operator*() { return *this; }
-        single_arg_inserter &operator=(const value_type &value)
-        {
-            m_set->insert(value);
-            return *this;
-        }
-
-    private:
-        T *m_set;
-    };
-
     template <class Container, typename T>
     using has_push_back = decltype(std::declval<Container &>().push_back(std::declval<T>()));
 
-    template <class Container, typename T>
-    using has_insert = decltype(std::declval<Container &>().insert(std::declval<T>()));
+    template <class Container, typename Value>
+    using has_insert = decltype(std::declval<Container &>().insert(std::declval<Value>()));
 
     template <typename Container>
     auto insert_wrapper(
@@ -61,7 +38,7 @@ namespace detail {
         std::enable_if_t<
             detail::is_detected_v<has_insert, Container, typename Container::value_type>, int> = 0)
     {
-        return single_arg_inserter<Container>(c);
+        return std::inserter<Container>(c, c.end());
     }
 
     // similar to std::inserter, but for QMap/QHash which usually accept a value in their operator=

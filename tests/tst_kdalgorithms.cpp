@@ -240,10 +240,12 @@ void TestAlgorithms::copy()
 
     // QSet
     {
+#if QT_VERSION >= 0x060000
         QSet<int> from{1, 2, 3, 4, 1, 3};
         QSet<int> to;
         kdalgorithms::copy(from, to);
         QCOMPARE(from, to);
+#endif
     }
 
     // QMap
@@ -369,9 +371,11 @@ void TestAlgorithms::filterOtherContainers()
     }
 
     {
+#if QT_VERSION >= 0x060000
         auto result = kdalgorithms::filtered<QSet>(intVector, isOdd);
         QSet<int> expected{1, 3};
         QCOMPARE(result, expected);
+#endif
     }
 
     {
@@ -529,9 +533,11 @@ void TestAlgorithms::transformOtherContainers()
     }
 
     {
+#if QT_VERSION >= 0x060000
         auto result = kdalgorithms::transformed<QSet>(intVector, toString);
         QSet<QString> expected{"1", "2", "3", "4"};
         QCOMPARE(result, expected);
+#endif
     }
 
     // This unfortunately doesn't work as I have no way to deduce the result type of the transform
