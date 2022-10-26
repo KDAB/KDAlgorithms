@@ -26,7 +26,7 @@ if(BUILD_TESTING AND ${KDALGORITHMS_BUILD_TEST})
     add_compile_options(-Wall)
 
     if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pedantic -Werror -Wno-deprecated -Wextra -Woverloaded-virtual -Winit-self -Wmissing-include-dirs -Wunused -Wno-div-by-zero -Werror=undef -Wpointer-arith -Wmissing-noreturn -Werror=return-type -Wsuggest-override")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pedantic -Werror -Wno-deprecated -Wextra -Woverloaded-virtual -Winit-self -Wmissing-include-dirs -Wunused -Wno-div-by-zero -Werror=undef -Wpointer-arith -Wmissing-noreturn -Werror=return-type")
     endif()
 
     if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
@@ -36,7 +36,6 @@ if(BUILD_TESTING AND ${KDALGORITHMS_BUILD_TEST})
     if(MSVC) # Check if we are using the Visual Studio compiler
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zc:__cplusplus") # Make __cplusplus match the actual C++ version used
     endif()
-
 
     # Needed for the unit tests
     find_package(QT NAMES Qt6 Qt5 COMPONENTS Core Gui Widgets REQUIRED)
