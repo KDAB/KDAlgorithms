@@ -747,10 +747,10 @@ void TestAlgorithms::sortWithCompare()
     }
 
     {
-        std::vector<Struct> structVec{{1, 3}, {3, 4}, {3, 2}, {1, 2}};
-        kdalgorithms::sort(structVec, &Struct::lessThanByXY);
+        std::vector<Struct> vec{{1, 3}, {3, 4}, {3, 2}, {1, 2}};
+        kdalgorithms::sort(vec, &Struct::lessThanByXY);
         std::vector<Struct> expected{{1, 2}, {1, 3}, {3, 2}, {3, 4}};
-        QCOMPARE(structVec, expected);
+        QCOMPARE(vec, expected);
     }
 }
 
@@ -764,8 +764,8 @@ void TestAlgorithms::sortedWithCompare()
     }
 
     {
-        std::vector<Struct> structVec{{1, 3}, {3, 4}, {3, 2}, {1, 2}};
-        auto result = kdalgorithms::sorted(structVec, &Struct::lessThanByXY);
+        std::vector<Struct> vec{{1, 3}, {3, 4}, {3, 2}, {1, 2}};
+        auto result = kdalgorithms::sorted(vec, &Struct::lessThanByXY);
         std::vector<Struct> expected{{1, 2}, {1, 3}, {3, 2}, {3, 4}};
         QCOMPARE(result, expected);
     }
@@ -1199,20 +1199,22 @@ void TestAlgorithms::get_match_or_default()
 {
     auto withKey = [](int key) { return [key](const Struct &s) { return s.key == key; }; };
 
-    auto value = kdalgorithms::get_match_or_default(structVec, withKey(2));
-    Struct expected{2, 3};
-    QCOMPARE(value, expected);
+    {
+        auto value = kdalgorithms::get_match_or_default(structVec, withKey(2));
+        Struct expected{2, 3};
+        QCOMPARE(value, expected);
 
-    value = kdalgorithms::get_match_or_default(structVec, withKey(-1));
-    QCOMPARE(value, Struct{});
+        value = kdalgorithms::get_match_or_default(structVec, withKey(-1));
+        QCOMPARE(value, Struct{});
 
-    Struct defaultValue{42, -42};
-    value = kdalgorithms::get_match_or_default(structVec, withKey(-1), defaultValue);
-    QCOMPARE(value, defaultValue);
+        Struct defaultValue{42, -42};
+        value = kdalgorithms::get_match_or_default(structVec, withKey(-1), defaultValue);
+        QCOMPARE(value, defaultValue);
 
-    value =
-        kdalgorithms::get_match_or_default(structVec, &Struct::hasEqualKeyValuePair, defaultValue);
-    QCOMPARE(value, defaultValue);
+        value = kdalgorithms::get_match_or_default(structVec, &Struct::hasEqualKeyValuePair,
+                                                   defaultValue);
+        QCOMPARE(value, defaultValue);
+    }
 
     {
         std::map<int, int> map{{1, 2}, {2, 1}, {13, 3}, {4, 1}};
