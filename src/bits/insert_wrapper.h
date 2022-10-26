@@ -53,7 +53,7 @@ namespace detail {
         using pointer = value_type *;
         using reference = value_type &;
 
-        qmap_inserter(T &map)
+        qmap_inserter(T *map)
             : m_map(map)
         {
         }
@@ -63,19 +63,19 @@ namespace detail {
         qmap_inserter &
         operator=(const std::pair<typename T::key_type, typename T::mapped_type> &pair)
         {
-            m_map.insert(pair.first, pair.second);
+            m_map->insert(pair.first, pair.second);
             return *this;
         }
 
     private:
-        T &m_map;
+        T *m_map;
     };
 
     template <typename Container>
     auto insert_wrapper(Container &c,
                         std::enable_if_t<detail::has_keyValueBegin_v<Container>, int> = 0)
     {
-        return qmap_inserter<Container>(c);
+        return qmap_inserter<Container>(&c);
     }
 
 } // namespace detail
