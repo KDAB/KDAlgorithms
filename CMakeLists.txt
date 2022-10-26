@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.9)
 project(kdalgorithms)
 
+if(POLICY CMP0077) # Yes, let the parent project set BUILD_TESTING before we include CTest.cmake below
+  cmake_policy(SET CMP0077 NEW)
+endif()
+
 add_library(kdalgorithms INTERFACE)
 target_include_directories(kdalgorithms INTERFACE src/)
 
