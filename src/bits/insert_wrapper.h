@@ -11,6 +11,7 @@
 #pragma once
 
 #include "method_tests.h"
+#include "shared.h"
 #include <iterator>
 #include <utility>
 
@@ -46,6 +47,12 @@ namespace detail {
     class qmap_inserter
     {
     public:
+        using iterator_category = std::output_iterator_tag;
+        using value_type = ValueType<T>;
+        using difference_type = std::ptrdiff_t;
+        using pointer = value_type *;
+        using reference = value_type &;
+
         qmap_inserter(T &map)
             : m_map(map)
         {
