@@ -20,7 +20,7 @@ skip_tags: false
 # Build worker image
 image:
   - Ubuntu2004
-  - macos
+  - macos-monterey
   - Visual Studio 2019
 
 # scripts that are called at very beginning, before repo cloning
@@ -46,7 +46,7 @@ environment:
 #    - useqt6: False
 
 install:
-  - sh: if [ "`uname -s`" = "Darwin" ]; then brew install ninja; else sudo apt-get -y update; sudo apt-get -y install mesa-common-dev libglu1-mesa-dev; fi
+  - sh: if [ "`uname -s`" = "Darwin" ]; then brew install ninja; else sudo apt-get -y update; fi
 
 before_build:
   - cmd: call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
