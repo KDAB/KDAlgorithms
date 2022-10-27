@@ -65,7 +65,7 @@ namespace detail {
     {
         std::transform(std::begin(input), std::end(input), std::begin(input),
                        std::forward<Transform>(transform));
-        return std::forward(input);
+        return std::forward<InputContainer>(input);
     }
 
     template <typename ResultContainer, typename InputContainer, typename Transform>
