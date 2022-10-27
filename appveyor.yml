@@ -42,8 +42,10 @@ configuration:
 
 environment:
   matrix:
-    - useqt6: True
-#    - useqt6: False
+    - preset: cpp14
+    - preset: cpp17
+    - preset: cpp20
+    - preset: cpp23
 
 install:
   - sh: if [ "`uname -s`" = "Darwin" ]; then brew install ninja; else sudo apt-get -y update; fi
@@ -56,8 +58,8 @@ before_build:
 build_script:
   - mkdir build
   - cd build
-  - cmd: cmake -G Ninja -DCMAKE_BUILD_TYPE=%CONFIGURATION% --preset=cpp14 ..
-  - sh: cmake -G Ninja -DCMAKE_BUILD_TYPE=$CONFIGURATION --preset=cpp14 ..
+  - cmd: cmake -G Ninja -DCMAKE_BUILD_TYPE=%CONFIGURATION% --preset=%preset% ..
+  - sh: cmake -G Ninja -DCMAKE_BUILD_TYPE=$CONFIGURATION --preset=$preset ..
   - cmake --build .
   - ctest --test-dir .
 
