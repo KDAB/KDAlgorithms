@@ -500,7 +500,7 @@ void TestAlgorithms::transformedWithRValue()
         QCOMPARE(result.at(0), 1);
         QCOMPARE(result.at(1), 4);
         QCOMPARE(result.at(2), 9);
-        // We obviously wont create a new ContainerObserver, but a QVector instead, so this is
+        // We obviously won't create a new ContainerObserver, but a QVector instead, so this is
         // just to test that that code path works too.
     }
 }

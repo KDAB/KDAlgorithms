@@ -313,14 +313,16 @@ bool answer = kdalgorithms::contains(ints, 4);
 The function is also overloaded with an initializer list, which makes it possible to write code like this:
 
 ```
-enum Column {ColumnA, ColumnB, ColumnC, ColumnD, ColumnD};
+enum class Column {ColumnA, ColumnB, ColumnC, ColumnD, ColumnE};
 Column column = ...;
 
-if (Algortihms::contains({ColumnA, ColumnC, ColumnE}, column)) 
+if (kdalgorithms::contains({ColumnA, ColumnC, ColumnE}, column))
 { 
    ....
 }
 ```
+
+However, <a href="valueIn">kdalgorithms::value_in</a> has a more pleasing syntax for that usecase.
 
 see [std::find](https://en.cppreference.com/w/cpp/algorithm/find) for the algorithm from the standard.
 
@@ -331,7 +333,7 @@ This is similar to *contains* but with the argument switched around. This makes 
 that feels a lot like *value in range* from languages like Python:
 
 ```
-if (Algortihms::value_in(column, {ColumnA, ColumnC, ColumnE}))
+if (kdalgorithms::value_in(column, {ColumnA, ColumnC, ColumnE}))
 { 
    ....
 }
@@ -341,7 +343,7 @@ if (Algortihms::value_in(column, {ColumnA, ColumnC, ColumnE}))
 ----------------------------------------------
 KDAlgorithms' version of find_if, takes a complete collection rather than two iterators. 
 This, however, poses the problem of which iterator to use when testing for <i>no result</i>. We've
-solved that by returns a proxy object wiht a simple boolean test method on.
+solved that by returns a proxy object with a simple boolean test method on.
 
 ```
     std::vector<int> vec{1, 2, 3, 4, 5};
@@ -354,7 +356,7 @@ solved that by returns a proxy object wiht a simple boolean test method on.
     // prints: 3
 ```
 
-If you want to modify the result of find_if, then you explictly need to ask for a mutable version:
+If you want to modify the result of find_if, then you explicitly need to ask for a mutable version:
 
 ```
     std::vector<int> vec{1, 2, 3, 4, 5};
