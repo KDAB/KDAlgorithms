@@ -97,6 +97,7 @@ private Q_SLOTS:
     void transformMemberFunction();
     void transformOtherContainers();
     void transformedMemberVariable();
+    void transformedStaticFunctions();
     void transform();
     void anyOf();
     void allOf();
@@ -641,6 +642,14 @@ void TestAlgorithms::transformedMemberVariable()
         QVector<int> expected{1, 2, 3};
         QCOMPARE(res, expected);
     }
+}
+
+void TestAlgorithms::transformedStaticFunctions()
+{
+    std::vector<std::string> strings{"abc", "def", "hij"};
+    auto res = kdalgorithms::transformed<QStringList>(strings, &QString::fromStdString);
+    QStringList expected{"abc", "def", "hij"};
+    QCOMPARE(res, expected);
 }
 
 void TestAlgorithms::transform()
