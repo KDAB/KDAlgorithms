@@ -18,14 +18,8 @@ namespace kdalgorithms {
 namespace detail {
     // Used for member functions
     // The method must be const, e.g. bool lessThan(...) const
-#if __cplusplus >= 202002L
     template <typename F>
-    requires is_const_method<F>::value
-#else
-    template <typename F, typename std::enable_if<is_const_method<F>::value, bool>::type = true>
-#endif
-        auto
-        to_function_object_helper(F &&f, std::true_type)
+    auto to_function_object_helper(F &&f, std::true_type)
     {
         return std::mem_fn(std::forward<F>(f));
     }
