@@ -116,6 +116,7 @@ Queries
 Other
 
 - <a href="#accumulate">accumulate</a>
+- <a href="#accumulate_if">accumulate_if</a>
 
 <a name="copy">copy</a>
 -----------------------
@@ -570,7 +571,41 @@ int result = kdalgorithms::accumulate(
 
 See [std::accumulate](https://en.cppreference.com/w/cpp/algorithm/accumulate) for the algorithm from the standard.
 
+### Accumulating with a builder object
 
+Given that accumulate accepts pointer to member functions as argument, a neat way to build the result is using a builder object:
+
+```
+struct ResultBuilder
+{
+    ResultBuilder &append(const std::string &other)
+    {
+        result += "/" + other;
+        return *this;
+    }
+    std::string result;
+};
+
+{
+    std::vector<std::string> list{"abc", "def", "hij"};
+    ResultBuilder result;
+    (void)kdalgorithms::accumulate(list, &ResultBuilder::append, std::ref(result));
+    result.result = "/abc/def/hij";
+}
+```
+
+
+<a name="accumulate_if">accumulate_if</a>
+-----------------------------------------
+This is similar to <a href="#accumulate">accumulate</a>, with the addition that it only accumulate if the provided predicate evaluates to true.
+
+```
+std::vector<int> ints{1,2,3,4};
+auto sumDoubles = [](int x, int y) { return x + y * y; };
+auto greaterThan = [](int value) { return [value](int test) { return test > value; }; };
+int result = kdalgorithms::accumulate_if(ints, sumDoubles, greatherThan(2));
+// result = 25
+```
 
 <a name="get_match">get_match (C++17) / get_match_or_default</a>
 -------------------------------------------------

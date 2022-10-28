@@ -125,6 +125,8 @@ private Q_SLOTS:
     void minValueGreaterThanCustomComparisor();
     void isPermutation();
     void accumulate();
+    void accumulateAndMemberFunctions();
+    void accumulate_if();
     void accumulateWithInitialValue();
     void accumulateDifferentReturnType();
     void accumulateWithAuto();
@@ -1158,6 +1160,133 @@ void TestAlgorithms::accumulate()
         int result = kdalgorithms::accumulate(
             map, [](int res, const auto &pair) { return res + pair.first * pair.second; }, 0);
         QCOMPARE(result, 10 + 40 + 90 + 160);
+    }
+}
+
+void TestAlgorithms::accumulateAndMemberFunctions()
+{
+    struct ResultBuilder
+    {
+        ResultBuilder &append(const std::string &other)
+        {
+            result += "/" + other;
+            return *this;
+        }
+        std::string result;
+    };
+
+    {
+        std::vector<std::string> list{"abc", "def", "hij"};
+        ResultBuilder result;
+        (void)kdalgorithms::accumulate(list, &ResultBuilder::append, std::ref(result));
+        QCOMPARE(result.result, "/abc/def/hij");
+    }
+
+    {
+        std::vector<std::string> list{"abc", "*abc", "*bah", "def", "hij"};
+        ResultBuilder result;
+        auto doNotStartWithAnAsterix = [](const std::string &str) { return str.at(0) != '*'; };
+        (void)kdalgorithms::accumulate_if(list, &ResultBuilder::append, doNotStartWithAnAsterix,
+                                          std::ref(result));
+        QCOMPARE(result.result, "/abc/def/hij");
+    }
+}
+
+void TestAlgorithms::accumulate_if()
+{
+    // Simple int function
+    {
+        auto sumDoubles = [](int x, int y) { return x + y * y; };
+        int result = kdalgorithms::accumulate_if(intVector, sumDoubles, greaterThan(2));
+        QCOMPARE(result, 25);
+    }
+
+    // simple string function
+    {
+        auto slashBetween = [](const QString &x, const QString &y) {
+            if (x.isEmpty())
+                return y;
+            else
+                return x + "/" + y;
+        };
+
+        auto doNotEndWithAnAsterix = [](const QString &str) { return !str.endsWith("*"); };
+
+        QStringList list{"abc", "abc*", "def", "hij", "bah*"};
+        QString stringResult =
+            kdalgorithms::accumulate_if(list, slashBetween, doNotEndWithAnAsterix);
+        QCOMPARE(stringResult, "abc/def/hij");
+    }
+
+    auto productIsLessThan100 = [](const auto &pair) { return pair.first * pair.second < 100; };
+    // std::map
+    {
+        std::map<int, int> map{{1, 10}, {2, 20}, {3, 30}, {4, 40}};
+        int result = kdalgorithms::accumulate_if(
+            map,
+            [](int res, const std::pair<const int, int> &pair) {
+                return res + pair.first * pair.second;
+            },
+            productIsLessThan100);
+        QCOMPARE(result, 10 + 40 + 90);
+    }
+
+    // std::map -specifying the default instead of the lambda type explicitly
+    {
+        std::map<int, int> map{{1, 10}, {2, 20}, {3, 30}, {4, 40}};
+        int result = kdalgorithms::accumulate_if(
+            map, [](int res, const auto &pair) { return res + pair.first * pair.second; },
+            productIsLessThan100, 0);
+        QCOMPARE(result, 10 + 40 + 90);
+    }
+
+    // QMap
+    {
+        QMap<int, int> map{{1, 10}, {2, 20}, {3, 30}, {4, 40}};
+        int result = kdalgorithms::accumulate_if(
+            map,
+            [](int res, const std::pair<const int, int> &pair) {
+                return res + pair.first * pair.second;
+            },
+            productIsLessThan100);
+        QCOMPARE(result, 10 + 40 + 90);
+    }
+
+    // QMap
+    {
+        QMap<int, int> map{{1, 10}, {2, 20}, {3, 30}, {4, 40}};
+        int result = kdalgorithms::accumulate_if(
+            map, [](int res, const auto &pair) { return res + pair.first * pair.second; },
+            productIsLessThan100, 0);
+        QCOMPARE(result, 10 + 40 + 90);
+    }
+
+    // QHash
+    {
+        QHash<int, int> map{{1, 10}, {2, 20}, {3, 30}, {4, 40}};
+        int result = kdalgorithms::accumulate_if(
+            map,
+            [](int res, const std::pair<const int, int> &pair) {
+                return res + pair.first * pair.second;
+            },
+            productIsLessThan100);
+        QCOMPARE(result, 10 + 40 + 90);
+    }
+
+    // QHash
+    {
+        QHash<int, int> map{{1, 10}, {2, 20}, {3, 30}, {4, 40}};
+        int result = kdalgorithms::accumulate_if(
+            map, [](int res, const auto &pair) { return res + pair.first * pair.second; },
+            productIsLessThan100, 0);
+        QCOMPARE(result, 10 + 40 + 90);
+    }
+
+    // Member function
+    {
+        auto fn = [](int subResult, const Struct &item) { return subResult + item.sumPairs(); };
+        auto result = kdalgorithms::accumulate_if(structVec, fn, &Struct::isKeyGreaterThanValue);
+        QCOMPARE(result, 10);
     }
 }
 

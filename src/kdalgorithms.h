@@ -252,10 +252,29 @@ requires std::is_invocable_r_v<ReturnType, BinaryOperation, ReturnType, ValueTyp
                           ReturnType initialValue = {})
 {
     auto range = read_iterator_wrapper(container);
-    return std::accumulate(range.begin, range.end, initialValue,
-                           std::forward<BinaryOperation>(accumulateFunction));
+    return std::accumulate(
+        range.begin, range.end, initialValue,
+        detail::to_function_object(std::forward<BinaryOperation>(accumulateFunction)));
 }
 
+// -------------------- accumulate_if --------------------
+template <typename Container, typename BinaryOperation, typename UnaryPredicate,
+          typename ReturnType = remove_cvref_t<traits::return_type_of_t<BinaryOperation>>>
+ReturnType accumulate_if(const Container &container, BinaryOperation &&accumulate,
+                         UnaryPredicate &&predicate, ReturnType initialValue = {})
+{
+    auto range = read_iterator_wrapper(container);
+    auto predicateFunction = detail::to_function_object(std::forward<UnaryPredicate>(predicate));
+    auto accumulateFunction = detail::to_function_object(std::forward<BinaryOperation>(accumulate));
+    auto fn = [&](const ReturnType &subResult, const ValueType<Container> &item) -> ReturnType {
+        if (predicateFunction(item))
+            return accumulateFunction(subResult, item);
+        else
+            return subResult;
+    };
+
+    return std::accumulate(range.begin, range.end, initialValue, fn);
+}
 // -------------------- get_first_match --------------------
 #if __cplusplus >= 201703L
 template <typename Container, typename UnaryPredicate>
