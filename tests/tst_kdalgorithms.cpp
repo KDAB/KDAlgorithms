@@ -96,6 +96,7 @@ private Q_SLOTS:
     void transformedWithRValue();
     void transformMemberFunction();
     void transformOtherContainers();
+    void transformedMemberVariable();
     void transform();
     void anyOf();
     void allOf();
@@ -604,6 +605,41 @@ void TestAlgorithms::transformOtherContainers()
                 map, [](const auto &item) { return std::make_pair(item.second, item.first); });
         std::multimap<std::string, int> expected{{"abc", 1}, {"abc", 2}, {"hij", 3}, {"klm", 4}};
         QCOMPARE(result, expected);
+    }
+}
+
+struct StructWithMemberVariable
+{
+    StructWithMemberVariable(int i)
+        : foo(i)
+    {
+    }
+    int foo;
+};
+
+void TestAlgorithms::transformedMemberVariable()
+{
+    std::vector<StructWithMemberVariable> vec;
+    vec.push_back({1});
+    vec.push_back({2});
+    vec.push_back({3});
+
+    {
+        auto res = kdalgorithms::transformed(vec, std::mem_fn(&StructWithMemberVariable::foo));
+        std::vector<int> expected{1, 2, 3};
+        QCOMPARE(res, expected);
+    }
+
+    {
+        auto res = kdalgorithms::transformed(vec, &StructWithMemberVariable::foo);
+        std::vector<int> expected{1, 2, 3};
+        QCOMPARE(res, expected);
+    }
+
+    {
+        auto res = kdalgorithms::transformed<QVector>(vec, &StructWithMemberVariable::foo);
+        QVector<int> expected{1, 2, 3};
+        QCOMPARE(res, expected);
     }
 }
 

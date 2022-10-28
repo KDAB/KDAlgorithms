@@ -28,10 +28,12 @@ namespace detail {
     // ResultItemType = resulting type when applying Transform on an item in Container.
 #if __cplusplus < 201703L
     template <typename Container, typename Transform>
-    using ResultItemType = typename std::result_of<Transform(ValueType<Container>)>::type;
+    using ResultItemType = typename std::remove_reference<
+        typename std::result_of<Transform(ValueType<Container>)>::type>::type;
 #else
     template <typename Container, typename Transform>
-    using ResultItemType = std::invoke_result_t<Transform, ValueType<Container>>;
+    using ResultItemType =
+        std::remove_reference_t<std::invoke_result_t<Transform, ValueType<Container>>>;
 #endif
 
     // Given a Container<Input> and a Transform which converts from Input to Output.
@@ -90,20 +92,9 @@ auto transformed(InputContainer &&input, Transform &&transform)
 }
 
 template <template <typename...> class ResultContainer, typename InputContainer, typename Transform>
-#if __cplusplus < 201703L
-using ResultTypeForTransformed =
-    ResultContainer<typename std::result_of<Transform(ValueType<InputContainer>)>::type>;
-
-#else
-using ResultTypeForTransformed =
-    ResultContainer<std::invoke_result_t<Transform, ValueType<InputContainer>>>;
-#endif
-
-template <template <typename...> class ResultContainer, typename InputContainer, typename Transform>
 auto transformed(InputContainer &&input, Transform &&transform)
 {
-    return detail::transformed<
-        ResultTypeForTransformed<ResultContainer, InputContainer, Transform>>(
+    return detail::transformed<ResultContainer<detail::ResultItemType<InputContainer, Transform>>>(
         std::forward<InputContainer>(input),
         detail::to_function_object(std::forward<Transform>(transform)));
 }
