@@ -47,6 +47,13 @@ environment:
     - preset: cpp20
     - preset: cpp23
 
+matrix:
+  exclude:
+    - image: macos-monterey
+      preset: cpp20
+    - image: macos-monterey
+      preset: cpp23
+
 install:
   - sh: if [ "`uname -s`" = "Darwin" ]; then brew install ninja; else sudo apt-get -y update; fi
 
