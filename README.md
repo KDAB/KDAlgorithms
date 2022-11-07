@@ -118,6 +118,7 @@ Other
 - <a href="#accumulate">accumulate</a>
 - <a href="#accumulate_if">accumulate_if</a>
 - <a href="#iota">iota</a>
+- <a href="#partitioned">partitioned</a>
 
 <a name="copy">copy</a>
 -----------------------
@@ -706,4 +707,35 @@ std::vector<int> result = kdalgorithms::iota(10, 5);
 // result = {10, 11, 12, 13, 14};
 ```
 
-- See [std::iota](https://en.cppreference.com/w/cpp/algorithm/iota) for the algorithm from the standard,
+See [std::iota](https://en.cppreference.com/w/cpp/algorithm/iota) for the algorithm from the standard.
+
+<a name="partitioned">partitioned</a>
+---------------------------------
+partitioned takes a container and a predicate, and returns two new containers, the first with the items matching the predicate, the second with the items not matching.
+
+```
+std::vector<int> vec{4, 1, 3, 2};
+const auto result = kdalgorithms::partition(vec, [](int i) { return i > 2; });
+// result.in = {4, 3}, result.out = {1, 2}
+```
+
+If your compiler supports C++17, then structural bindings may make the above slightlt more readable.
+
+```
+std::vector<int> vec{4, 1, 3, 2};
+const auto& [in, out] = kdalgorithms::partition(vec, [](int i) { return i > 2; });
+// in = {4, 3}, out = {1, 2}
+```
+
+If the container provided is an x-value (expiring value), then the items will be moved over rather than copied over.
+
+Similar to <a href="#transform">transformed</a>, it is possible to change the container type:
+
+```     
+std::vector<int> vec{4, 1, 3, 2};
+const auto& [in, out] =
+    kdalgorithms::partitioned<std::unordered_set>(vec, [](int i) { return i > 2; });
+// in = std::unordered_set{4, 3}, out = std::unordered_set{1, 2}
+```
+
+See [std::partition](https://en.cppreference.com/w/cpp/algorithm/partition) for the algorithm from the standard.

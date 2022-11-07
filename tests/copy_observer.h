@@ -24,7 +24,7 @@ struct CopyObserver
     friend bool operator==(const CopyObserver &x, const CopyObserver &y);
     static void reset();
 
-    int value;
+    int value = -1;
     static int copies;
     static int moves;
 };

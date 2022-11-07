@@ -9,6 +9,7 @@
 ****************************************************************************/
 
 #include "copy_observer.h"
+#include <utility>
 
 int CopyObserver::copies = 0;
 int CopyObserver::moves = 0;
@@ -26,7 +27,7 @@ CopyObserver::CopyObserver(const CopyObserver &other)
 
 CopyObserver::CopyObserver(CopyObserver &&other) noexcept
 {
-    value = other.value;
+    value = std::exchange(other.value, {});
     ++moves;
 }
 
@@ -50,7 +51,7 @@ void CopyObserver::reset()
 
 CopyObserver &CopyObserver::operator=(CopyObserver &&other) noexcept
 {
-    value = other.value;
+    value = std::exchange(other.value, {});
     ++moves;
     return *this;
 }
