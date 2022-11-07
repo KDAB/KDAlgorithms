@@ -142,6 +142,7 @@ private Q_SLOTS:
     void index_of_match();
     void find_if();
     void find_if_not();
+    void iota();
 };
 
 void TestAlgorithms::copy()
@@ -1703,6 +1704,41 @@ void TestAlgorithms::find_if_not()
 
         result = kdalgorithms::mutable_find_if_not(vec, [](int) { return true; });
         QVERIFY(!result);
+    }
+}
+
+void TestAlgorithms::iota()
+{
+    { // Simple
+        std::vector<int> result = kdalgorithms::iota(10, 5);
+        std::vector<int> expected{10, 11, 12, 13, 14};
+        QCOMPARE(result, expected);
+    }
+
+    { // std::list
+        std::list<int> result = kdalgorithms::iota<std::list>(10, 5);
+        std::list<int> expected{10, 11, 12, 13, 14};
+        QCOMPARE(result, expected);
+    }
+
+#if QT_VERSION >= 0x060000
+    { // QList
+        QList<int> result = kdalgorithms::iota<QList>(10, 5);
+        QList<int> expected{10, 11, 12, 13, 14};
+        QCOMPARE(result, expected);
+    }
+#endif
+
+    { // QVector
+        QVector<int> result = kdalgorithms::iota<QVector>(10, 5);
+        QVector<int> expected{10, 11, 12, 13, 14};
+        QCOMPARE(result, expected);
+    }
+
+    { // non integer data type
+        auto result = kdalgorithms::iota('a', 3);
+        std::vector<char> expected{'a', 'b', 'c'};
+        QCOMPARE(result, expected);
     }
 }
 
