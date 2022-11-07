@@ -117,6 +117,7 @@ Other
 
 - <a href="#accumulate">accumulate</a>
 - <a href="#accumulate_if">accumulate_if</a>
+- <a href="#iota">iota</a>
 
 <a name="copy">copy</a>
 -----------------------
@@ -695,3 +696,14 @@ kdalgorithms::erase_if(vec, with_key(2));
 - See [std::remove / std::remove_if](https://en.cppreference.com/w/cpp/algorithm/remove) for the algorithm from the standard,
 - See [std::ranges::remove / std::ranges::remove_if](https://en.cppreference.com/w/cpp/algorithm/ranges/remove) for the C++20 ranges implementation
 - See [std::erase / std::erase_if](https://en.cppreference.com/w/cpp/container/vector/erase2) for the C++20 implementation. 
+
+<a name="iota">iota</a>
+-----------------------
+Generate a container with a number of elements  in incremental order
+
+```
+std::vector<int> result = kdalgorithms::iota(10, 5);
+// result = {10, 11, 12, 13, 14};
+```
+
+- See [std::iota](https://en.cppreference.com/w/cpp/algorithm/iota) for the algorithm from the standard,

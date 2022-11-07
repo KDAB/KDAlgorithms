@@ -24,6 +24,7 @@
 #include <numeric>
 #include <type_traits>
 #include <utility>
+#include <vector>
 
 #if __cplusplus >= 201703L
 #include <optional>
@@ -372,6 +373,15 @@ auto index_of_match(const Container &container, UnaryPredicate &&predicate)
 {
     auto result = kdalgorithms::find_if(container, std::forward<UnaryPredicate>(predicate));
     return result.has_result() ? std::distance(result.begin, result.iterator) : -1;
+}
+
+// -------------------- iota --------------------
+template <template <typename...> class Container = std::vector, typename Value>
+Container<Value> iota(Value initial, int count)
+{
+    Container<Value> result(count);
+    std::iota(std::begin(result), std::end(result), initial);
+    return result;
 }
 
 } // namespace kdalgorithms
