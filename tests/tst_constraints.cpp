@@ -70,4 +70,21 @@ FAIL_3_ARG(accumulate_if_accumulate_fn_arg, accumulate_if, vector<int>, function
 FAIL_3_ARG(accumulate_if_predicate, accumulate_if, vector<int>, function<int(int, int)>,
            function<string(int)>)
 
+template <typename ResultContainer, typename Container, typename UnaryPredicate>
+void err_partitioned()
+{
+    static_assert(!requires(Container container, UnaryPredicate pred) {
+        kdalgorithms::partitioned<ResultContainer>(container, pred);
+    });
+}
+
+void test_constraints()
+{
+    // wrong type of items of result vector
+    err_partitioned<vector<string>, vector<int>, function<bool(int)>>();
+
+    // wrong predicate argument type
+    err_partitioned<vector<int>, vector<int>, function<bool(string)>>();
+}
+
 #endif // C++ 20

@@ -384,4 +384,53 @@ Container<Value> iota(Value initial, int count)
     return result;
 }
 
+// -------------------- partition --------------------
+template <typename T>
+struct partition_result
+{
+    T in;
+    T out;
+};
+
+template <typename ResultContainer, typename Container, typename UnaryPredicate>
+#if __cplusplus >= 202002L
+requires UnaryPredicateOnContainerValues<UnaryPredicate, Container> && std::is_convertible_v<
+    ValueType<Container>, ValueType<ResultContainer>>
+#endif
+auto partitioned(Container &&container, UnaryPredicate predicate)
+{
+    partition_result<remove_cvref_t<ResultContainer>> result;
+    auto inInserter = detail::insert_wrapper(result.in);
+    auto outInserter = detail::insert_wrapper(result.out);
+
+    auto forward = [](auto &&value) {
+        if (!std::is_lvalue_reference<Container>::value)
+            return std::move(value);
+        else
+            return value;
+    };
+
+    for (auto &val : container) {
+        if (detail::to_function_object(std::forward<UnaryPredicate>(predicate))(val))
+            *(++inInserter) = forward(val);
+        else
+            *(++outInserter) = forward(val);
+    }
+    return result;
+}
+
+template <typename Container, typename UnaryPredicate>
+auto partitioned(Container &&container, UnaryPredicate predicate)
+{
+    return partitioned<Container, Container, UnaryPredicate>(
+        std::forward<Container>(container), std::forward<UnaryPredicate>(predicate));
+}
+
+template <template <typename...> class ResultContainer, typename Container, typename UnaryPredicate>
+auto partitioned(Container &&container, UnaryPredicate predicate)
+{
+    return partitioned<ResultContainer<ValueType<Container>>>(
+        std::forward<Container>(container), std::forward<UnaryPredicate>(predicate));
+}
+
 } // namespace kdalgorithms

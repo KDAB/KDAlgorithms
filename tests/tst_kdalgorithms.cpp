@@ -143,6 +143,7 @@ private Q_SLOTS:
     void find_if();
     void find_if_not();
     void iota();
+    void partition();
 };
 
 void TestAlgorithms::copy()
@@ -1739,6 +1740,104 @@ void TestAlgorithms::iota()
         auto result = kdalgorithms::iota('a', 3);
         std::vector<char> expected{'a', 'b', 'c'};
         QCOMPARE(result, expected);
+    }
+}
+
+void TestAlgorithms::partition()
+{
+    { // Simple
+        const auto result = kdalgorithms::partitioned(intVector, [](int i) { return i > 2; });
+        std::vector<int> expectedIn = {3, 4};
+        std::vector<int> expectedOut = {1, 2};
+        QCOMPARE(result.in, expectedIn);
+        QCOMPARE(result.out, expectedOut);
+    }
+
+    { // std::map
+        std::map<int, int> map{{1, 10}, {3, 2}, {2, 3}, {4, 5}};
+        const auto &result = kdalgorithms::partitioned(
+            map, [](const auto &pair) { return pair.first * pair.second >= 10; });
+        std::map<int, int> expectedIn = {{1, 10}, {4, 5}};
+        std::map<int, int> expectedOut = {{3, 2}, {2, 3}};
+        QCOMPARE(result.in, expectedIn);
+        QCOMPARE(result.out, expectedOut);
+    }
+
+    { // move
+        std::vector<CopyObserver> expectedIn = {3};
+        std::vector<CopyObserver> expectedOut = {1, 2};
+        CopyObserver::reset();
+        const auto &result = kdalgorithms::partitioned(
+            getObserverVector(), [](const CopyObserver &o) { return o.value > 2; });
+        QCOMPARE(result.in, expectedIn);
+        QCOMPARE(result.out, expectedOut);
+        QCOMPARE(CopyObserver::copies, 0);
+    }
+
+    { // Ensure I do not move away from l-values
+        auto vec = getObserverVector();
+        auto vecExpected = getObserverVector();
+        std::vector<CopyObserver> expectedIn = {3};
+        std::vector<CopyObserver> expectedOut = {1, 2};
+        CopyObserver::reset();
+        const auto &result =
+            kdalgorithms::partitioned(vec, [](const CopyObserver &o) { return o.value > 2; });
+        QCOMPARE(result.in, expectedIn);
+        QCOMPARE(result.out, expectedOut);
+        QCOMPARE(vec, vecExpected);
+        QCOMPARE(CopyObserver::copies, 3);
+    }
+
+    { // move with maps
+        std::map<int, CopyObserver> map{{1, 10}, {3, 2}, {2, 3}, {4, 5}};
+        std::map<int, CopyObserver> expectedIn = {{1, 10}, {4, 5}};
+        std::map<int, CopyObserver> expectedOut = {{3, 2}, {2, 3}};
+        CopyObserver::reset();
+        const auto &result = kdalgorithms::partitioned(
+            std::move(map), [](const auto &pair) { return pair.first * pair.second.value >= 10; });
+        QCOMPARE(result.in, expectedIn);
+        QCOMPARE(result.out, expectedOut);
+        QCOMPARE(CopyObserver::copies, 0);
+    }
+
+    { // Ensure I do not move away from l-values in maps
+        std::map<int, CopyObserver> map{{1, 10}, {3, 2}, {2, 3}, {4, 5}};
+        std::map<int, CopyObserver> expected = map;
+        std::map<int, CopyObserver> expectedIn = {{1, 10}, {4, 5}};
+        std::map<int, CopyObserver> expectedOut = {{3, 2}, {2, 3}};
+        CopyObserver::reset();
+        const auto &result = kdalgorithms::partitioned(
+            map, [](const auto &pair) { return pair.first * pair.second.value >= 10; });
+        QCOMPARE(result.in, expectedIn);
+        QCOMPARE(result.out, expectedOut);
+        QCOMPARE(map, expected);
+        QCOMPARE(CopyObserver::copies, 4);
+    }
+
+    { // member function
+        const auto &result = kdalgorithms::partitioned(structVec, &Struct::isKeyGreaterThanValue);
+        std::vector<Struct> expectedIn{{3, 2}, {4, 1}};
+        std::vector<Struct> expectedOut{{1, 4}, {2, 3}};
+        QCOMPARE(result.in, expectedIn);
+        QCOMPARE(result.out, expectedOut);
+    }
+
+    { // convert container only specifying the container type
+        const auto &result =
+            kdalgorithms::partitioned<std::unordered_set>(intVector, [](int i) { return i > 2; });
+        std::unordered_set<int> expectedIn = {3, 4};
+        std::unordered_set<int> expectedOut = {1, 2};
+        QCOMPARE(result.in, expectedIn);
+        QCOMPARE(result.out, expectedOut);
+    }
+
+    { // convert container specifying the container and item type
+        const auto result = kdalgorithms::partitioned<std::unordered_set<double>>(
+            intVector, [](int i) { return i > 2; });
+        std::unordered_set<double> expectedIn = {3, 4};
+        std::unordered_set<double> expectedOut = {1, 2};
+        QCOMPARE(result.in, expectedIn);
+        QCOMPARE(result.out, expectedOut);
     }
 }
 
