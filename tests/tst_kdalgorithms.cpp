@@ -1179,8 +1179,7 @@ void TestAlgorithms::accumulateAndMemberFunctions()
 
     {
         std::vector<std::string> list{"abc", "def", "hij"};
-        ResultBuilder result;
-        (void)kdalgorithms::accumulate(list, &ResultBuilder::append, std::ref(result));
+        auto result = kdalgorithms::accumulate(list, &ResultBuilder::append, ResultBuilder());
         QCOMPARE(result.result, "/abc/def/hij");
     }
 
