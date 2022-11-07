@@ -590,8 +590,7 @@ struct ResultBuilder
 
 {
     std::vector<std::string> list{"abc", "def", "hij"};
-    ResultBuilder result;
-    (void)kdalgorithms::accumulate(list, &ResultBuilder::append, std::ref(result));
+    auto result = kdalgorithms::accumulate(list, &ResultBuilder::append, ResultBuilder());
     result.result = "/abc/def/hij";
 }
 ```
