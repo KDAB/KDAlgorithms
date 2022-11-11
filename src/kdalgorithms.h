@@ -260,10 +260,14 @@ requires std::is_invocable_r_v<ReturnType, BinaryOperation, ReturnType, ValueTyp
 // -------------------- accumulate_if --------------------
 template <typename Container, typename BinaryOperation, typename UnaryPredicate,
           typename ReturnType = remove_cvref_t<traits::return_type_of_t<BinaryOperation>>>
-ReturnType accumulate_if(const Container &container, BinaryOperation &&accumulate,
-                         UnaryPredicate &&predicate, ReturnType initialValue = {})
+#if __cplusplus >= 202002L
+requires std::is_invocable_r_v<
+    ReturnType, BinaryOperation, ReturnType,
+    ValueType<Container>> && UnaryPredicateOnContainerValues<UnaryPredicate, Container>
+#endif
+    ReturnType accumulate_if(const Container &container, BinaryOperation &&accumulate,
+                             UnaryPredicate &&predicate, ReturnType initialValue = {})
 {
-    auto range = read_iterator_wrapper(container);
     auto predicateFunction = detail::to_function_object(std::forward<UnaryPredicate>(predicate));
     auto accumulateFunction = detail::to_function_object(std::forward<BinaryOperation>(accumulate));
     auto fn = [&](const ReturnType &subResult, const ValueType<Container> &item) -> ReturnType {
@@ -273,7 +277,7 @@ ReturnType accumulate_if(const Container &container, BinaryOperation &&accumulat
             return subResult;
     };
 
-    return std::accumulate(range.begin, range.end, initialValue, fn);
+    return kdalgorithms::accumulate(container, fn, initialValue);
 }
 // -------------------- get_first_match --------------------
 #if __cplusplus >= 201703L
