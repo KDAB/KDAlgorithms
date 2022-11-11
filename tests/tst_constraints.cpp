@@ -48,8 +48,7 @@ FAIL_2_ARG(filter, filter, vector<int>, function<string(string)>)
 FAIL_2_ARG(contains, contains, vector<int>, string)
 FAIL_2_ARG(count, count, vector<int>, string)
 FAIL_2_ARG(get_first_match, get_match, vector<int>, function<bool(string)>)
-FAIL_2_ARG(get_first_match_or_default, get_match_or_default, vector<int>,
-           function<bool(string)>)
+FAIL_2_ARG(get_first_match_or_default, get_match_or_default, vector<int>, function<bool(string)>)
 FAIL_2_ARG(count_if_wong_type, count_if, vector<int>, std::function<bool(string)>)
 FAIL_2_ARG(count_if_no_return, count_if, vector<int>, std::function<void(int)>)
 FAIL_2_ARG(max_element_wrong_predicate, max_element, vector<int>, function<bool(string, string)>)
@@ -64,5 +63,11 @@ FAIL_3_ARG(max_value_less_than_one_arg, max_value_less_than, vector<int>, int, f
 FAIL_2_ARG(is_permutation, is_permutation, vector<int>, vector<string>)
 FAIL_2_ARG(accumulate_wrong_arg_count, accumulate, vector<int>, function<int(int)>)
 FAIL_2_ARG(accumulate_wrong_return_type, accumulate, vector<int>, function<string(int, int)>)
+FAIL_3_ARG(accumulate_if_accumulate_fn_return_type, accumulate_if, vector<int>,
+           function<string(int, int)>, function<int(int)>)
+FAIL_3_ARG(accumulate_if_accumulate_fn_arg, accumulate_if, vector<int>, function<int(string, int)>,
+           function<int(int)>)
+FAIL_3_ARG(accumulate_if_predicate, accumulate_if, vector<int>, function<int(int, int)>,
+           function<string(int)>)
 
 #endif // C++ 20
