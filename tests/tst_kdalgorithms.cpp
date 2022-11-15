@@ -403,10 +403,19 @@ void TestAlgorithms::filterOtherContainers()
 
 void TestAlgorithms::filter()
 {
-    std::vector<int> vec{1, 2, 3, 4};
-    kdalgorithms::filter(vec, isOdd);
-    std::vector<int> expected{1, 3};
-    QCOMPARE(vec, expected);
+    {
+        std::vector<int> vec{1, 2, 3, 4};
+        kdalgorithms::filter(vec, isOdd);
+        std::vector<int> expected{1, 3};
+        QCOMPARE(vec, expected);
+    }
+
+    {
+        QList<int> intList{1, 2, 3, 4};
+        kdalgorithms::filter(intList, isOdd);
+        QList<int> expected{1, 3};
+        QCOMPARE(intList, expected);
+    }
 }
 
 void TestAlgorithms::transformedChangeContainer()

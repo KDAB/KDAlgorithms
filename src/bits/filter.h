@@ -69,13 +69,13 @@ void filter(Container &input, UnaryPredicate &&predicate)
 #endif
 {
 #if __cplusplus < 201703L
-    auto it = std::remove_if(begin(input), end(input),
+    auto it = std::remove_if(std::begin(input), std::end(input),
                              [&predicate](const ValueType<Container> &v) { return !predicate(v); });
 #else
-    auto it = std::remove_if(begin(input), end(input),
+    auto it = std::remove_if(std::begin(input), std::end(input),
                              std::not_fn(std::forward<UnaryPredicate>(predicate)));
 #endif
-    input.erase(it, end(input));
+    input.erase(it, std::end(input));
 }
 
 } // namespace kdalgorithms
