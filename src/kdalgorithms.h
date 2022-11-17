@@ -246,7 +246,7 @@ bool is_permutation(const Container1 &container1, const Container2 &container2,
 
 // -------------------- accumulate --------------------
 template <typename Container, typename BinaryOperation = std::plus<ValueType<Container>>,
-          typename ReturnType = remove_cvref_t<traits::return_type_of_t<BinaryOperation>>>
+          typename ReturnType = remove_cvref_t<detail::return_type_of_t<BinaryOperation>>>
 #if __cplusplus >= 202002L
 requires std::is_invocable_r_v<ReturnType, BinaryOperation, ReturnType, ValueType<Container>>
 #endif
@@ -261,7 +261,7 @@ requires std::is_invocable_r_v<ReturnType, BinaryOperation, ReturnType, ValueTyp
 
 // -------------------- accumulate_if --------------------
 template <typename Container, typename BinaryOperation, typename UnaryPredicate,
-          typename ReturnType = remove_cvref_t<traits::return_type_of_t<BinaryOperation>>>
+          typename ReturnType = remove_cvref_t<detail::return_type_of_t<BinaryOperation>>>
 #if __cplusplus >= 202002L
 requires std::is_invocable_r_v<
     ReturnType, BinaryOperation, ReturnType,
