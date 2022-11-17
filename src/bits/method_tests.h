@@ -11,6 +11,8 @@
 #pragma once
 
 #include "is_detected.h"
+#include "shared.h"
+
 namespace kdalgorithms {
 
 namespace detail {
@@ -20,6 +22,9 @@ namespace detail {
 
         template <typename Container>
         using has_keyValueBegin = decltype(std::declval<Container &>().keyValueBegin());
+
+        template <typename Generator, typename Size>
+        using has_generator_with_index = invoke_result_t<Generator, Size>;
     }
 
     template <typename Container>
@@ -30,6 +35,10 @@ namespace detail {
 
     template <typename Container>
     constexpr bool has_keyValueBegin_v = detail::is_detected_v<tests::has_keyValueBegin, Container>;
+
+    template <typename Generator, typename Size>
+    constexpr bool has_generator_with_index_v =
+        detail::is_detected_v<tests::has_generator_with_index, Generator, Size>;
 
 } // namespace detail
 } // namespace kdalgorithms

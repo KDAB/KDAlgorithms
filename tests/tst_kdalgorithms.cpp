@@ -144,6 +144,8 @@ private Q_SLOTS:
     void find_if_not();
     void iota();
     void partition();
+    void generate_n();
+    void generate_until();
 };
 
 void TestAlgorithms::copy()
@@ -1847,6 +1849,200 @@ void TestAlgorithms::partition()
         QCOMPARE(result.in, expectedIn);
         QCOMPARE(result.out, expectedOut);
     }
+}
+
+void TestAlgorithms::generate_n()
+{
+    { // vector
+        std::vector<int> result;
+        kdalgorithms::generate_n(result, 5, [](int index) { return index; });
+        std::vector<int> expected{0, 1, 2, 3, 4};
+        QCOMPARE(result, expected);
+    }
+
+    { // QVector
+        QVector<int> result;
+        kdalgorithms::generate_n(result, 5, [](int index) { return index; });
+        QVector<int> expected{0, 1, 2, 3, 4};
+        QCOMPARE(result, expected);
+    }
+
+    { // unordered_set
+        std::unordered_set<int> result;
+        kdalgorithms::generate_n(result, 5, [](int index) { return index * index; });
+        std::unordered_set<int> expected{0, 1, 4, 9, 16};
+        QCOMPARE(result, expected);
+    }
+
+#if QT_VERSION >= 0x060000
+    { // QSet
+        QSet<int> result;
+        kdalgorithms::generate_n(result, 5, [](int index) { return index; });
+        QSet<int> expected{0, 1, 2, 3, 4};
+        QCOMPARE(result, expected);
+    }
+#endif
+
+    { // map
+        std::map<int, int> result;
+        kdalgorithms::generate_n(result, 5,
+                                 [](int index) { return std::make_pair(index, index * index); });
+        std::map<int, int> expected{{0, 0}, {1, 1}, {2, 4}, {3, 9}, {4, 16}};
+        QCOMPARE(result, expected);
+    }
+
+    { // QMap
+        QMap<int, QString> result;
+        kdalgorithms::generate_n(result, 5,
+                                 [](int index) { return std::make_pair(index, toString(index)); });
+        QMap<int, QString> expected{{0, "0"}, {1, "1"}, {2, "2"}, {3, "3"}, {4, "4"}};
+        QCOMPARE(result, expected);
+    }
+
+    { // generator not taking any parameter
+        std::vector<int> result;
+        kdalgorithms::generate_n(result, 5, [i = 0]() mutable { return ++i; });
+        std::vector<int> expected{1, 2, 3, 4, 5};
+        QCOMPARE(result, expected);
+    }
+}
+
+#if __cplusplus >= 201703L
+struct FibGenerator
+{
+    // OK, a stupid generator which produces the fib numbers up to 100
+    int step = 0;
+    int parent = 1;
+    int grantParent = 1;
+    std::optional<int> operator()()
+    {
+        step++;
+        if (step <= 2)
+            return 1;
+
+        int value = parent + grantParent;
+        if (value > 100)
+            return {};
+        grantParent = parent;
+        parent = value;
+        return value;
+    }
+};
+#endif // __cplusplus >= 201703L
+
+class SimplifiedOptional
+{
+public:
+    SimplifiedOptional() { }
+    SimplifiedOptional(int value)
+        : m_value(value)
+        , m_hasValue(true)
+    {
+    }
+
+    int operator*() { return m_value; }
+    operator bool() { return m_hasValue; }
+
+private:
+    int m_value{};
+    bool m_hasValue = false;
+};
+
+void TestAlgorithms::generate_until()
+{
+    { // Simple case using SimplifiedOptional class
+        auto generator = [x = 0]() mutable -> SimplifiedOptional {
+            if (x < 4) {
+                ++x;
+                return x * x;
+            }
+            return {};
+        };
+
+        auto result = kdalgorithms::generate_until(generator);
+        std::vector<int> expected = {1, 4, 9, 16};
+        QCOMPARE(result, expected);
+    }
+
+    { // Simple case using smart pointers
+        auto generator = [x = 0]() mutable -> std::unique_ptr<int> {
+            if (x < 4) {
+                ++x;
+                return std::make_unique<int>(x * x);
+            }
+            return {};
+        };
+
+        auto result = kdalgorithms::generate_until(generator);
+        std::vector<int> expected = {1, 4, 9, 16};
+        QCOMPARE(result, expected);
+    }
+
+#if __cplusplus >= 201703L
+    { // Simple case using std::optional
+        auto generator = [x = 0]() mutable -> std::optional<int> {
+            if (x < 4) {
+                ++x;
+                return x * x;
+            }
+            return {};
+        };
+
+        auto result = kdalgorithms::generate_until(generator);
+        std::vector<int> expected = {1, 4, 9, 16};
+        QCOMPARE(result, expected);
+    }
+
+    { // use a container different from the default for the return type
+        auto generator = [x = 0]() mutable -> std::optional<int> {
+            if (x < 4) {
+                ++x;
+                return x * x;
+            }
+            return {};
+        };
+
+        auto result = kdalgorithms::generate_until<std::deque>(generator);
+        std::deque<int> expected = {1, 4, 9, 16};
+        QCOMPARE(result, expected);
+    }
+
+    { // Use a generator object
+        auto result = kdalgorithms::generate_until(FibGenerator());
+        std::vector<int> expected = {1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89};
+        QCOMPARE(result, expected);
+    }
+
+    { // Verify no copies happening for the items
+        int i = 0;
+        CopyObserver::reset();
+        auto result = kdalgorithms::generate_until([&i]() -> std::optional<CopyObserver> {
+            ++i;
+            if (i < 5)
+                return CopyObserver(i);
+            else
+                return {};
+        });
+        QCOMPARE(CopyObserver::copies, 0);
+        QCOMPARE(result.size(), 4);
+        for (int i = 0; i < 4; ++i)
+            QCOMPARE(result.at(i).value, i + 1);
+    }
+
+    { // Provide a fully specified container type
+        auto generator = [x = 0]() mutable -> std::optional<QString> {
+            if (x < 4) {
+                ++x;
+                return QString::number(x);
+            }
+            return {};
+        };
+
+        auto result = kdalgorithms::generate_until<QStringList>(generator);
+        QStringList expected = {"1", "2", "3", "4"};
+        QCOMPARE(result, expected);
+    }
+#endif // __cplusplus >= 201703L
 }
 
 QTEST_MAIN(TestAlgorithms)

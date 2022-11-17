@@ -40,6 +40,19 @@ namespace detail {
     {
         using value_type = std::pair<const typename T::key_type, typename T::mapped_type>;
     };
+
+// Wrapper around result_of and invoke_result
+#if __cplusplus < 201703L
+    template <typename FN, typename... ARGS>
+    using invoke_result = std::result_of<FN(ARGS...)>;
+#else
+    template <typename FN, typename... ARGS>
+    using invoke_result = std::invoke_result<FN, ARGS...>;
+#endif
+
+    template <typename FN, typename... ARGS>
+    using invoke_result_t = typename invoke_result<FN, ARGS...>::type;
+
 }
 
 template <typename Container>
