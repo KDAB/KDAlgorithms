@@ -49,6 +49,7 @@ if(BUILD_TESTING AND ${KDALGORITHMS_BUILD_TEST})
         src/bits/read_iterator_wrapper.h
         src/bits/find_if.h
         src/bits/filter.h
+        src/bits/generate.h
         src/bits/insert_wrapper.h
         src/bits/is_const_method.h
         src/bits/is_detected.h

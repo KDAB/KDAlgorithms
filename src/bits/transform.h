@@ -26,15 +26,9 @@ namespace detail {
     }
 
     // ResultItemType = resulting type when applying Transform on an item in Container.
-#if __cplusplus < 201703L
-    template <typename Container, typename Transform>
-    using ResultItemType = typename std::remove_reference<
-        typename std::result_of<Transform(ValueType<Container>)>::type>::type;
-#else
     template <typename Container, typename Transform>
     using ResultItemType =
-        std::remove_reference_t<std::invoke_result_t<Transform, ValueType<Container>>>;
-#endif
+        std::remove_reference_t<detail::invoke_result_t<Transform, ValueType<Container>>>;
 
     // Given a Container<Input> and a Transform which converts from Input to Output.
     // TransformedType = Container<Output>

@@ -12,6 +12,7 @@
 
 #include "bits/filter.h"
 #include "bits/find_if.h"
+#include "bits/generate.h"
 #include "bits/insert_wrapper.h"
 #include "bits/method_tests.h"
 #include "bits/operators.h"
@@ -384,7 +385,7 @@ Container<Value> iota(Value initial, int count)
     return result;
 }
 
-// -------------------- partition --------------------
+// -------------------- partitioned --------------------
 template <typename T>
 struct partition_result
 {

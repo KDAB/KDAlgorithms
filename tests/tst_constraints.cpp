@@ -69,6 +69,10 @@ FAIL_3_ARG(accumulate_if_accumulate_fn_arg, accumulate_if, vector<int>, function
            function<int(int)>)
 FAIL_3_ARG(accumulate_if_predicate, accumulate_if, vector<int>, function<int(int, int)>,
            function<string(int)>)
+FAIL_3_ARG(generate_n_wrong_generator_input_type, generate_n, vector<string>, int,
+           function<int(int)>)
+FAIL_3_ARG(generate_n_wrong_generator_return_type, generate_n, vector<string>, int,
+           function<string(string)>)
 
 template <typename ResultContainer, typename Container, typename UnaryPredicate>
 void err_partitioned()
@@ -78,6 +82,12 @@ void err_partitioned()
     });
 }
 
+template <typename Container, typename Generator>
+void err_generate()
+{
+    static_assert(!requires(Generator generator) { kdalgorithms::generate_until<Container>(generator); });
+}
+
 void test_constraints()
 {
     // wrong type of items of result vector
@@ -85,6 +95,15 @@ void test_constraints()
 
     // wrong predicate argument type
     err_partitioned<vector<int>, vector<int>, function<bool(string)>>();
+
+    // wrong type in the optional
+    err_generate<vector<int>, function<optional<string>()>>();
+
+    // Forgot the std::optional in the generator
+    err_generate<vector<int>, function<int()>>();
+
+    // Generator shouldn't take any parameter
+    err_generate<vector<int>, function<optional<int>(int)>>();
 }
 
 #endif // C++ 20
