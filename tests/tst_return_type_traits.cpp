@@ -14,7 +14,7 @@
 #include <type_traits>
 #include <vector>
 
-using namespace kdalgorithms::traits;
+using namespace kdalgorithms::detail;
 
 class TestReturnTypeTraits
 {
