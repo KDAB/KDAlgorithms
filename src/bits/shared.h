@@ -53,6 +53,12 @@ namespace detail {
     template <typename FN, typename... ARGS>
     using invoke_result_t = typename invoke_result<FN, ARGS...>::type;
 
+    // Test if two variables is at the same address.
+    template <typename T, typename S>
+    bool is_same_object(const T &t, const S &s)
+    {
+        return static_cast<const void *>(&t) == static_cast<const void *>(&s);
+    }
 }
 
 template <typename Container>

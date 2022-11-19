@@ -42,17 +42,12 @@ namespace detail {
 // -------------------- generate_n --------------------
 template <typename Container, typename Size, typename Generator>
 #if __cplusplus >= 202002L
-requires std::is_convertible_v<detail::invoke_result_t<Generator, int>,
-                               ValueType<Container>> || std::
-    is_convertible_v<detail::invoke_result_t<Generator>, ValueType<Container>>
+    requires std::is_convertible_v<detail::invoke_result_t<Generator, int>, ValueType<Container>>
+    || std::is_convertible_v<detail::invoke_result_t<Generator>, ValueType<Container>>
 #endif
 void generate_n(Container &container, Size count, Generator &&generator)
 {
-#if __cplusplus >= 201703L
-    if constexpr (detail::has_reserve_method_v<Container>) {
-        container.reserve(container.size() + count);
-    }
-#endif
+    detail::reserve(container, container.size() + count);
 
     auto iterator = detail::insert_wrapper(container);
 
@@ -62,7 +57,7 @@ void generate_n(Container &container, Size count, Generator &&generator)
     }
 }
 
-// -------------------- generate --------------------
+// -------------------- generate_until --------------------
 namespace detail {
     template <typename T>
     using pointed_to_type = remove_cvref_t<decltype(*std::declval<T>())>;
@@ -73,7 +68,7 @@ namespace detail {
 }
 template <typename Container, typename Generator>
 #if __cplusplus >= 202002L
-requires std::is_convertible_v<detail::generator_value_type<Generator>, ValueType<Container>>
+    requires std::is_convertible_v<detail::generator_value_type<Generator>, ValueType<Container>>
 #endif
 auto generate_until(Generator &&generator)
 {

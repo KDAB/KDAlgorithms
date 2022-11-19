@@ -11,7 +11,7 @@
 #pragma once
 
 #include "insert_wrapper.h"
-#include "method_tests.h"
+#include "reserve_helper.h"
 #include "shared.h"
 #include "to_function_object.h"
 #include <algorithm>
@@ -42,11 +42,7 @@ namespace detail {
     ResultContainer transformed(InputContainer &&input, Transform &&transform, std::true_type)
     {
         ResultContainer result;
-#if __cplusplus >= 201703L
-        if constexpr (detail::has_reserve_method_v<ResultContainer>) {
-            result.reserve(input.size());
-        }
-#endif
+        detail::reserve(result, input.size());
         auto range = read_iterator_wrapper(std::forward<InputContainer>(input));
         std::transform(range.begin, range.end, detail::insert_wrapper(result),
                        std::forward<Transform>(transform));
