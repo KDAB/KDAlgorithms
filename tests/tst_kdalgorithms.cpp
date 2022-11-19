@@ -146,6 +146,7 @@ private Q_SLOTS:
     void partition();
     void generate_n();
     void generate_until();
+    void isSame();
 };
 
 void TestAlgorithms::copy()
@@ -270,6 +271,41 @@ void TestAlgorithms::copy()
         QHash<int, int> to;
         kdalgorithms::copy(from, to);
         QCOMPARE(from, to);
+    }
+
+    { // Self copy - OK
+        std::vector<int> v{1, 2, 3};
+        kdalgorithms::copy(v, v);
+        std::vector<int> expected{1, 2, 3, 1, 2, 3};
+        QCOMPARE(v, expected);
+    }
+
+    { // std::list self copy - std::list doesn't have a reserve
+        std::list<int> v{1, 2, 3};
+        std::list<int> expected{1, 2, 3, 1, 2, 3};
+        kdalgorithms::copy(v, v);
+        QCOMPARE(v, expected);
+    }
+
+    { // std::map self copy - Doesn't make sense, but doesn't fail either
+        std::map<int, int> v{{1, 1}, {2, 2}, {3, 3}};
+        std::map<int, int> expected{{1, 1}, {2, 2}, {3, 3}};
+        kdalgorithms::copy(v, v);
+        QCOMPARE(v, expected);
+    }
+
+    { // std::set Self copy - Doesn't make sense, but doesn't fail either
+        std::set<int> v{1, 2, 3};
+        std::set<int> expected{1, 2, 3};
+        kdalgorithms::copy(v, v);
+        QCOMPARE(v, expected);
+    }
+
+    { // std::multimap self copy
+        std::multimap<int, int> v{{1, 1}, {2, 2}, {3, 3}};
+        std::multimap<int, int> expected{{1, 1}, {2, 2}, {3, 3}, {1, 1}, {2, 2}, {3, 3}};
+        kdalgorithms::copy(v, v);
+        QCOMPARE(v, expected);
     }
 }
 
@@ -2043,6 +2079,42 @@ void TestAlgorithms::generate_until()
         QCOMPARE(result, expected);
     }
 #endif // __cplusplus >= 201703L
+}
+
+namespace {
+struct X
+{
+};
+struct Y : X
+{
+};
+}
+
+void TestAlgorithms::isSame()
+{
+    using namespace kdalgorithms::detail;
+
+    // Simple
+    QVERIFY(is_same_object(intVector, intVector));
+
+    // obviously not he same
+    QVERIFY(!is_same_object(intVector, structVec));
+
+    { // same content but not same object
+        auto copy = intVector;
+        QVERIFY(!is_same_object(intVector, copy));
+    }
+
+    { // one being an alias of the other
+        auto &other = intVector;
+        QVERIFY(is_same_object(intVector, other));
+    }
+
+    { // One being a super class of the other
+        Y y;
+        X &x = y;
+        QVERIFY(is_same_object(x, y));
+    }
 }
 
 QTEST_MAIN(TestAlgorithms)

@@ -17,6 +17,7 @@
 #include "bits/method_tests.h"
 #include "bits/operators.h"
 #include "bits/read_iterator_wrapper.h"
+#include "bits/reserve_helper.h"
 #include "bits/return_type_trait.h"
 #include "bits/shared.h"
 #include "bits/to_function_object.h"
@@ -36,15 +37,16 @@ namespace kdalgorithms {
 // -------------------- copy --------------------
 template <typename InputContainer, typename OutputContainer>
 #if __cplusplus >= 202002L
-requires ContainerOfType<OutputContainer, ValueType<InputContainer>>
+    requires ContainerOfType<OutputContainer, ValueType<InputContainer>>
 #endif
 void copy(InputContainer &&input, OutputContainer &output)
 {
-#if __cplusplus >= 201703L
-    if constexpr (detail::has_reserve_method_v<OutputContainer>) {
-        output.reserve(input.size() + output.size());
+    bool foundReserve = detail::reserve(output, input.size() + output.size());
+    if (!foundReserve && detail::is_same_object(input, output)) {
+        remove_cvref_t<InputContainer> tmp = input;
+        copy(tmp, output);
+        return;
     }
-#endif
     auto range = read_iterator_wrapper(std::forward<InputContainer>(input));
     std::copy(range.begin, range.end, detail::insert_wrapper(output));
 }
@@ -114,9 +116,10 @@ bool is_sorted(const Container &container, Compare &&compare = {})
 // -------------------- contains / value_in --------------------
 template <typename Container, typename Value>
 #if __cplusplus >= 202002L
-requires std::equality_comparable_with<ValueType<Container>, Value>
+    requires std::equality_comparable_with<ValueType<Container>, Value>
 #endif
-bool contains(const Container &container, Value &&value)
+    bool
+contains(const Container &container, Value &&value)
 {
     return std::find(std::cbegin(container), std::cend(container), std::forward<Value>(value))
         != std::cend(container);
@@ -124,9 +127,10 @@ bool contains(const Container &container, Value &&value)
 
 template <typename Value, typename ContainerValue>
 #if __cplusplus >= 202002L
-requires std::equality_comparable_with<ContainerValue, Value>
+    requires std::equality_comparable_with<ContainerValue, Value>
 #endif
-bool contains(std::initializer_list<ContainerValue> container, Value &&value)
+    bool
+contains(std::initializer_list<ContainerValue> container, Value &&value)
 {
     const auto it =
         std::find(std::begin(container), std::end(container), std::forward<Value>(value));
@@ -135,9 +139,10 @@ bool contains(std::initializer_list<ContainerValue> container, Value &&value)
 
 template <typename Value, typename ContainerValue>
 #if __cplusplus >= 202002L
-requires std::equality_comparable_with<ContainerValue, Value>
+    requires std::equality_comparable_with<ContainerValue, Value>
 #endif
-bool value_in(Value &&value, std::initializer_list<ContainerValue> container)
+    bool
+value_in(Value &&value, std::initializer_list<ContainerValue> container)
 {
     return contains(container, std::forward<Value>(value));
 }
@@ -145,7 +150,7 @@ bool value_in(Value &&value, std::initializer_list<ContainerValue> container)
 // -------------------- count / count_if --------------------
 template <typename Container, typename Value>
 #if __cplusplus >= 202002L
-requires ContainerOfType<Container, Value>
+    requires ContainerOfType<Container, Value>
 #endif
 int count(const Container &container, Value &&value)
 {
@@ -154,7 +159,7 @@ int count(const Container &container, Value &&value)
 
 template <typename Container, typename UnaryPredicate>
 #if __cplusplus >= 202002L
-requires UnaryPredicateOnContainerValues<UnaryPredicate, Container>
+    requires UnaryPredicateOnContainerValues<UnaryPredicate, Container>
 #endif
 int count_if(const Container &container, UnaryPredicate &&predicate)
 {
@@ -167,10 +172,9 @@ int count_if(const Container &container, UnaryPredicate &&predicate)
 #if __cplusplus >= 201703L
 template <typename Container, typename Compare = std::less<ValueType<Container>>>
 #if __cplusplus >= 202002L
-requires BinaryPredicateOnContainerValues<Compare, Container>
+    requires BinaryPredicateOnContainerValues<Compare, Container>
 #endif
-    std::optional<ValueType<Container>> max_element(const Container &container,
-                                                    Compare &&compare = {})
+std::optional<ValueType<Container>> max_element(const Container &container, Compare &&compare = {})
 {
     if (container.empty())
         return {};
@@ -181,10 +185,9 @@ requires BinaryPredicateOnContainerValues<Compare, Container>
 
 template <typename Container, typename Compare = std::less<ValueType<Container>>>
 #if __cplusplus >= 202002L
-requires BinaryPredicateOnContainerValues<Compare, Container>
+    requires BinaryPredicateOnContainerValues<Compare, Container>
 #endif
-    std::optional<ValueType<Container>> min_element(const Container &container,
-                                                    Compare &&compare = {})
+std::optional<ValueType<Container>> min_element(const Container &container, Compare &&compare = {})
 {
     if (container.empty())
         return {};
@@ -197,10 +200,11 @@ requires BinaryPredicateOnContainerValues<Compare, Container>
 #if __cplusplus >= 201703L
 template <typename Container, typename Item, typename Compare = std::less<ValueType<Container>>>
 #if __cplusplus >= 202002L
-requires BinaryPredicateOnContainerValues<Compare, Container> && ContainerOfType<Container, Item>
+    requires BinaryPredicateOnContainerValues<Compare, Container>
+    && ContainerOfType<Container, Item>
 #endif
-    std::optional<Item> max_value_less_than(const Container &container, Item &&needle,
-                                            Compare &&compare = {})
+std::optional<Item> max_value_less_than(const Container &container, Item &&needle,
+                                        Compare &&compare = {})
 {
     auto it =
         std::lower_bound(std::cbegin(container), std::cend(container), std::forward<Item>(needle),
@@ -214,10 +218,11 @@ requires BinaryPredicateOnContainerValues<Compare, Container> && ContainerOfType
 
 template <typename Container, typename Item, typename Compare = std::less<ValueType<Container>>>
 #if __cplusplus >= 202002L
-requires BinaryPredicateOnContainerValues<Compare, Container> && ContainerOfType<Container, Item>
+    requires BinaryPredicateOnContainerValues<Compare, Container>
+    && ContainerOfType<Container, Item>
 #endif
-    std::optional<Item> min_value_greater_than(const Container &container, Item &&needle,
-                                               Compare &&compare = {})
+std::optional<Item> min_value_greater_than(const Container &container, Item &&needle,
+                                           Compare &&compare = {})
 {
     auto it =
         std::upper_bound(std::cbegin(container), std::cend(container), std::forward<Item>(needle),
@@ -233,11 +238,11 @@ requires BinaryPredicateOnContainerValues<Compare, Container> && ContainerOfType
 template <typename Container1, typename Container2,
           typename Compare = std::equal_to<ValueType<Container1>>>
 #if __cplusplus >= 202002L
-requires BinaryPredicateOnContainerValues<Compare, Container1> && BinaryPredicateOnContainerValues<
-    Compare, Container2>
+    requires BinaryPredicateOnContainerValues<Compare, Container1>
+    && BinaryPredicateOnContainerValues<Compare, Container2>
 #endif
-bool is_permutation(const Container1 &container1, const Container2 &container2,
-                    Compare &&compare = {})
+    bool
+is_permutation(const Container1 &container1, const Container2 &container2, Compare &&compare = {})
 {
     return std::is_permutation(std::cbegin(container1), std::cend(container1),
                                std::cbegin(container2), std::cend(container2),
@@ -248,10 +253,10 @@ bool is_permutation(const Container1 &container1, const Container2 &container2,
 template <typename Container, typename BinaryOperation = std::plus<ValueType<Container>>,
           typename ReturnType = remove_cvref_t<detail::return_type_of_t<BinaryOperation>>>
 #if __cplusplus >= 202002L
-requires std::is_invocable_r_v<ReturnType, BinaryOperation, ReturnType, ValueType<Container>>
+    requires std::is_invocable_r_v<ReturnType, BinaryOperation, ReturnType, ValueType<Container>>
 #endif
-    ReturnType accumulate(const Container &container, BinaryOperation &&accumulateFunction = {},
-                          ReturnType initialValue = {})
+ReturnType accumulate(const Container &container, BinaryOperation &&accumulateFunction = {},
+                      ReturnType initialValue = {})
 {
     auto range = read_iterator_wrapper(container);
     return std::accumulate(
@@ -263,12 +268,11 @@ requires std::is_invocable_r_v<ReturnType, BinaryOperation, ReturnType, ValueTyp
 template <typename Container, typename BinaryOperation, typename UnaryPredicate,
           typename ReturnType = remove_cvref_t<detail::return_type_of_t<BinaryOperation>>>
 #if __cplusplus >= 202002L
-requires std::is_invocable_r_v<
-    ReturnType, BinaryOperation, ReturnType,
-    ValueType<Container>> && UnaryPredicateOnContainerValues<UnaryPredicate, Container>
+    requires std::is_invocable_r_v<ReturnType, BinaryOperation, ReturnType, ValueType<Container>>
+    && UnaryPredicateOnContainerValues<UnaryPredicate, Container>
 #endif
-    ReturnType accumulate_if(const Container &container, BinaryOperation &&accumulate,
-                             UnaryPredicate &&predicate, ReturnType initialValue = {})
+ReturnType accumulate_if(const Container &container, BinaryOperation &&accumulate,
+                         UnaryPredicate &&predicate, ReturnType initialValue = {})
 {
     auto predicateFunction = detail::to_function_object(std::forward<UnaryPredicate>(predicate));
     auto accumulateFunction = detail::to_function_object(std::forward<BinaryOperation>(accumulate));
@@ -285,10 +289,10 @@ requires std::is_invocable_r_v<
 #if __cplusplus >= 201703L
 template <typename Container, typename UnaryPredicate>
 #if __cplusplus >= 202002L
-requires UnaryPredicateOnContainerValues<UnaryPredicate, Container>
+    requires UnaryPredicateOnContainerValues<UnaryPredicate, Container>
 #endif
-    std::optional<ValueType<Container>> get_match(const Container &container,
-                                                  UnaryPredicate &&predicate)
+std::optional<ValueType<Container>> get_match(const Container &container,
+                                              UnaryPredicate &&predicate)
 {
     auto result = kdalgorithms::find_if(container, std::forward<UnaryPredicate>(predicate));
     if (result)
@@ -301,11 +305,10 @@ requires UnaryPredicateOnContainerValues<UnaryPredicate, Container>
 // -------------------- get_first_match_or_default --------------------
 template <typename Container, typename UnaryPredicate>
 #if __cplusplus >= 202002L
-requires UnaryPredicateOnContainerValues<UnaryPredicate, Container>
+    requires UnaryPredicateOnContainerValues<UnaryPredicate, Container>
 #endif
-    ValueType<Container> get_match_or_default(const Container &container,
-                                              UnaryPredicate &&predicate,
-                                              const ValueType<Container> &defaultValue = {})
+ValueType<Container> get_match_or_default(const Container &container, UnaryPredicate &&predicate,
+                                          const ValueType<Container> &defaultValue = {})
 {
     auto result = kdalgorithms::find_if(container, std::forward<UnaryPredicate>(predicate));
     if (result)
@@ -345,7 +348,7 @@ bool has_duplicates(Container &&container, SortOption sort)
 // -------------------- erase / erase_if --------------------
 template <typename Container, typename Value>
 #if __cplusplus >= 202002L
-requires ContainerOfType<Container, Value>
+    requires ContainerOfType<Container, Value>
 #endif
 auto erase(Container &container, Value &&value)
 {
@@ -357,7 +360,7 @@ auto erase(Container &container, Value &&value)
 
 template <typename Container, typename UnaryPredicate>
 #if __cplusplus >= 202002L
-requires UnaryPredicateOnContainerValues<UnaryPredicate, Container>
+    requires UnaryPredicateOnContainerValues<UnaryPredicate, Container>
 #endif
 auto erase_if(Container &container, UnaryPredicate &&predicate)
 {
@@ -395,8 +398,8 @@ struct partition_result
 
 template <typename ResultContainer, typename Container, typename UnaryPredicate>
 #if __cplusplus >= 202002L
-requires UnaryPredicateOnContainerValues<UnaryPredicate, Container> && std::is_convertible_v<
-    ValueType<Container>, ValueType<ResultContainer>>
+    requires UnaryPredicateOnContainerValues<UnaryPredicate, Container>
+    && std::is_convertible_v<ValueType<Container>, ValueType<ResultContainer>>
 #endif
 auto partitioned(Container &&container, UnaryPredicate predicate)
 {

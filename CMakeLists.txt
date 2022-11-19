@@ -55,6 +55,7 @@ if(BUILD_TESTING AND ${KDALGORITHMS_BUILD_TEST})
         src/bits/is_detected.h
         src/bits/method_tests.h
         src/bits/operators.h
+        src/bits/reserve_helper.h
         src/bits/return_type_trait.h
         src/bits/shared.h
         src/bits/to_function_object.h

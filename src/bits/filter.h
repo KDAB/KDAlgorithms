@@ -13,6 +13,7 @@
 #include "insert_wrapper.h"
 #include "method_tests.h"
 #include "read_iterator_wrapper.h"
+#include "reserve_helper.h"
 #include "shared.h"
 #include "to_function_object.h"
 #include <algorithm>
@@ -25,11 +26,8 @@ namespace detail {
     ResultContainer filtered(InputContainer &&input, UnaryPredicate &&predicate)
     {
         ResultContainer result;
-#if __cplusplus >= 201703L
-        if constexpr (detail::has_reserve_method_v<ResultContainer>) {
-            result.reserve(input.size());
-        }
-#endif
+        detail::reserve(result, input.size());
+
         auto range = read_iterator_wrapper(std::forward<InputContainer>(input));
         std::copy_if(range.begin, range.end, detail::insert_wrapper(result),
                      std::forward<UnaryPredicate>(predicate));
