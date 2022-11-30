@@ -60,20 +60,27 @@ namespace detail {
         return std::forward<InputContainer>(input);
     }
 
+    template <typename InputContainer, typename ResultContainer>
+    static constexpr std::integral_constant<
+        bool,
+        std::is_lvalue_reference<InputContainer>::value
+            || !std::is_same<ResultContainer, InputContainer>::value>
+        need_new_container;
+
     template <typename ResultContainer, typename InputContainer, typename Transform>
     ResultContainer transformed(InputContainer &&input, Transform &&transform)
     {
-        return transformed<ResultContainer>(
-            std::forward<InputContainer>(input), std::forward<Transform>(transform),
-            std::integral_constant < bool,
-            std::is_lvalue_reference<InputContainer>::value
-                || !std::is_same<ResultContainer, InputContainer>::value > ());
+        return transformed<ResultContainer>(std::forward<InputContainer>(input),
+                                            std::forward<Transform>(transform),
+                                            need_new_container<InputContainer, ResultContainer>);
     }
 } // namespace detail
 
 template <typename InputContainer, typename Transform>
 auto transformed(InputContainer &&input, Transform &&transform)
-
+#if __cplusplus >= 202002L
+    requires std::is_invocable_v<Transform, ValueType<InputContainer>>
+#endif
 {
     using ResultType = detail::TransformedType<InputContainer, Transform>;
     return detail::transformed<ResultType>(
@@ -83,6 +90,9 @@ auto transformed(InputContainer &&input, Transform &&transform)
 
 template <template <typename...> class ResultContainer, typename InputContainer, typename Transform>
 auto transformed(InputContainer &&input, Transform &&transform)
+#if __cplusplus >= 202002L
+    requires std::is_invocable_v<Transform, ValueType<InputContainer>>
+#endif
 {
     return detail::transformed<ResultContainer<detail::ResultItemType<InputContainer, Transform>>>(
         std::forward<InputContainer>(input),
@@ -91,6 +101,9 @@ auto transformed(InputContainer &&input, Transform &&transform)
 
 template <typename ResultContainer, typename InputContainer, typename Transform>
 auto transformed(InputContainer &&input, Transform &&transform)
+#if __cplusplus >= 202002L
+    requires std::is_invocable_r_v<ValueType<ResultContainer>, Transform, ValueType<InputContainer>>
+#endif
 {
     return detail::transformed<ResultContainer>(
         std::forward<InputContainer>(input),
@@ -117,9 +130,109 @@ auto transformed_with_new_return_type(InputContainer &&input, Transform &&transf
 // -------------------- transform --------------------
 template <typename Container, typename UnaryPredicate>
 void transform(Container &input, UnaryPredicate &&predicate)
+#if __cplusplus >= 202002L
+    requires UnaryPredicateOnContainerValues<UnaryPredicate, Container>
+#endif
+
 {
     std::transform(std::begin(input), std::end(input), std::begin(input),
                    std::forward<UnaryPredicate>(predicate));
+}
+
+// -------------------- transformed_if --------------------
+namespace detail {
+    // Version used for l-values or where the container type changes
+    template <typename ResultContainer, typename InputContainer, typename Transform,
+              typename UnaryPredicate>
+    ResultContainer transformed_if(InputContainer &&input, Transform &&transform,
+                                   UnaryPredicate &&unaryPredicate, std::true_type)
+    {
+        ResultContainer result;
+        detail::reserve(result, input.size());
+        auto range = read_iterator_wrapper(std::forward<InputContainer>(input));
+        auto inserter = detail::insert_wrapper(result);
+        for (auto it = range.begin; it != range.end; ++it) {
+            if (unaryPredicate(*it)) {
+                *inserter = transform(*it);
+                ++inserter;
+            }
+        }
+        return result;
+    }
+
+    // optimized version to use for r-values where container type is the same
+    // in-place editing is possible in that case.
+    template <typename ResultContainer, typename InputContainer, typename Transform,
+              typename UnaryPredicate>
+    ResultContainer transformed_if(InputContainer &&input, Transform &&transform,
+                                   UnaryPredicate &&unaryPredicate,
+                                   std::false_type /* r-value and same containers */)
+    {
+        auto range = read_iterator_wrapper(std::forward<InputContainer>(input));
+        auto writeIterator = std::begin(input);
+        for (auto readIterator = range.begin; readIterator != range.end; ++readIterator) {
+            if (unaryPredicate(*readIterator)) {
+                *writeIterator = transform(*readIterator);
+                ++writeIterator;
+            }
+        }
+        input.erase(writeIterator, std::end(input));
+        return std::forward<InputContainer>(input);
+    }
+
+    template <typename ResultContainer, typename InputContainer, typename Transform,
+              typename UnaryPredicate>
+    ResultContainer transformed_if(InputContainer &&input, Transform &&transform,
+                                   UnaryPredicate &&unaryPredicate)
+    {
+        return transformed_if<ResultContainer>(std::forward<InputContainer>(input),
+                                               std::forward<Transform>(transform), unaryPredicate,
+                                               need_new_container<InputContainer, ResultContainer>);
+    }
+}
+
+template <typename InputContainer, typename Transform, typename UnaryPredicate>
+#if __cplusplus >= 202002L
+    requires UnaryPredicateOnContainerValues<UnaryPredicate, InputContainer>
+    && std::is_invocable_v<Transform, ValueType<InputContainer>>
+#endif
+auto transformed_if(InputContainer &&input, Transform &&transform, UnaryPredicate &&unaryPredicate)
+
+{
+    using ResultType = detail::TransformedType<InputContainer, Transform>;
+    return detail::transformed_if<ResultType>(
+        std::forward<InputContainer>(input),
+        detail::to_function_object(std::forward<Transform>(transform)),
+        detail::to_function_object(std::forward<UnaryPredicate>(unaryPredicate)));
+}
+
+template <template <typename...> class ResultContainer, typename InputContainer, typename Transform,
+          typename UnaryPredicate>
+#if __cplusplus >= 202002L
+    requires UnaryPredicateOnContainerValues<UnaryPredicate, InputContainer>
+    && std::is_invocable_v<Transform, ValueType<InputContainer>>
+#endif
+auto transformed_if(InputContainer &&input, Transform &&transform, UnaryPredicate &&unaryPredicate)
+{
+    return detail::transformed_if<
+        ResultContainer<detail::ResultItemType<InputContainer, Transform>>>(
+        std::forward<InputContainer>(input),
+        detail::to_function_object(std::forward<Transform>(transform)),
+        detail::to_function_object(std::forward<UnaryPredicate>(unaryPredicate)));
+}
+
+template <typename ResultContainer, typename InputContainer, typename Transform,
+          typename UnaryPredicate>
+#if __cplusplus >= 202002L
+    requires UnaryPredicateOnContainerValues<UnaryPredicate, InputContainer>
+    && std::is_invocable_r_v<ValueType<ResultContainer>, Transform, ValueType<InputContainer>>
+#endif
+auto transformed_if(InputContainer &&input, Transform &&transform, UnaryPredicate &&unaryPredicate)
+{
+    return detail::transformed_if<ResultContainer>(
+        std::forward<InputContainer>(input),
+        detail::to_function_object(std::forward<Transform>(transform)),
+        detail::to_function_object(std::forward<UnaryPredicate>(unaryPredicate)));
 }
 
 } // namespace kdalgorithms

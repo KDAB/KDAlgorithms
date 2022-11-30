@@ -92,7 +92,8 @@ Modifying algorithms
 
 - <a href="#copy">copy</a>
 - <a href="#filter">filter</a>
-- <a href="#transform">transform</a>
+- <a href="#transform">transform / transformed</a>
+- <a href="#transformed_if">transformed_if</a>
 - <a href="#reverse">reverse</a>
 - <a href="#sort">sort</a>
 - <a href="#remove_duplicates">remove_duplicates</a>
@@ -227,6 +228,37 @@ auto result = kdalgorithms::transformed_with_new_return_type<std::map<std::strin
 ```
 
 See [std::transform](https://en.cppreference.com/w/cpp/algorithm/transform) for the algorithm from the standard.
+
+<a name="transformed_if">transformed_if</a>
+-------------------------------------------
+<b>transformed_if</b> is a combination of <a href="#transform">transformed</a> and <a href="#filter">filtered</a>. 
+The function takes a container and throws away any item that doesn't match the filter, and applies the transform on the remaining.
+
+```
+std::vector<int> intVector{1, 2, 3, 4};
+auto squareItem = [] (int i) { return i*i; };
+auto isOdd = [] (int i) { return i%2 == 1; };
+
+auto result = kdalgorithms::transformed_if(intVector, squareItem, isOdd);
+// result = {1, 9}
+```
+
+<b>transformed_if</b> supports the same features as regular <a href="#transform">transformed</a> does, 
+including using member functions, and using a different container for the result:
+
+<b>Member functions:</b>
+
+```
+auto result = kdalgorithms::transformed_if(structVec, &Struct::sumPairs,
+                                           &Struct::isKeyGreaterThanValue);
+```
+
+<b>Changing container</b>
+
+```
+auto result = kdalgorithms::transformed_if<std::deque>(intVector, squareItem, isOdd);
+```
+
 
 <a name="reverse">reverse / reversed</a>
 -----------------------------------------

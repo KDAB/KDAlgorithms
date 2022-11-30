@@ -73,19 +73,65 @@ FAIL_3_ARG(generate_n_wrong_generator_input_type, generate_n, vector<string>, in
            function<int(int)>)
 FAIL_3_ARG(generate_n_wrong_generator_return_type, generate_n, vector<string>, int,
            function<string(string)>)
+FAIL_3_ARG(transformed_if_wrong_predicate, transformed_if, vector<int>, std::function<string(int)>,
+           function<bool(string)>)
+FAIL_3_ARG(transformed_if_wrong_transform, transformed_if, vector<int>,
+           std::function<string(int, int)>, function<bool(int)>)
+FAIL_2_ARG(transform_wrong_predicate, transform, vector<int>, std::function<bool(int, int)>)
+FAIL_2_ARG(transformed_wrong_predicate, transformed, vector<int>, std::function<string()>)
 
 template <typename ResultContainer, typename Container, typename UnaryPredicate>
 void err_partitioned()
 {
     static_assert(!requires(Container container, UnaryPredicate pred) {
-        kdalgorithms::partitioned<ResultContainer>(container, pred);
-    });
+                       kdalgorithms::partitioned<ResultContainer>(container, pred);
+                   });
 }
 
 template <typename Container, typename Generator>
+
 void err_generate()
 {
-    static_assert(!requires(Generator generator) { kdalgorithms::generate_until<Container>(generator); });
+    static_assert(
+        !requires(Generator generator) { kdalgorithms::generate_until<Container>(generator); });
+}
+
+template <template <typename...> class ResultContainer, typename InputContainer, typename Transform,
+          typename UnaryPredicate>
+void err_transformed_if1()
+{
+    static_assert(!requires(InputContainer inputContainer, Transform transform,
+                            UnaryPredicate unaryPredicate) {
+                       kdalgorithms::transformed_if<ResultContainer>(inputContainer, transform,
+                                                                     unaryPredicate);
+                   });
+}
+
+template <typename ResultContainer, typename InputContainer, typename Transform,
+          typename UnaryPredicate>
+void err_transformed_if2()
+{
+    static_assert(!requires(InputContainer inputContainer, Transform transform,
+                            UnaryPredicate unaryPredicate) {
+                       kdalgorithms::transformed_if<ResultContainer>(inputContainer, transform,
+                                                                     unaryPredicate);
+                   });
+}
+
+template <template <typename...> class ResultContainer, typename InputContainer, typename Transform>
+void err_transformed1()
+{
+    static_assert(!requires(InputContainer inputContainer, Transform transform) {
+                       kdalgorithms::transformed<ResultContainer>(inputContainer, transform);
+                   });
+}
+
+template <typename ResultContainer, typename InputContainer, typename Transform>
+void err_transformed2()
+{
+    static_assert(!requires(InputContainer inputContainer, Transform transform) {
+                       kdalgorithms::transformed<ResultContainer>(inputContainer, transform);
+                   });
 }
 
 void test_constraints()
@@ -104,6 +150,23 @@ void test_constraints()
 
     // Generator shouldn't take any parameter
     err_generate<vector<int>, function<optional<int>(int)>>();
+
+    // wrong Transform
+    err_transformed_if1<list, vector<int>, std::function<char(string)>, std::function<bool(int)>>();
+    err_transformed_if2<vector<string>, vector<int>, std::function<char(int)>,
+                        std::function<bool(int)>>();
+    err_transformed1<list, vector<int>, std::function<char(string)>>();
+    err_transformed2<vector<string>, vector<int>, std::function<string()>>();
+
+    // wrong predicate
+    err_transformed_if1<list, vector<int>, std::function<string(int)>,
+                        std::function<string(int)>>();
+    err_transformed_if1<list, vector<int>, std::function<string(int)>,
+                        std::function<bool(string)>>();
+    err_transformed_if2<vector<string>, vector<int>, std::function<string(int)>,
+                        std::function<string(int)>>();
+    err_transformed_if2<vector<string>, vector<int>, std::function<string(int)>,
+                        std::function<bool(string)>>();
 }
 
 #endif // C++ 20
