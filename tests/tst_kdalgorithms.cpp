@@ -99,6 +99,7 @@ private Q_SLOTS:
     void transformedMemberVariable();
     void transformedStaticFunctions();
     void transform();
+    void filtered_transformed();
     void anyOf();
     void allOf();
     void noneOf();
@@ -709,6 +710,56 @@ void TestAlgorithms::transform()
     kdalgorithms::transform(vec, squareItem);
     std::vector<int> expected{1, 4, 9, 16};
     QCOMPARE(vec, expected);
+}
+
+void TestAlgorithms::filtered_transformed()
+{
+    { // simple
+        auto result = kdalgorithms::filtered_transformed(intVector, squareItem, isOdd);
+        std::vector<int> expected{1, 9};
+        QCOMPARE(result, expected);
+    }
+
+    { // member functions
+        auto result = kdalgorithms::filtered_transformed(structVec, &Struct::sumPairs,
+                                                   &Struct::isKeyGreaterThanValue);
+        std::vector<int> expected{5, 5};
+        QCOMPARE(result, expected);
+    }
+
+    {
+        // optimized move functions
+        using Container = ContainerObserver<int>;
+        auto create = [] {
+            Container container;
+            container.push_back(1);
+            container.push_back(2);
+            container.push_back(3);
+            return container;
+        };
+
+        Container container = create();
+        Container::reset();
+        Container result = kdalgorithms::filtered_transformed(std::move(container), squareItem, isOdd);
+        QCOMPARE(result.size(), 2);
+        QCOMPARE(result.at(0), 1);
+        QCOMPARE(result.at(1), 9);
+        QCOMPARE(Container::copies, 0);
+    }
+
+    {
+        // transform container
+        auto result = kdalgorithms::filtered_transformed<QVector>(intVector, squareItem, isOdd);
+        QVector<int> expected{1, 9};
+        QCOMPARE(result, expected);
+    }
+
+    { // specify full return type
+        auto result = kdalgorithms::filtered_transformed<QStringList>(
+            intVector, [](int i) { return QString::number(i); }, isOdd);
+        QStringList expected{"1", "3"};
+        QCOMPARE(result, expected);
+    }
 }
 
 void TestAlgorithms::anyOf()
