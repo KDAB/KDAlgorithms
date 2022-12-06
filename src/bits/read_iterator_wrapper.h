@@ -18,10 +18,20 @@ namespace kdalgorithms {
 
 namespace detail {
     template <typename Iterator>
-    struct IteratorPair
+    class IteratorPair
     {
-        Iterator begin;
-        Iterator end;
+    public:
+        IteratorPair(Iterator begin, Iterator end)
+            : m_begin(std::move(begin))
+            , m_end(std::move(end))
+        {
+        }
+        inline auto begin() { return m_begin; }
+        inline auto end() { return m_end; }
+
+    private:
+        Iterator m_begin;
+        Iterator m_end;
     };
 
     template <typename Iterator>
@@ -62,5 +72,4 @@ auto read_iterator_wrapper(Container &&container)
         std::forward<Container>(container), typename std::is_lvalue_reference<Container>::type(),
         detail::has_keyValueBegin<Container>());
 }
-
 } // namespace kdalgorithms

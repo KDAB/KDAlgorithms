@@ -48,7 +48,7 @@ void copy(InputContainer &&input, OutputContainer &output)
         return;
     }
     auto range = read_iterator_wrapper(std::forward<InputContainer>(input));
-    std::copy(range.begin, range.end, detail::insert_wrapper(output));
+    std::copy(range.begin(), range.end(), detail::insert_wrapper(output));
 }
 
 // -------------------- all_of / any_of / none_of --------------------
@@ -56,7 +56,7 @@ template <typename Container, typename UnaryPredicate>
 bool any_of(const Container &container, UnaryPredicate &&predicate)
 {
     auto range = read_iterator_wrapper(container);
-    return std::any_of(range.begin, range.end,
+    return std::any_of(range.begin(), range.end(),
                        detail::to_function_object(std::forward<UnaryPredicate>(predicate)));
 }
 
@@ -64,7 +64,7 @@ template <typename Container, typename UnaryPredicate>
 bool all_of(const Container &container, UnaryPredicate &&predicate)
 {
     auto range = read_iterator_wrapper(container);
-    return std::all_of(range.begin, range.end,
+    return std::all_of(range.begin(), range.end(),
                        detail::to_function_object(std::forward<UnaryPredicate>(predicate)));
 }
 
@@ -72,7 +72,7 @@ template <typename Container, typename UnaryPredicate>
 bool none_of(const Container &container, UnaryPredicate &&predicate)
 {
     auto range = read_iterator_wrapper(container);
-    return std::none_of(range.begin, range.end,
+    return std::none_of(range.begin(), range.end(),
                         detail::to_function_object(std::forward<UnaryPredicate>(predicate)));
 }
 
@@ -164,7 +164,7 @@ template <typename Container, typename UnaryPredicate>
 int count_if(const Container &container, UnaryPredicate &&predicate)
 {
     auto range = read_iterator_wrapper(container);
-    return std::count_if(range.begin, range.end,
+    return std::count_if(range.begin(), range.end(),
                          detail::to_function_object(std::forward<UnaryPredicate>(predicate)));
 }
 
@@ -260,7 +260,7 @@ ReturnType accumulate(const Container &container, BinaryOperation &&accumulateFu
 {
     auto range = read_iterator_wrapper(container);
     return std::accumulate(
-        range.begin, range.end, initialValue,
+        range.begin(), range.end(), initialValue,
         detail::to_function_object(std::forward<BinaryOperation>(accumulateFunction)));
 }
 

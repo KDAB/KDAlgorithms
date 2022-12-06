@@ -29,7 +29,7 @@ namespace detail {
         detail::reserve(result, input.size());
 
         auto range = read_iterator_wrapper(std::forward<InputContainer>(input));
-        std::copy_if(range.begin, range.end, detail::insert_wrapper(result),
+        std::copy_if(range.begin(), range.end(), detail::insert_wrapper(result),
                      std::forward<UnaryPredicate>(predicate));
         return result;
     }

@@ -44,7 +44,7 @@ namespace detail {
         ResultContainer result;
         detail::reserve(result, input.size());
         auto range = read_iterator_wrapper(std::forward<InputContainer>(input));
-        std::transform(range.begin, range.end, detail::insert_wrapper(result),
+        std::transform(range.begin(), range.end(), detail::insert_wrapper(result),
                        std::forward<Transform>(transform));
         return result;
     }
@@ -145,15 +145,15 @@ namespace detail {
     template <typename ResultContainer, typename InputContainer, typename Transform,
               typename UnaryPredicate>
     ResultContainer filtered_transformed(InputContainer &&input, Transform &&transform,
-                                   UnaryPredicate &&unaryPredicate, std::true_type)
+                                         UnaryPredicate &&unaryPredicate, std::true_type)
     {
         ResultContainer result;
         detail::reserve(result, input.size());
         auto range = read_iterator_wrapper(std::forward<InputContainer>(input));
         auto inserter = detail::insert_wrapper(result);
-        for (auto it = range.begin; it != range.end; ++it) {
-            if (unaryPredicate(*it)) {
-                *inserter = transform(*it);
+        for (const auto &value : range) {
+            if (unaryPredicate(value)) {
+                *inserter = transform(value);
                 ++inserter;
             }
         }
@@ -165,14 +165,14 @@ namespace detail {
     template <typename ResultContainer, typename InputContainer, typename Transform,
               typename UnaryPredicate>
     ResultContainer filtered_transformed(InputContainer &&input, Transform &&transform,
-                                   UnaryPredicate &&unaryPredicate,
-                                   std::false_type /* r-value and same containers */)
+                                         UnaryPredicate &&unaryPredicate,
+                                         std::false_type /* r-value and same containers */)
     {
         auto range = read_iterator_wrapper(std::forward<InputContainer>(input));
         auto writeIterator = std::begin(input);
-        for (auto readIterator = range.begin; readIterator != range.end; ++readIterator) {
-            if (unaryPredicate(*readIterator)) {
-                *writeIterator = transform(*readIterator);
+        for (const auto &value : range) {
+            if (unaryPredicate(value)) {
+                *writeIterator = transform(value);
                 ++writeIterator;
             }
         }
@@ -183,11 +183,11 @@ namespace detail {
     template <typename ResultContainer, typename InputContainer, typename Transform,
               typename UnaryPredicate>
     ResultContainer filtered_transformed(InputContainer &&input, Transform &&transform,
-                                   UnaryPredicate &&unaryPredicate)
+                                         UnaryPredicate &&unaryPredicate)
     {
-        return filtered_transformed<ResultContainer>(std::forward<InputContainer>(input),
-                                               std::forward<Transform>(transform), unaryPredicate,
-                                               need_new_container<InputContainer, ResultContainer>);
+        return filtered_transformed<ResultContainer>(
+            std::forward<InputContainer>(input), std::forward<Transform>(transform), unaryPredicate,
+            need_new_container<InputContainer, ResultContainer>);
     }
 }
 
@@ -196,7 +196,8 @@ template <typename InputContainer, typename Transform, typename UnaryPredicate>
     requires UnaryPredicateOnContainerValues<UnaryPredicate, InputContainer>
     && std::is_invocable_v<Transform, ValueType<InputContainer>>
 #endif
-auto filtered_transformed(InputContainer &&input, Transform &&transform, UnaryPredicate &&unaryPredicate)
+auto filtered_transformed(InputContainer &&input, Transform &&transform,
+                          UnaryPredicate &&unaryPredicate)
 
 {
     using ResultType = detail::TransformedType<InputContainer, Transform>;
@@ -212,7 +213,8 @@ template <template <typename...> class ResultContainer, typename InputContainer,
     requires UnaryPredicateOnContainerValues<UnaryPredicate, InputContainer>
     && std::is_invocable_v<Transform, ValueType<InputContainer>>
 #endif
-auto filtered_transformed(InputContainer &&input, Transform &&transform, UnaryPredicate &&unaryPredicate)
+auto filtered_transformed(InputContainer &&input, Transform &&transform,
+                          UnaryPredicate &&unaryPredicate)
 {
     return detail::filtered_transformed<
         ResultContainer<detail::ResultItemType<InputContainer, Transform>>>(
@@ -227,7 +229,8 @@ template <typename ResultContainer, typename InputContainer, typename Transform,
     requires UnaryPredicateOnContainerValues<UnaryPredicate, InputContainer>
     && std::is_invocable_r_v<ValueType<ResultContainer>, Transform, ValueType<InputContainer>>
 #endif
-auto filtered_transformed(InputContainer &&input, Transform &&transform, UnaryPredicate &&unaryPredicate)
+auto filtered_transformed(InputContainer &&input, Transform &&transform,
+                          UnaryPredicate &&unaryPredicate)
 {
     return detail::filtered_transformed<ResultContainer>(
         std::forward<InputContainer>(input),

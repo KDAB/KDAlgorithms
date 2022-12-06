@@ -86,30 +86,30 @@ public:
 
 template <typename Container, typename UnaryPredicate>
 #if __cplusplus >= 202002L
-requires UnaryPredicateOnContainerValues<UnaryPredicate, Container>
+    requires UnaryPredicateOnContainerValues<UnaryPredicate, Container>
 #endif
 auto find_if(const Container &container, UnaryPredicate &&predicate)
 {
     auto range = detail::find_if_iterator_wrapper(container);
-    auto it = std::find_if(range.begin, range.end,
+    auto it = std::find_if(range.begin(), range.end(),
                            detail::to_function_object(std::forward<UnaryPredicate>(predicate)));
-    using Iterator = decltype(range.begin);
-    return iterator_result<Iterator>(it, range.begin, range.end);
+    using Iterator = decltype(range.begin());
+    return iterator_result<Iterator>(it, range.begin(), range.end());
 }
 
 template <typename Container, typename Predicate>
 auto mutable_find_if(Container &container, Predicate &&predicate)
 {
     auto range = detail::find_if_iterator_wrapper(container);
-    auto it = std::find_if(range.begin, range.end,
+    auto it = std::find_if(range.begin(), range.end(),
                            detail::to_function_object(std::forward<Predicate>(predicate)));
-    using Iterator = decltype(range.begin);
-    return iterator_result<Iterator>(it, range.begin, range.end);
+    using Iterator = decltype(range.begin());
+    return iterator_result<Iterator>(it, range.begin(), range.end());
 }
 
 template <typename Container, typename UnaryPredicate>
 #if __cplusplus >= 202002L
-requires UnaryPredicateOnContainerValues<UnaryPredicate, Container>
+    requires UnaryPredicateOnContainerValues<UnaryPredicate, Container>
 #endif
 auto find_if_not(const Container &container, UnaryPredicate &&predicate)
 {
