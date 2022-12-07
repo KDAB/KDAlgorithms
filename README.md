@@ -83,7 +83,7 @@ unit tests.
 
 Qt
 --
-kdalgorihms supports all of Qt's containers, with the exception that with Qt5 QSet isn't supported.
+kdalgorithms supports all of Qt's containers, with the exception that with Qt5 QSet isn't supported.
 
 Algorithms
 ==========
@@ -370,7 +370,7 @@ see [std::find](https://en.cppreference.com/w/cpp/algorithm/find) for the algori
 <a name="valueIn">value_in</a>
 --------------------------------
 
-This is similar to *contains* but with the argument switched around. This makes it possible to write code
+This is similar to *contains* but with the arguments switched around. This makes it possible to write code
 that feels a lot like *value in range* from languages like Python:
 
 ```
@@ -388,7 +388,7 @@ solved that by returns a proxy object with a simple boolean test method on.
 
 ```
     std::vector<int> vec{1, 2, 3, 4, 5};
-    auto result = kdalgorihms::find_if(vec, [](int i) { return i > 2; });
+    auto result = kdalgorithms::find_if(vec, [](int i) { return i > 2; });
     if (result)
        std::cout << *result << std::endl;
     else
