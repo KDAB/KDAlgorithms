@@ -7,6 +7,7 @@ endif()
 
 add_library(kdalgorithms INTERFACE)
 target_include_directories(kdalgorithms INTERFACE src/)
+add_library(KDAB::KDAlgorithms ALIAS kdalgorithms)
 
 include(CTest)
 
