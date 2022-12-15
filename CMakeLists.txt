@@ -6,8 +6,8 @@ if(POLICY CMP0077) # Yes, let the parent project set BUILD_TESTING before we inc
 endif()
 
 add_library(kdalgorithms INTERFACE)
-target_include_directories(kdalgorithms INTERFACE src/)
 add_library(KDAB::KDAlgorithms ALIAS kdalgorithms)
+target_include_directories(kdalgorithms INTERFACE src/)
 
 include(CTest)
 
