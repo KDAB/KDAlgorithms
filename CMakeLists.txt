@@ -74,5 +74,5 @@ if(BUILD_TESTING AND ${KDALGORITHMS_BUILD_TEST})
     add_executable(tst_return_type_traits tests/tst_return_type_traits.cpp)
 
     # Make it show up in Qt Creator
-    add_custom_target(additional_files SOURCES README.md run)
+    add_custom_target(additional_files SOURCES README.md run Documentation/algorithms.md Documentation/deploying.md)
 endif()
