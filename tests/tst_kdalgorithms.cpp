@@ -148,6 +148,7 @@ private Q_SLOTS:
     void generate_n();
     void generate_until();
     void isSame();
+    void zip();
 };
 
 void TestAlgorithms::copy()
@@ -722,7 +723,7 @@ void TestAlgorithms::filtered_transformed()
 
     { // member functions
         auto result = kdalgorithms::filtered_transformed(structVec, &Struct::sumPairs,
-                                                   &Struct::isKeyGreaterThanValue);
+                                                         &Struct::isKeyGreaterThanValue);
         std::vector<int> expected{5, 5};
         QCOMPARE(result, expected);
     }
@@ -740,7 +741,8 @@ void TestAlgorithms::filtered_transformed()
 
         Container container = create();
         Container::reset();
-        Container result = kdalgorithms::filtered_transformed(std::move(container), squareItem, isOdd);
+        Container result =
+            kdalgorithms::filtered_transformed(std::move(container), squareItem, isOdd);
         QCOMPARE(result.size(), 2);
         QCOMPARE(result.at(0), 1);
         QCOMPARE(result.at(1), 9);
@@ -2168,6 +2170,64 @@ void TestAlgorithms::isSame()
     }
 }
 
+void TestAlgorithms::zip()
+{
+    { // Simple
+        std::vector<int> v1{1, 2, 3};
+        std::vector<char> v2{'a', 'b', 'c'};
+
+        auto result = kdalgorithms::zip(v1, v2);
+        std::vector<std::tuple<int, char>> expected{{1, 'a'}, {2, 'b'}, {3, 'c'}};
+        QCOMPARE(result, expected);
+    }
+
+    { // three different contains
+        std::vector<int> v1{1, 2, 3};
+        std::deque<char> v2{'a', 'b', 'c'};
+        std::list<std::string> v3{"hello", "kdalgorithms", "world"};
+
+        auto result = kdalgorithms::zip(v1, v2, v3);
+        std::vector<std::tuple<int, char, std::string>> expected{
+            {1, 'a', "hello"}, {2, 'b', "kdalgorithms"}, {3, 'c', "world"}};
+        QCOMPARE(result, expected);
+    }
+
+    { // different length of containers
+        std::vector<int> v1{1, 2, 3};
+        std::deque<char> v2{'a', 'b', 'c', 'd', 'e'};
+        std::list<std::string> v3{"hello", "again", "kdalgorithms", "world"};
+
+        auto result = kdalgorithms::zip(v1, v2, v3);
+        std::vector<std::tuple<int, char, std::string>> expected{
+            {1, 'a', "hello"}, {2, 'b', "again"}, {3, 'c', "kdalgorithms"}};
+        QCOMPARE(result, expected);
+    }
+
+    { // Change container type
+        std::vector<int> v1{1, 2, 3};
+        std::list<char> v2{'a', 'b', 'c'};
+
+        auto result = kdalgorithms::zip<std::deque>(v1, v2);
+        std::deque<std::tuple<int, char>> expected{{1, 'a'}, {2, 'b'}, {3, 'c'}};
+        QCOMPARE(result, expected);
+    }
+
+    { // r-value
+        auto result =
+            kdalgorithms::zip(std::vector<int>{1, 2, 3}, std::vector<char>{'a', 'b', 'c'});
+        std::vector<std::tuple<int, char>> expected{{1, 'a'}, {2, 'b'}, {3, 'c'}};
+        QCOMPARE(result, expected);
+    }
+
+    { // Count the number of copies
+        std::vector<CopyObserver> v1{1, 2, 3};
+        std::vector<char> v2{'a', 'b', 'c'};
+
+        CopyObserver::reset();
+        (void)kdalgorithms::zip(std::move(v1), std::move(v2));
+        QCOMPARE(CopyObserver::copies, 0);
+    }
+}
 QTEST_MAIN(TestAlgorithms)
 
 #include "tst_kdalgorithms.moc"

@@ -22,6 +22,7 @@
 #include "bits/shared.h"
 #include "bits/to_function_object.h"
 #include "bits/transform.h"
+#include "bits/zip.h"
 #include <algorithm>
 #include <numeric>
 #include <type_traits>

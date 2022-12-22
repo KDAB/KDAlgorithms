@@ -35,6 +35,7 @@ Other
 - <a href="#generate_n">generate_n</a>
 - <a href="#generate_until">generate_until</a>
 - <a href="#partitioned">partitioned</a>
+- <a href="#zip">zip</a>
 
 
 
@@ -761,3 +762,26 @@ const auto& [in, out] =
 ```
 
 See [std::partition](https://en.cppreference.com/w/cpp/algorithm/partition) for the algorithm from the standard.
+
+<a name="zip">zip</a>
+---------------------
+zip takes a number of containers and return one container with tuples for each of the items in the input containers.
+
+```
+std::vector<int> x{1, 2, 3};
+std::deque<char> y{'a', 'b', 'c'};
+std::list<std::string> x{"hello", "kdalgorithms", "world"};
+
+auto result = kdalgorithms::zip(x, y, z);
+// result is a std::vector<std::tuple<int, char, std::string>>
+// and the values are {1, 'a', "hello"}, {2, 'b', "kdalgorithms"}, {3, 'c', "world"}
+```
+
+As all other algorithms, the items will be moved over if the input container is an xvalue (an expiring value which can be stolen).
+Further it is possible to change the result container:
+
+```
+auto result = kdalgorithms::zip<std::deque>(v1, v2);
+```
+
+See [boost::compine](https://www.boost.org/doc/libs/1_81_0/libs/range/doc/html/range/reference/utilities/combine.html) for similar algorithm in boost, and [std::ranges::views::zip](https://en.cppreference.com/w/cpp/ranges/zip_view) for the C++23 version.
