@@ -61,6 +61,8 @@ if(BUILD_TESTING AND ${KDALGORITHMS_BUILD_TEST})
         src/bits/shared.h
         src/bits/to_function_object.h
         src/bits/transform.h
+        src/bits/zip.h
+        src/bits/tuple_utils.h
 
         tests/tst_kdalgorithms.cpp
         tests/tst_constraints.cpp

@@ -28,6 +28,7 @@ namespace detail {
         }
         inline auto begin() { return m_begin; }
         inline auto end() { return m_end; }
+        void operator++() { m_begin++; }
 
     private:
         Iterator m_begin;
