@@ -46,6 +46,7 @@ if(BUILD_TESTING AND ${KDALGORITHMS_BUILD_TEST})
     enable_testing()
     add_executable(tst_kdalgorithms
         src/kdalgorithms.h
+        src/kdalgorithms/to_string.h
 
         src/bits/read_iterator_wrapper.h
         src/bits/find_if.h

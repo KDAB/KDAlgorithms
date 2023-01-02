@@ -9,6 +9,7 @@
 ****************************************************************************/
 
 #include "../src/kdalgorithms.h"
+#include "../src/kdalgorithms/to_string.h"
 #include "ContainerObserver.h"
 #include "copy_observer.h"
 #include <QList>
@@ -17,6 +18,8 @@
 #include <algorithm>
 #include <deque>
 #include <forward_list>
+#include <iostream>
+#include <map>
 #include <set>
 #include <unordered_map>
 #include <unordered_set>
@@ -149,6 +152,7 @@ private Q_SLOTS:
     void generate_until();
     void isSame();
     void zip();
+    void toStringTest();
 };
 
 void TestAlgorithms::copy()
@@ -2227,6 +2231,61 @@ void TestAlgorithms::zip()
         (void)kdalgorithms::zip(std::move(v1), std::move(v2));
         QCOMPARE(CopyObserver::copies, 0);
     }
+
+    { // Just an example
+        std::vector<std::string> names{"Jesper", "Helena", "Louise", "Laura", "Santa"};
+        std::vector<int> ages{52, 49, 11, 8};
+
+        auto olderThan = [](int age) {
+            return [age](const auto &tuple) { return std::get<1>(tuple) > age; };
+        };
+        auto getName = [](const auto &tuple) { return std::get<0>(tuple); };
+        auto oldPeople = kdalgorithms::filtered_transformed(kdalgorithms::zip(names, ages), getName,
+                                                            olderThan(40));
+
+        std::vector<std::string> expected{"Jesper", "Helena"};
+        QCOMPARE(oldPeople, expected);
+    }
+}
+
+namespace kdalgorithms {
+std::string to_string(const Struct &s)
+{
+    return std::string("Struct{") + to_string(s.key) + ", " + to_string(s.value) + "}";
+}
+}
+
+void TestAlgorithms::toStringTest()
+{
+    QCOMPARE(kdalgorithms::to_string(10), "10");
+    QCOMPARE(kdalgorithms::to_string(true), "true");
+
+    std::vector vec{1, 2, 3};
+    QCOMPARE(kdalgorithms::to_string(vec), "[1, 2, 3]");
+
+    std::vector<std::vector<int>> vvec{vec, vec};
+    QCOMPARE(kdalgorithms::to_string(vvec), "[[1, 2, 3], [1, 2, 3]]");
+
+#if 0 // IVAN1
+    std::unordered_map<int, std::string> unorderedMap{{1, "one"}, {2, "two"}, {3, "three"}};
+    QCOMPARE(kdalgorithms::to_string(unorderedMap),
+             "{{3 -> \"three\"}, {2 -> \"two\"}, {1 -> \"one\"}}");
+
+    std::map<int, std::string> orderedMap{{1, "one"}, {2, "two"}, {3, "three"}};
+    QCOMPARE(kdalgorithms::to_string(orderedMap),
+             "{{1 -> \"one\"}, {2 -> \"two\"}, {3 -> \"three\"}}");
+#endif
+
+    QCOMPARE(kdalgorithms::to_string(std::pair(vec, "hello")), "([1, 2, 3], \"hello\")");
+
+    QCOMPARE(kdalgorithms::to_string(std::tuple<int, std::string, bool>(10, "Hi", true)),
+             "(10, \"Hi\", true)");
+
+    QCOMPARE(kdalgorithms::to_string(Struct{10, 20}), "Struct{10, 20}");
+#if 0 // IVAN2
+    QCOMPARE(kdalgorithms::to_string(std::vector<Struct>{{10, 20}, {30, 40}}),
+             "[Struct{10, 20}, Struct{30, 40}]");
+#endif
 }
 QTEST_MAIN(TestAlgorithms)
 
