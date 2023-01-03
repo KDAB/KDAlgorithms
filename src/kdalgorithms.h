@@ -353,10 +353,15 @@ template <typename Container, typename Value>
 #endif
 auto erase(Container &container, Value &&value)
 {
+#if __cplusplus >= 202002L
+    using std::erase;
+    return erase(container, std::forward<Value>(value));
+#else
     auto it = std::remove(std::begin(container), std::end(container), std::forward<Value>(value));
     auto count = std::distance(it, std::end(container));
     container.erase(it, std::end(container));
     return count;
+#endif
 }
 
 template <typename Container, typename UnaryPredicate>
@@ -365,11 +370,16 @@ template <typename Container, typename UnaryPredicate>
 #endif
 auto erase_if(Container &container, UnaryPredicate &&predicate)
 {
+#if __cplusplus >= 202002L
+    using std::erase_if;
+    return erase_if(container, detail::to_function_object(std::forward<UnaryPredicate>(predicate)));
+#else
     auto it = std::remove_if(std::begin(container), std::end(container),
                              detail::to_function_object(std::forward<UnaryPredicate>(predicate)));
     auto count = std::distance(it, std::end(container));
     container.erase(it, std::end(container));
     return count;
+#endif
 }
 
 // -------------------- index_of_match --------------------
