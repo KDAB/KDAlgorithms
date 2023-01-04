@@ -15,27 +15,30 @@
 #include <unordered_map>
 #include <vector>
 
+#include "../bits/is_detected.h"
+#include "../bits/method_tests.h"
+
 namespace kdalgorithms {
 
 using std::to_string;
 
-std::string to_string(bool b)
+inline std::string to_string(bool b)
 {
     return b ? "true" : "false";
 }
 
-std::string to_string(const std::string &s)
+inline std::string to_string(const std::string &s)
 {
     return "\"" + s + "\"";
 }
 
-std::string to_string(const char *s)
+inline std::string to_string(const char *s)
 {
     return "\"" + std::string(s) + "\"";
 }
+
 template <typename Container,
-          typename enabled = decltype(std::declval<Container>().push_back(
-              std::declval<typename Container::value_type>()))>
+         std::enable_if_t<detail::tests::has_value_type<Container> and not detail::tests::has_key_and_mapped_type<Container>, int> = 0>
 std::string to_string(const Container &container)
 {
     std::string result = "[";
@@ -49,10 +52,8 @@ std::string to_string(const Container &container)
     return result + "]";
 }
 
-#if 0 // IVAN1
 template <typename Map,
-          typename enabled =
-              decltype(std::declval<Map>().insert(std::declval<typename Map::value_type>()))>
+         std::enable_if_t<detail::tests::has_value_type<Map> and detail::tests::has_key_and_mapped_type<Map>, int> = 0>
 std::string to_string(const Map &map)
 {
     std::string result = "{";
@@ -65,7 +66,6 @@ std::string to_string(const Map &map)
     }
     return result + "}";
 }
-#endif
 
 template <typename T1, typename T2>
 std::string to_string(const std::pair<T1, T2> &pair)

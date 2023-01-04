@@ -17,17 +17,11 @@
 
 namespace kdalgorithms {
 namespace detail {
-    template <class Container, typename T>
-    using has_push_back = decltype(std::declval<Container &>().push_back(std::declval<T>()));
-
-    template <class Container, typename Value>
-    using has_insert = decltype(std::declval<Container &>().insert(std::declval<Value>()));
 
     template <typename Container>
     auto insert_wrapper(
         Container &c,
-        std::enable_if_t<
-            detail::is_detected_v<has_push_back, Container, typename Container::value_type>, int> =
+        std::enable_if_t<tests::has_push_back<Container>, int> =
             0)
     {
         return std::back_inserter(c);
@@ -36,8 +30,7 @@ namespace detail {
     template <typename Container>
     auto insert_wrapper(
         Container &c,
-        std::enable_if_t<
-            detail::is_detected_v<has_insert, Container, typename Container::value_type>, int> = 0)
+        std::enable_if_t<tests::has_insert<Container>, int> = 0)
     {
         return std::inserter<Container>(c, c.end());
     }

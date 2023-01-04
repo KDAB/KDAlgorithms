@@ -17,13 +17,16 @@
 
 namespace kdalgorithms {
 namespace detail {
+    template< typename... Ts >
+    using void_t = void;
+
     template <class AlwaysVoid, template <class...> class, typename... Args>
     struct detector : std::false_type
     {
     };
 
     template <template <class...> class Op, typename... Args>
-    struct detector<std::void_t<Op<Args...>>, Op, Args...> : std::true_type
+    struct detector<void_t<Op<Args...>>, Op, Args...> : std::true_type
     {
     };
 

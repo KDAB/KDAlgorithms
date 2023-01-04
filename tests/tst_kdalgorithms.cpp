@@ -26,7 +26,6 @@
 #include <utility>
 #include <vector>
 
-namespace {
 bool isOdd(int x)
 {
     return x % 2 == 1;
@@ -74,9 +73,14 @@ struct Struct
     int sumPairs() const { return key + value; }
 };
 
+std::string to_string(const Struct &s)
+{
+    using kdalgorithms::to_string;
+    return std::string("Struct{") + to_string(s.key) + ", " + to_string(s.value) + "}";
+}
+
 const std::vector<Struct> structVec{{1, 4}, {2, 3}, {3, 2}, {4, 1}};
 
-} // namespace
 class TestAlgorithms : public QObject
 {
     Q_OBJECT
@@ -2248,44 +2252,35 @@ void TestAlgorithms::zip()
     }
 }
 
-namespace kdalgorithms {
-std::string to_string(const Struct &s)
-{
-    return std::string("Struct{") + to_string(s.key) + ", " + to_string(s.value) + "}";
-}
-}
-
 void TestAlgorithms::toStringTest()
 {
-    QCOMPARE(kdalgorithms::to_string(10), "10");
-    QCOMPARE(kdalgorithms::to_string(true), "true");
+    using kdalgorithms::to_string;
+
+    QCOMPARE(to_string(10), "10");
+    QCOMPARE(to_string(true), "true");
 
     std::vector vec{1, 2, 3};
-    QCOMPARE(kdalgorithms::to_string(vec), "[1, 2, 3]");
+    QCOMPARE(to_string(vec), "[1, 2, 3]");
 
     std::vector<std::vector<int>> vvec{vec, vec};
-    QCOMPARE(kdalgorithms::to_string(vvec), "[[1, 2, 3], [1, 2, 3]]");
+    QCOMPARE(to_string(vvec), "[[1, 2, 3], [1, 2, 3]]");
 
-#if 0 // IVAN1
     std::unordered_map<int, std::string> unorderedMap{{1, "one"}, {2, "two"}, {3, "three"}};
-    QCOMPARE(kdalgorithms::to_string(unorderedMap),
+    QCOMPARE(to_string(unorderedMap),
              "{{3 -> \"three\"}, {2 -> \"two\"}, {1 -> \"one\"}}");
 
     std::map<int, std::string> orderedMap{{1, "one"}, {2, "two"}, {3, "three"}};
-    QCOMPARE(kdalgorithms::to_string(orderedMap),
+    QCOMPARE(to_string(orderedMap),
              "{{1 -> \"one\"}, {2 -> \"two\"}, {3 -> \"three\"}}");
-#endif
 
-    QCOMPARE(kdalgorithms::to_string(std::pair(vec, "hello")), "([1, 2, 3], \"hello\")");
+    QCOMPARE(to_string(std::pair(vec, "hello")), "([1, 2, 3], \"hello\")");
 
-    QCOMPARE(kdalgorithms::to_string(std::tuple<int, std::string, bool>(10, "Hi", true)),
+    QCOMPARE(to_string(std::tuple<int, std::string, bool>(10, "Hi", true)),
              "(10, \"Hi\", true)");
 
-    QCOMPARE(kdalgorithms::to_string(Struct{10, 20}), "Struct{10, 20}");
-#if 0 // IVAN2
-    QCOMPARE(kdalgorithms::to_string(std::vector<Struct>{{10, 20}, {30, 40}}),
+    QCOMPARE(to_string(Struct{10, 20}), "Struct{10, 20}");
+    QCOMPARE(to_string(std::vector<Struct>{{10, 20}, {30, 40}}),
              "[Struct{10, 20}, Struct{30, 40}]");
-#endif
 }
 QTEST_MAIN(TestAlgorithms)
 

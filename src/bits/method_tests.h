@@ -25,6 +25,41 @@ namespace detail {
 
         template <typename Generator, typename Size>
         using has_generator_with_index = invoke_result_t<Generator, Size>;
+
+        template <typename Container>
+        using value_type = typename remove_cvref_t<Container>::value_type;
+
+        template <typename Container>
+        using key_type = typename remove_cvref_t<Container>::key_type;
+
+        template <typename Container>
+        using mapped_type = typename remove_cvref_t<Container>::mapped_type;
+
+        template <typename Container>
+        constexpr bool has_value_type = is_detected_v<value_type, Container>;
+
+        template <typename Container>
+        constexpr bool has_key_and_mapped_type = is_detected_v<key_type, Container> and is_detected_v<mapped_type, Container>;
+
+        template <typename Container, bool value_type, typename Void = void>
+        struct has_push_back_helper : std::false_type { };
+
+        template <typename Container>
+        struct has_push_back_helper<Container, true, detail::void_t<
+            decltype(std::declval<Container &>().push_back(std::declval<typename Container::value_type>()))>> : std::true_type {};
+
+        template <typename Container, bool value_type, typename Void = void>
+        struct has_insert_helper : std::false_type { };
+
+        template <typename Container>
+        struct has_insert_helper<Container, true, detail::void_t<
+            decltype(std::declval<Container &>().insert(std::declval<typename Container::value_type>()))>> : std::true_type {};
+
+        template <class Container>
+        constexpr bool has_push_back = has_push_back_helper<Container, has_value_type<Container>>::value;
+
+        template <class Container>
+        constexpr bool has_insert = has_insert_helper<Container, has_value_type<Container>>::value;
     }
 
     template <typename Container>
