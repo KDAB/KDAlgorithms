@@ -347,31 +347,72 @@ bool has_duplicates(Container &&container, SortOption sort)
 }
 
 // -------------------- erase / erase_if --------------------
+namespace detail {
+    // erase/erase_if fallbacks for the case that C++20-style uniform erase is not available
+    template <typename Container, typename Value>
+    auto erase_fallback(Container &container, Value &&value)
+    {
+        auto it =
+            std::remove(std::begin(container), std::end(container), std::forward<Value>(value));
+        auto count = std::distance(it, std::end(container));
+        container.erase(it, std::end(container));
+        return count;
+    }
+
+    template <typename Container, typename UnaryPredicate>
+    auto erase_if_fallback(Container &container, UnaryPredicate &&predicate)
+    {
+        auto it =
+            std::remove_if(std::begin(container), std::end(container),
+                           detail::to_function_object(std::forward<UnaryPredicate>(predicate)));
+        auto count = std::distance(it, std::end(container));
+        container.erase(it, std::end(container));
+        return count;
+    }
+
+} // namespace detail
+
 template <typename Container, typename Value>
 #if __cplusplus >= 202002L
-    requires ContainerOfType<Container, Value>
+requires ContainerOfType<Container, Value>
 #endif
 auto erase(Container &container, Value &&value)
 {
-    auto it = std::remove(std::begin(container), std::end(container), std::forward<Value>(value));
-    auto count = std::distance(it, std::end(container));
-    container.erase(it, std::end(container));
-    return count;
+#if __cplusplus >= 202002L
+    using std::erase;
+    if constexpr (requires { erase(container, std::forward<Value>(value)); }) {
+        return erase(container, std::forward<Value>(value));
+    } else {
+        return detail::erase_fallback(container, std::forward<Value>(value));
+    }
+#else
+    return detail::erase_fallback(container, std::forward<Value>(value));
+#endif
 }
 
 template <typename Container, typename UnaryPredicate>
 #if __cplusplus >= 202002L
-    requires UnaryPredicateOnContainerValues<UnaryPredicate, Container>
+requires UnaryPredicateOnContainerValues<UnaryPredicate, Container>
 #endif
 auto erase_if(Container &container, UnaryPredicate &&predicate)
 {
-    auto it = std::remove_if(std::begin(container), std::end(container),
-                             detail::to_function_object(std::forward<UnaryPredicate>(predicate)));
-    auto count = std::distance(it, std::end(container));
-    container.erase(it, std::end(container));
-    return count;
+#if __cplusplus >= 202002L
+    using std::erase_if;
+    if constexpr (requires {
+                      erase_if(container,
+                               detail::to_function_object(std::forward<UnaryPredicate>(predicate)));
+                  }) {
+        return erase_if(container,
+                        detail::to_function_object(std::forward<UnaryPredicate>(predicate)));
+    } else {
+        return detail::erase_if_fallback(
+            container, detail::to_function_object(std::forward<UnaryPredicate>(predicate)));
+    }
+#else
+    return detail::erase_if_fallback(
+        container, detail::to_function_object(std::forward<UnaryPredicate>(predicate)));
+#endif
 }
-
 // -------------------- index_of_match --------------------
 template <typename Container, typename UnaryPredicate>
 auto index_of_match(const Container &container, UnaryPredicate &&predicate)
