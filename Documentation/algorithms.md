@@ -4,6 +4,7 @@ Algorithms
 Modifying algorithms
 
 - <a href="#copy">copy</a>
+- <a href="#copied">copied</a>
 - <a href="#filter">filter</a>
 - <a href="#transform">transform / transformed</a>
 - <a href="#filtered_transformed">filtered_transformed</a>
@@ -43,7 +44,6 @@ Other
 -----------------------
 This algorithm appends the content of one collection to another.
 
->
 ```
 std::vector<int> src = ...;
 std::list<int> dest = ...;
@@ -53,6 +53,25 @@ kdalgorithms::copy(src, dest);
 To only copy some elements, see the algorithms <a href="#filter">filter and filtered</a>
 
 See [std::copy](https://en.cppreference.com/w/cpp/algorithm/copy) for the algorithm from the standard.
+
+<a name="copied">copied</a>
+---------------------------
+This algorithm returns a copy of the input elements, with the container changed in the process, simlimar to <a href="#transformed">transformed</a>.
+If you do not need to change the container, then simply use the contaioners copy constrcutor instead of this algorithm.
+
+```
+std::vector<int> vec{1, 2, 3, 4, 1, 3};
+auto result = kdalgorithms::copied<std::unordered_set>(vec);
+// result is now an unordered_set with the items 1,2,3,4 in.
+```
+
+The items themselves may also be implicit converted in the process:
+
+```
+std::vector<int> vec{1, 2, 3, 4, 1, 3};
+auto result = kdalgorithms::copied<std::unordered_set<double>>(vec);
+// result is now an unordered_set of doubles with the items 1,2,3,4 in.
+```
 
 <a name="filter">filter / filtered</a>
 --------------------------------------

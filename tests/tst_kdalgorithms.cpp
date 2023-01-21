@@ -81,6 +81,7 @@ class TestAlgorithms : public QObject
 private Q_SLOTS:
     void copy();
     void copyAsMove();
+    void copied();
     void filteredChangeContainer();
     void filteredSameContainer();
     void filteredAsMove();
@@ -335,6 +336,72 @@ void TestAlgorithms::copyAsMove()
     CopyObserver::reset();
     kdalgorithms::copy(getConstObserverVector(), result);
     QCOMPARE(CopyObserver::copies, 3);
+}
+
+void TestAlgorithms::copied()
+{
+    // Convert the container - specify the complete type
+    {
+        auto result = kdalgorithms::copied<QVector<int>>(intVector);
+        QVector<int> expected{1, 2, 3, 4};
+        QCOMPARE(result, expected);
+    }
+
+    // Convert the container - specify only the container
+    {
+        auto result = kdalgorithms::copied<std::deque>(intVector);
+        std::deque<int> expected{1, 2, 3, 4};
+        QCOMPARE(result, expected);
+    }
+
+    // Convert the type in the container
+    {
+        auto result = kdalgorithms::copied<std::vector<double>>(intVector);
+        std::vector<double> expected{1.0, 2.0, 3.0, 4.0};
+        QCOMPARE(result, expected);
+    }
+
+    // unordered_set
+    {
+        std::vector<int> vec{1, 2, 3, 4, 1, 3};
+        auto result = kdalgorithms::copied<std::unordered_set>(vec);
+        std::unordered_set<int> expected{1, 2, 3, 4};
+        QCOMPARE(result, expected);
+    }
+
+    // map converted to vector
+    {
+        std::map<int, int> map{{1, 2}, {2, 3}, {4, 5}};
+        auto result = kdalgorithms::copied<std::vector>(map);
+        std::vector<std::pair<const int, int>> expected{{1, 2}, {2, 3}, {4, 5}};
+        QCOMPARE(result, expected);
+    }
+
+    // r-value
+    {
+        auto result = kdalgorithms::copied<std::list>(getIntVector());
+        std::list<int> expected{1, 2, 3, 4};
+        QCOMPARE(result, expected);
+    }
+
+    // r-value Convert the container - specify the complete type
+    {
+        auto result = kdalgorithms::copied<QVector<int>>(getIntVector());
+        QVector<int> expected{1, 2, 3, 4};
+        QCOMPARE(result, expected);
+    }
+
+    // count copies
+    {
+        std::vector<CopyObserver> result;
+        CopyObserver::reset();
+        (void)kdalgorithms::copied<QVector>(getObserverVector());
+        QCOMPARE(CopyObserver::copies, 0);
+
+        CopyObserver::reset();
+        (void)kdalgorithms::copied<QList>(getConstObserverVector());
+        QCOMPARE(CopyObserver::copies, 3);
+    }
 }
 
 void TestAlgorithms::filteredSameContainer()

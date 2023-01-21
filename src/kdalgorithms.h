@@ -52,6 +52,27 @@ void copy(InputContainer &&input, OutputContainer &output)
     std::copy(range.begin(), range.end(), detail::insert_wrapper(output));
 }
 
+// -------------------- copied --------------------
+template <typename ResultContainer, typename InputContainer>
+#if __cplusplus >= 202002L
+    requires ContainerOfType<ResultContainer, ValueType<InputContainer>>
+#endif
+ResultContainer copied(InputContainer &&input)
+{
+    static_assert(!std::is_same<ResultContainer, InputContainer>::value,
+                  "Use copy constructor instead of kdalgorithms::copied");
+    ResultContainer result;
+    kdalgorithms::copy(std::forward<InputContainer>(input), result);
+    return result;
+}
+
+template <template <typename...> class ResultContainer, typename InputContainer>
+auto copied(InputContainer &&input)
+{
+    return copied<ResultContainer<ValueType<InputContainer>>, InputContainer>(
+        std::forward<InputContainer>(input));
+}
+
 // -------------------- all_of / any_of / none_of --------------------
 template <typename Container, typename UnaryPredicate>
 bool any_of(const Container &container, UnaryPredicate &&predicate)
@@ -374,7 +395,7 @@ namespace detail {
 
 template <typename Container, typename Value>
 #if __cplusplus >= 202002L
-requires ContainerOfType<Container, Value>
+    requires ContainerOfType<Container, Value>
 #endif
 auto erase(Container &container, Value &&value)
 {
@@ -392,7 +413,7 @@ auto erase(Container &container, Value &&value)
 
 template <typename Container, typename UnaryPredicate>
 #if __cplusplus >= 202002L
-requires UnaryPredicateOnContainerValues<UnaryPredicate, Container>
+    requires UnaryPredicateOnContainerValues<UnaryPredicate, Container>
 #endif
 auto erase_if(Container &container, UnaryPredicate &&predicate)
 {
