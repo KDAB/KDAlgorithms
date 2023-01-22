@@ -35,6 +35,7 @@ Other
 - <a href="#iota">iota</a>
 - <a href="#generate_n">generate_n</a>
 - <a href="#generate_until">generate_until</a>
+- <a href="#for_each">for_each</a>
 - <a href="#partitioned">partitioned</a>
 - <a href="#zip">zip</a>
 
@@ -750,6 +751,18 @@ operator bool();
 See the unit tests for an example implementation.
 
 See [std::generate](https://en.cppreference.com/w/cpp/algorithm/generate) for the algorithm from the standard,
+
+<a name="for_each">for_each</a>
+-------------------------------
+This algorithm invokes a specific function on each element of a container.
+
+```
+kdalgorithms::for_each(structVec, &Struct::print);
+```
+
+I'm sure there are good and valid usecases for using for_each, but will nevertheless claims that in 98% of the cases there are alternative algorithms which are a better match.
+
+See [std::for_each](https://en.cppreference.com/w/cpp/algorithm/for_each) for the algorithm from the standard,
 
 <a name="partitioned">partitioned</a>
 ---------------------------------
