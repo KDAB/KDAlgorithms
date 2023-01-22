@@ -500,4 +500,14 @@ auto partitioned(Container &&container, UnaryPredicate predicate)
         std::forward<Container>(container), std::forward<UnaryPredicate>(predicate));
 }
 
+template <typename Container, typename UnaryFunction>
+#if __cplusplus >= 202002L
+    requires UnaryFunctionOnContainerValues<UnaryFunction, Container>
+#endif
+void for_each(Container &&container, UnaryFunction &&function)
+{
+    auto range = read_iterator_wrapper(std::forward<Container>(container));
+    std::for_each(range.begin(), range.end(),
+                  detail::to_function_object(std::forward<UnaryFunction>(function)));
+}
 } // namespace kdalgorithms

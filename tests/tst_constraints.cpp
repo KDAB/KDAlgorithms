@@ -73,12 +73,14 @@ FAIL_3_ARG(generate_n_wrong_generator_input_type, generate_n, vector<string>, in
            function<int(int)>)
 FAIL_3_ARG(generate_n_wrong_generator_return_type, generate_n, vector<string>, int,
            function<string(string)>)
-FAIL_3_ARG(filtered_transformed_wrong_predicate, filtered_transformed, vector<int>, std::function<string(int)>,
-           function<bool(string)>)
+FAIL_3_ARG(filtered_transformed_wrong_predicate, filtered_transformed, vector<int>,
+           std::function<string(int)>, function<bool(string)>)
 FAIL_3_ARG(filtered_transformed_wrong_transform, filtered_transformed, vector<int>,
            std::function<string(int, int)>, function<bool(int)>)
 FAIL_2_ARG(transform_wrong_predicate, transform, vector<int>, std::function<bool(int, int)>)
 FAIL_2_ARG(transformed_wrong_predicate, transformed, vector<int>, std::function<string()>)
+FAIL_2_ARG(for_each_wrong_predicate, for_each, vector<int>, std::function<void(string)>)
+FAIL_2_ARG(for_each_wrong_parameter_count, for_each, vector<int>, std::function<void(int, bool)>)
 
 template <typename ResultContainer, typename Container, typename UnaryPredicate>
 void err_partitioned()
@@ -102,8 +104,8 @@ void err_filtered_transformed1()
 {
     static_assert(!requires(InputContainer inputContainer, Transform transform,
                             UnaryPredicate unaryPredicate) {
-                       kdalgorithms::filtered_transformed<ResultContainer>(inputContainer, transform,
-                                                                     unaryPredicate);
+                       kdalgorithms::filtered_transformed<ResultContainer>(
+                           inputContainer, transform, unaryPredicate);
                    });
 }
 
@@ -113,8 +115,8 @@ void err_filtered_transformed2()
 {
     static_assert(!requires(InputContainer inputContainer, Transform transform,
                             UnaryPredicate unaryPredicate) {
-                       kdalgorithms::filtered_transformed<ResultContainer>(inputContainer, transform,
-                                                                     unaryPredicate);
+                       kdalgorithms::filtered_transformed<ResultContainer>(
+                           inputContainer, transform, unaryPredicate);
                    });
 }
 
@@ -152,21 +154,22 @@ void test_constraints()
     err_generate<vector<int>, function<optional<int>(int)>>();
 
     // wrong Transform
-    err_filtered_transformed1<list, vector<int>, std::function<char(string)>, std::function<bool(int)>>();
+    err_filtered_transformed1<list, vector<int>, std::function<char(string)>,
+                              std::function<bool(int)>>();
     err_filtered_transformed2<vector<string>, vector<int>, std::function<char(int)>,
-                        std::function<bool(int)>>();
+                              std::function<bool(int)>>();
     err_transformed1<list, vector<int>, std::function<char(string)>>();
     err_transformed2<vector<string>, vector<int>, std::function<string()>>();
 
     // wrong predicate
     err_filtered_transformed1<list, vector<int>, std::function<string(int)>,
-                        std::function<string(int)>>();
+                              std::function<string(int)>>();
     err_filtered_transformed1<list, vector<int>, std::function<string(int)>,
-                        std::function<bool(string)>>();
+                              std::function<bool(string)>>();
     err_filtered_transformed2<vector<string>, vector<int>, std::function<string(int)>,
-                        std::function<string(int)>>();
+                              std::function<string(int)>>();
     err_filtered_transformed2<vector<string>, vector<int>, std::function<string(int)>,
-                        std::function<bool(string)>>();
+                              std::function<bool(string)>>();
 }
 
 #endif // C++ 20

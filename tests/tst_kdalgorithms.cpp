@@ -17,6 +17,7 @@
 #include <algorithm>
 #include <deque>
 #include <forward_list>
+#include <iostream>
 #include <set>
 #include <unordered_map>
 #include <unordered_set>
@@ -69,6 +70,7 @@ struct Struct
     bool hasEqualValues(const Struct &other) const { return value == other.value; }
     bool hasEqualKeyValuePair() const { return key == value; }
     int sumPairs() const { return key + value; }
+    void print() const { std::cout << "{ " << key << ", " << value << " }" << std::endl; }
 };
 
 const std::vector<Struct> structVec{{1, 4}, {2, 3}, {3, 2}, {4, 1}};
@@ -150,6 +152,7 @@ private Q_SLOTS:
     void generate_until();
     void isSame();
     void zip();
+    void for_each();
 };
 
 void TestAlgorithms::copy()
@@ -2293,6 +2296,25 @@ void TestAlgorithms::zip()
         CopyObserver::reset();
         (void)kdalgorithms::zip(std::move(v1), std::move(v2));
         QCOMPARE(CopyObserver::copies, 0);
+    }
+}
+
+void TestAlgorithms::for_each()
+{
+    { // simple lambda
+        std::vector<int> result;
+        kdalgorithms::for_each(intVector, [&result](int i) { result.push_back(i); });
+        QCOMPARE(result, getIntVector());
+    }
+
+    { // r-value
+        std::vector<int> result;
+        kdalgorithms::for_each(getIntVector(), [&result](int i) { result.push_back(i); });
+        QCOMPARE(result, intVector);
+    }
+
+    { // member function
+        kdalgorithms::for_each(structVec, &Struct::print);
     }
 }
 QTEST_MAIN(TestAlgorithms)

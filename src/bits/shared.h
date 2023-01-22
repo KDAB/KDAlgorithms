@@ -73,6 +73,9 @@ template <typename UnaryPredicate, typename Container>
 concept UnaryPredicateOnContainerValues =
     std::is_invocable_r_v<bool, UnaryPredicate, ValueType<Container>>;
 
+template <typename UnaryFunction, typename Container>
+concept UnaryFunctionOnContainerValues = std::is_invocable_v<UnaryFunction, ValueType<Container>>;
+
 template <typename BinaryPredicate, typename Container>
 concept BinaryPredicateOnContainerValues =
     std::is_invocable_r_v<bool, BinaryPredicate, ValueType<Container>, ValueType<Container>>;
