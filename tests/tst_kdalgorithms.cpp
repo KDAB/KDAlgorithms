@@ -2297,6 +2297,15 @@ void TestAlgorithms::zip()
         (void)kdalgorithms::zip(std::move(v1), std::move(v2));
         QCOMPARE(CopyObserver::copies, 0);
     }
+
+    { // Non std-containers
+        QVector<int> v1{1, 2, 3};
+        QVector<char> v2{'a', 'b', 'c'};
+
+        auto result = kdalgorithms::zip<QVector>(v1, v2);
+        QVector<std::tuple<int, char>> expected{{1, 'a'}, {2, 'b'}, {3, 'c'}};
+        QCOMPARE(result, expected);
+    }
 }
 
 void TestAlgorithms::for_each()
