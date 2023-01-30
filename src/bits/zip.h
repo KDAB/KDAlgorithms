@@ -40,7 +40,8 @@ namespace detail {
 template <template <typename...> class ResultContainer = std::vector, typename... Containers>
 auto zip(Containers &&...containers)
 {
-    auto iterators = make_tuple(read_iterator_wrapper(std::forward<Containers>(containers))...);
+    auto iterators =
+        std::make_tuple(read_iterator_wrapper(std::forward<Containers>(containers))...);
 
     using TupleValueType = std::tuple<ValueType<Containers>...>;
     ResultContainer<TupleValueType> result;
