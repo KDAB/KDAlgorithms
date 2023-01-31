@@ -47,6 +47,7 @@ std::function<bool(int)> greaterThan(int testValue)
 
 const std::vector<int> emptyIntVector;
 const std::vector<int> intVector{1, 2, 3, 4};
+const std::vector<int> unsortedIntVector{8,2,3,6,11};
 
 std::vector<int> getIntVector()
 {
@@ -74,6 +75,7 @@ struct Struct
 };
 
 const std::vector<Struct> structVec{{1, 4}, {2, 3}, {3, 2}, {4, 1}};
+const std::vector<Struct> unsortedStructVec{{2, 4}, {1, 3}, {4, 2}, {3, 1}};
 
 } // namespace
 class TestAlgorithms : public QObject
@@ -125,6 +127,8 @@ private Q_SLOTS:
     void min();
     void maxValueLessThan();
     void maxValueLessThanCustomComparisor();
+    void maxValueLessThanUnsorted();
+    void maxValueLessThanUnsortedCustomComparisor();
     void minValueGreaterThan();
     void minValueGreaterThanCustomComparisor();
     void isPermutation();
@@ -1187,6 +1191,45 @@ void TestAlgorithms::maxValueLessThanCustomComparisor()
 
     result = kdalgorithms::max_value_less_than(structVec, Struct{4, 4}, &Struct::lessThanByXY);
     expected = {4, 1};
+    QCOMPARE(result.value(), expected);
+#endif
+}
+
+void TestAlgorithms::maxValueLessThanUnsorted()
+{
+#if __cplusplus >= 201703L
+    auto result = kdalgorithms::max_value_less_than_unsorted(unsortedIntVector, 4);
+    QCOMPARE(result.value(), 3);
+
+    result = kdalgorithms::max_value_less_than_unsorted(unsortedIntVector, 100);
+    QCOMPARE(result.value(), 11);
+
+    result = kdalgorithms::max_value_less_than_unsorted(unsortedIntVector, 7);
+    QCOMPARE(result.value(), 6);
+
+    result = kdalgorithms::max_value_less_than_unsorted(unsortedIntVector, 1);
+    QVERIFY(!result.has_value());
+    
+    result = kdalgorithms::max_value_less_than(emptyIntVector, 10);
+    QVERIFY(!result.has_value());
+
+    std::set<int> set{1, 12, 3, 4, -23};
+    result = kdalgorithms::max_value_less_than_unsorted(set, 4);
+    QCOMPARE(*result, 3);
+#endif
+}
+
+void TestAlgorithms::maxValueLessThanUnsortedCustomComparisor()
+{
+#if __cplusplus >= 201703L
+    auto compare = [](const Struct &v1, const Struct &v2) { return v1.key < v2.key; };
+
+    auto result = kdalgorithms::max_value_less_than_unsorted(unsortedStructVec, Struct{4, 4}, compare);
+    Struct expected{3, 1};
+    QCOMPARE(result.value(), expected);
+
+    result = kdalgorithms::max_value_less_than_unsorted(unsortedStructVec, Struct{4, 4}, &Struct::lessThanByXY);
+    expected = {4, 2};
     QCOMPARE(result.value(), expected);
 #endif
 }
