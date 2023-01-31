@@ -433,8 +433,9 @@ Both functions returns a [std::optional](https://en.cppreference.com/w/cpp/utili
 std::vector<int> ints{1,2,3,4};
 std::vector<int> unsortedInts{2,4,1,3};
 std::optional<int> result = kdalgorithms::max_value_less_than(ints, 4);
-std::optional<int> resultForUnsorted = kdalgorithms::max_value_less_than_unsorted(unsortedInts, 4);
 // result.value() = 3
+std::optional<int> resultForUnsortedContainer = kdalgorithms::max_value_less_than_unsorted(unsortedInts, 4);
+// max_value_less_than_unsorted works on the unsorted container and it has O(n) complexity, so use it as per your use case :)
 // resultForUnsorted.value() = 3;
 
 result = kdalgorithms::max_value_less_than(ints, -1);
