@@ -1210,7 +1210,7 @@ void TestAlgorithms::maxValueLessThanUnsorted()
     result = kdalgorithms::max_value_less_than_unsorted(unsortedIntVector, 1);
     QVERIFY(!result.has_value());
     
-    result = kdalgorithms::max_value_less_than(emptyIntVector, 10);
+    result = kdalgorithms::max_value_less_than_unsorted(emptyIntVector, 10);
     QVERIFY(!result.has_value());
 
     std::set<int> set{1, 12, 3, 4, -23};
