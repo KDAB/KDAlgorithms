@@ -243,13 +243,12 @@ template <typename Container, typename Item, typename Compare = std::less<ValueT
     requires BinaryPredicateOnContainerValues<Compare, Container>
     && ContainerOfType<Container, Item>
 #endif
-    std::optional<Item> max_value_less_than_unordered(const Container &container, Item &&needle,
+    std::optional<Item> max_value_less_than_unordered(const Container &container, const Item &&needle,
                                                      Compare &&compare = {})
 {
-
     auto _compare = detail::to_function_object(std::forward<Compare>(compare));
 
-    std::optional<Item> result = std::nullopt;
+    std::optional<Item> result;
 
     for (const auto &item : container) {
         if (_compare(item, needle) && (!result || _compare(*result, item))) {
