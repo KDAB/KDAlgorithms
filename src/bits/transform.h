@@ -128,15 +128,15 @@ auto transformed_with_new_return_type(InputContainer &&input, Transform &&transf
 }
 
 // -------------------- transform --------------------
-template <typename Container, typename UnaryPredicate>
-void transform(Container &input, UnaryPredicate &&predicate)
+template <typename Container, typename Transform>
+void transform(Container &input, Transform &&predicate)
 #if __cplusplus >= 202002L
-    requires UnaryPredicateOnContainerValues<UnaryPredicate, Container>
+    requires std::is_invocable_r_v<ValueType<Container>, Transform, ValueType<Container>>
 #endif
 
 {
     std::transform(std::begin(input), std::end(input), std::begin(input),
-                   std::forward<UnaryPredicate>(predicate));
+                   std::forward<Transform>(predicate));
 }
 
 // -------------------- filtered_transformed --------------------

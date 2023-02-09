@@ -781,6 +781,12 @@ void TestAlgorithms::transform()
     kdalgorithms::transform(vec, squareItem);
     std::vector<int> expected{1, 4, 9, 16};
     QCOMPARE(vec, expected);
+
+    QStringList strings{"abc", "def", "hij"};
+    auto to_upper = [](const QString &string) { return string.toUpper(); };
+    kdalgorithms::transform(strings, to_upper);
+    QStringList expected_strings{"ABC", "DEF", "HIJ"};
+    QCOMPARE(strings, expected_strings);
 }
 
 void TestAlgorithms::filtered_transformed()
