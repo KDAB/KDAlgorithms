@@ -9,6 +9,10 @@ add_library(kdalgorithms INTERFACE)
 add_library(KDAB::KDAlgorithms ALIAS kdalgorithms)
 target_include_directories(kdalgorithms INTERFACE src/)
 
+if(MSVC)
+    target_compile_options(kdalgorithms INTERFACE /Zc:__cplusplus)
+endif()
+
 include(CTest)
 
 if (CMAKE_SOURCE_DIR STREQUAL PROJECT_SOURCE_DIR)
