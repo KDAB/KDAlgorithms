@@ -275,6 +275,27 @@ std::optional<Item> min_value_greater_than(const Container &container, Item &&ne
 
     return *it;
 }
+
+template <typename Container, typename Item, typename Compare = std::less<ValueType<Container>>>
+#if __cplusplus >= 202002L
+    requires BinaryPredicateOnContainerValues<Compare, Container>
+    && ContainerOfType<Container, Item>
+#endif
+    std::optional<Item> min_value_greater_than_unordered(const Container &container, const Item &&needle,
+                                                     Compare &&compare = {})
+{
+    auto _compare = detail::to_function_object(std::forward<Compare>(compare));
+
+    std::optional<Item> result;
+
+    for (const auto &item : container) {
+        if (_compare(needle, item) && (!result || _compare(item, *result))) {
+            result = item;
+        }
+    }
+
+    return result;
+}
 #endif
 
 // -------------------- is_permutation --------------------
@@ -531,4 +552,4 @@ void for_each(Container &&container, UnaryFunction &&function)
     std::for_each(range.begin(), range.end(),
                   detail::to_function_object(std::forward<UnaryFunction>(function)));
 }
-} // namespace kdalgorithm
+} // namespace kdalgorithms
