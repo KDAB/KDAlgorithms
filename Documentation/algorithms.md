@@ -21,7 +21,7 @@ Queries
 - <a href="#find_if">find_if / mutable_find_if</a>
 - <a href="#count">count</a>
 - <a href="#minMaxElement">min_element / max_element</a> (C++17)
-- <a href="#minMaxWithPivot">min_value_greater_than / max_value_less_than</a> (C++17)
+- <a href="#minMaxWithPivot">min_value_greater_than / max_value_less_than / max_value_less_than_unordered / min_value_greater_than_unordered</a> (C++17)
 - <a href="#isPermutation">is_permutation</a>
 - <a href="#get_match">get_match (C++17) / get_match_or_default</a>
 - <a href="#index_of_match">index_of_match</a>
@@ -420,7 +420,7 @@ OK, I admit, that's a silly example.
 See [std::min_element](https://en.cppreference.com/w/cpp/algorithm/min_element) and [std::max_element](https://en.cppreference.com/w/cpp/algorithm/max_element) for the algorithm from the standard.
 
 
-<a name="minMaxWithPivot">min_value_greater_than | max_value_less_than</a> (C++17)
+<a name="minMaxWithPivot">min_value_greater_than | max_value_less_than | max_value_less_than_unordered | min_value_greater_than_unordered</a> (C++17)
 ------------------------------------------------------------------------------------------------
 When searching for the minimum value greater than a specific item or when searching for the maximum value
 less than a specific item, the algorithms lower_bound and upper_bound comes into play.
@@ -431,10 +431,14 @@ Both functions returns a [std::optional](https://en.cppreference.com/w/cpp/utili
 
 ```
 std::vector<int> ints{1,2,3,4};
-std::optional<int> result = kdalgorithms::max_value_less_than(int_vector, 4);
+std::vector<int> unsortedInts{2,4,1,3};
+std::optional<int> result = kdalgorithms::max_value_less_than(ints, 4);
 // result.value() = 3
+std::optional<int> resultForUnsortedContainer = kdalgorithms::max_value_less_than_unordered(unsortedInts, 4);
+// max_value_less_than_unordered works on the unsorted container and it has O(n) complexity, so use it as per your use case :)
+// resultForUnsorted.value() = 3;
 
-result = kdalgorithms::max_value_less_than(int_vector, -1);
+result = kdalgorithms::max_value_less_than(ints, -1);
 // result.has_value() = false
 ```
 
