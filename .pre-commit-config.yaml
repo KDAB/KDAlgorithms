@@ -2,6 +2,6 @@
 # See https://pre-commit.com/hooks.html for more hooks
 repos:
 - repo: https://github.com/fsfe/reuse-tool
-  rev: v1.1.0
+  rev: v1.1.2
   hooks:
   - id: reuse
