@@ -47,7 +47,7 @@ std::function<bool(int)> greaterThan(int testValue)
 
 const std::vector<int> emptyIntVector;
 const std::vector<int> intVector{1, 2, 3, 4};
-const std::vector<int> unsortedIntVector{8,2,3,6,11};
+const std::vector<int> unsortedIntVector{8, 2, 3, 6, 11};
 
 std::vector<int> getIntVector()
 {
@@ -153,6 +153,7 @@ private Q_SLOTS:
     void find_if();
     void find_if_not();
     void iota();
+    void iota_single_arg();
     void partition();
     void generate_n();
     void generate_until();
@@ -1217,7 +1218,7 @@ void TestAlgorithms::maxValueLessThanUnordered()
 
     result = kdalgorithms::max_value_less_than_unordered(unsortedIntVector, 1);
     QVERIFY(!result.has_value());
-    
+
     result = kdalgorithms::max_value_less_than_unordered(emptyIntVector, 10);
     QVERIFY(!result.has_value());
 
@@ -1232,11 +1233,13 @@ void TestAlgorithms::maxValueLessThanUnorderedCustomComparisor()
 #if __cplusplus >= 201703L
     auto compare = [](const Struct &v1, const Struct &v2) { return v1.key < v2.key; };
 
-    auto result = kdalgorithms::max_value_less_than_unordered(unsortedStructVec, Struct{4, 4}, compare);
+    auto result =
+        kdalgorithms::max_value_less_than_unordered(unsortedStructVec, Struct{4, 4}, compare);
     Struct expected{3, 1};
     QCOMPARE(result.value(), expected);
 
-    result = kdalgorithms::max_value_less_than_unordered(unsortedStructVec, Struct{4, 4}, &Struct::lessThanByXY);
+    result = kdalgorithms::max_value_less_than_unordered(unsortedStructVec, Struct{4, 4},
+                                                         &Struct::lessThanByXY);
     expected = {4, 2};
     QCOMPARE(result.value(), expected);
 #endif
@@ -1253,7 +1256,7 @@ void TestAlgorithms::minValueGreaterThanUnordered()
 
     result = kdalgorithms::min_value_greater_than_unordered(unsortedIntVector, 100);
     QVERIFY(!result.has_value());
-    
+
     result = kdalgorithms::min_value_greater_than_unordered(emptyIntVector, 10);
     QVERIFY(!result.has_value());
 
@@ -1268,11 +1271,13 @@ void TestAlgorithms::minValueGreaterThanUnorderedCustomComparisor()
 #if __cplusplus >= 201703L
     auto compare = [](const Struct &v1, const Struct &v2) { return v1.key < v2.key; };
 
-    auto result = kdalgorithms::min_value_greater_than_unordered(unsortedStructVec, Struct{4, 4}, compare);
+    auto result =
+        kdalgorithms::min_value_greater_than_unordered(unsortedStructVec, Struct{4, 4}, compare);
     Struct expected{5, 4};
     QCOMPARE(result.value(), expected);
 
-    result = kdalgorithms::min_value_greater_than_unordered(unsortedStructVec, Struct{4, 4}, &Struct::lessThanByXY);
+    result = kdalgorithms::min_value_greater_than_unordered(unsortedStructVec, Struct{4, 4},
+                                                            &Struct::lessThanByXY);
     expected = {5, 4};
     QCOMPARE(result.value(), expected);
 #endif
@@ -1995,6 +2000,26 @@ void TestAlgorithms::iota()
     { // non integer data type
         auto result = kdalgorithms::iota('a', 3);
         std::vector<char> expected{'a', 'b', 'c'};
+        QCOMPARE(result, expected);
+    }
+}
+
+void TestAlgorithms::iota_single_arg()
+{
+    { // Simple
+        std::vector<int> result = kdalgorithms::iota(5);
+        std::vector<int> expected{0, 1, 2, 3, 4};
+        QCOMPARE(result, expected);
+    }
+
+    { // 0
+        std::vector<int> result = kdalgorithms::iota(0);
+        std::vector<int> expected{};
+        QCOMPARE(result, expected);
+    }
+    { // std::list
+        std::list<int> result = kdalgorithms::iota<std::list>(3);
+        std::list<int> expected{0, 1, 2};
         QCOMPARE(result, expected);
     }
 }

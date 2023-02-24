@@ -680,6 +680,14 @@ std::vector<int> result = kdalgorithms::iota(10, 5);
 // result = {10, 11, 12, 13, 14};
 ```
 
+*iota* might also be used with just a single argument, in which case it generates a container of that many elements starting at 0:
+
+```
+std::vector<int> result = kdalgorithms::iota(5);
+// result = {0, 1, 2, 3, 4};
+```
+If you are familiar with Python, then this one argument version is equivalent to the python expression "`range(5)`"
+
 See [std::iota](https://en.cppreference.com/w/cpp/algorithm/iota) for the algorithm from the standard.
 
 <a name="generate_n">generate_n</a>

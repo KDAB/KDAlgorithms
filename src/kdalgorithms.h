@@ -243,8 +243,8 @@ template <typename Container, typename Item, typename Compare = std::less<ValueT
     requires BinaryPredicateOnContainerValues<Compare, Container>
     && ContainerOfType<Container, Item>
 #endif
-    std::optional<Item> max_value_less_than_unordered(const Container &container, const Item &&needle,
-                                                     Compare &&compare = {})
+std::optional<Item> max_value_less_than_unordered(const Container &container, const Item &&needle,
+                                                  Compare &&compare = {})
 {
     auto _compare = detail::to_function_object(std::forward<Compare>(compare));
 
@@ -281,8 +281,8 @@ template <typename Container, typename Item, typename Compare = std::less<ValueT
     requires BinaryPredicateOnContainerValues<Compare, Container>
     && ContainerOfType<Container, Item>
 #endif
-    std::optional<Item> min_value_greater_than_unordered(const Container &container, const Item &&needle,
-                                                     Compare &&compare = {})
+std::optional<Item> min_value_greater_than_unordered(const Container &container,
+                                                     const Item &&needle, Compare &&compare = {})
 {
     auto _compare = detail::to_function_object(std::forward<Compare>(compare));
 
@@ -490,6 +490,14 @@ Container<Value> iota(Value initial, int count)
 {
     Container<Value> result(count);
     std::iota(std::begin(result), std::end(result), initial);
+    return result;
+}
+
+template <template <typename...> class Container = std::vector>
+Container<int> iota(int count)
+{
+    Container<int> result(count);
+    std::iota(std::begin(result), std::end(result), 0);
     return result;
 }
 
