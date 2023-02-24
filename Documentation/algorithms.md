@@ -15,14 +15,14 @@ Modifying algorithms
 
 Queries
 
-- <a href="#allAnyNone">all_of / any_of / none_of</a>
+- <a href="#all_any_none">all_of / any_of / none_of</a>
 - <a href="#contains">contains</a>
-- <a href="#valueIn">value_in</a>
+- <a href="#value_in">value_in</a>
 - <a href="#find_if">find_if / mutable_find_if</a>
 - <a href="#count">count</a>
-- <a href="#minMaxElement">min_element / max_element</a> (C++17)
-- <a href="#minMaxWithPivot">min_value_greater_than / max_value_less_than / max_value_less_than_unordered / min_value_greater_than_unordered</a> (C++17)
-- <a href="#isPermutation">is_permutation</a>
+- <a href="#min_max_element">min_element / max_element</a> (C++17)
+- <a href="#min_max_with_pivot">min_value_greater_than / max_value_less_than / max_value_less_than_unordered / min_value_greater_than_unordered</a> (C++17)
+- <a href="#is_permutation">is_permutation</a>
 - <a href="#get_match">get_match (C++17) / get_match_or_default</a>
 - <a href="#index_of_match">index_of_match</a>
 - <a href="#has_duplicates">has_duplicates</a>
@@ -268,7 +268,7 @@ auto result = kdalgorithms::is_sorted(unsorted, [](Struct x, Struct y) { return 
 See [std::is_sorted](https://en.cppreference.com/w/cpp/algorithm/is_sorted) for the algorithm from the standard.
 
 
-<a name="allAnyNone">all_of / any_of / none_of</a>
+<a name="all_any_none">all_of / any_of / none_of</a>
 ---------------------------------------------------
 ```
 std::vector<int> ints{1,2,3};
@@ -299,11 +299,11 @@ if (kdalgorithms::contains({ColumnA, ColumnC, ColumnE}, column))
 }
 ```
 
-However, <a href="valueIn">kdalgorithms::value_in</a> has a more pleasing syntax for that usecase.
+However, <a href="value_in">kdalgorithms::value_in</a> has a more pleasing syntax for that usecase.
 
 see [std::find](https://en.cppreference.com/w/cpp/algorithm/find) for the algorithm from the standard.
 
-<a name="valueIn">value_in</a>
+<a name="value_in">value_in</a>
 --------------------------------
 
 This is similar to *contains* but with the arguments switched around. This makes it possible to write code
@@ -388,7 +388,7 @@ auto result = kdalgorithms::count_if(vec, [](int i) { return i > 2; });
 
 See [std::count](https://en.cppreference.com/w/cpp/algorithm/count) and [std::count_if](https://en.cppreference.com/w/cpp/algorithm/count_if)  for the algorithm from the standard.
 
-<a name="minMaxElement">min_element / max_element</a> (C++17)
+<a name="min_max_element">min_element / max_element</a> (C++17)
 --------------------------------------------------------------
 [std::min](https://en.cppreference.com/w/cpp/algorithm/min) and [std::max](https://en.cppreference.com/w/cpp/algorithm/max)
 can compare two values, and in addition to that it can find the smallest/largest item in a initializer_list. On the other hand,
@@ -420,7 +420,7 @@ OK, I admit, that's a silly example.
 See [std::min_element](https://en.cppreference.com/w/cpp/algorithm/min_element) and [std::max_element](https://en.cppreference.com/w/cpp/algorithm/max_element) for the algorithm from the standard.
 
 
-<a name="minMaxWithPivot">min_value_greater_than | max_value_less_than | max_value_less_than_unordered | min_value_greater_than_unordered</a> (C++17)
+<a name="min_max_with_pivot">min_value_greater_than | max_value_less_than | max_value_less_than_unordered | min_value_greater_than_unordered</a> (C++17)
 ------------------------------------------------------------------------------------------------
 When searching for the minimum value greater than a specific item or when searching for the maximum value
 less than a specific item, the algorithms lower_bound and upper_bound comes into play.
@@ -461,7 +461,7 @@ auto result = kdalgorithms::max_value_less_than(vec, S{4, 4}, compare);
 *Observe, that due to the usage of std::optional, the above functions are only available when
 compiling with C++17 or above.*
 
-<a name="isPermutation">is_permutation</a>
+<a name="is_permutation">is_permutation</a>
 ------------------------------------------
 ```
 std::vector<int> x{1,2,3,4}
