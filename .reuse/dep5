@@ -4,6 +4,6 @@ Upstream-Contact:  <info@kdab.com>
 Source: https://www.github.com/KDAB/KDAlgorithms
 
 #misc source code
-Files: run .gitignore CMakeLists.txt CMakePresets.json README.md _clang-format .pre-commit-config.yaml appveyor.yml Documentation/* Example/CMakeLists.txt
+Files: run .gitignore CMakeLists.txt CMakePresets.json README.md _clang-format .pre-commit-config.yaml appveyor.yml Documentation/* Example/CMakeLists.txt Inspiration/CMakeLists.txt
 Copyright: 2022 Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
 License: MIT

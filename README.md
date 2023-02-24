@@ -5,8 +5,10 @@ The purpose of this library is to make it easier to work with algorithms in C++1
 
 * <a href="Documentation/algorithms.md">Documentation of all the algorithms</a>
 * <a href="Documentation/deploying.md">Deploying the algorithms with CMake</a>
-* <a href="tests/tst_kdalgorithms.cpp">Be inspired by all the unit tests</a>
+* <a href="Documentation/inspiration.md">Get inspired by some real world examples</a>
+* <a href="tests/tst_kdalgorithms.cpp">Get inspired by all the unit tests</a>
 * <a href="https://youtu.be/iAEIPk64ZJw?list=PL6CJYn40gN6gf-G-o6syFwGrtq3kItEqI">Youtube video introducing the library</a>
+* <a href="https://www.kdab.com/introducing-kdalgorithms">A blog post on KDAlgorithms</a>
 
 Example - filtered
 ------------------
