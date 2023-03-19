@@ -198,7 +198,7 @@ template <typename Container, typename Compare = std::less<ValueType<Container>>
 #endif
 std::optional<ValueType<Container>> max_value(const Container &container, Compare &&compare = {})
 {
-    if (container.empty())
+    if (std::cbegin(container) == std::cend(container))
         return {};
 
     return *std::max_element(std::cbegin(container), std::cend(container),
@@ -218,7 +218,7 @@ template <typename Container, typename Compare = std::less<ValueType<Container>>
 #endif
 std::optional<ValueType<Container>> min_value(const Container &container, Compare &&compare = {})
 {
-    if (container.empty())
+    if (std::cbegin(container) == std::cend(container))
         return {};
     return *std::min_element(std::cbegin(container), std::cend(container),
                              detail::to_function_object(std::forward<Compare>(compare)));
