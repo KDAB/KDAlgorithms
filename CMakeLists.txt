@@ -86,6 +86,7 @@ if(BUILD_TESTING AND ${KDALGORITHMS_BUILD_TEST})
         Documentation/algorithms.md
         Documentation/deploying.md
         Documentation/inspiration.md
+        Documentation/ChangeLog.md
     )
 
     add_subdirectory(Inspiration)

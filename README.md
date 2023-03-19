@@ -9,6 +9,7 @@ The purpose of this library is to make it easier to work with algorithms in C++1
 * <a href="tests/tst_kdalgorithms.cpp">Get inspired by all the unit tests</a>
 * <a href="https://youtu.be/iAEIPk64ZJw?list=PL6CJYn40gN6gf-G-o6syFwGrtq3kItEqI">Youtube video introducing the library</a>
 * <a href="https://www.kdab.com/introducing-kdalgorithms">A blog post on KDAlgorithms</a>
+* <a href="Documentation/ChangeLog.md">Change Log</a>
 
 Example - filtered
 ------------------
