@@ -190,13 +190,13 @@ int count_if(const Container &container, UnaryPredicate &&predicate)
                          detail::to_function_object(std::forward<UnaryPredicate>(predicate)));
 }
 
-// -------------------- min / max --------------------
+// -------------------- min_value / max_value --------------------
 #if __cplusplus >= 201703L
 template <typename Container, typename Compare = std::less<ValueType<Container>>>
 #if __cplusplus >= 202002L
     requires BinaryPredicateOnContainerValues<Compare, Container>
 #endif
-std::optional<ValueType<Container>> max_element(const Container &container, Compare &&compare = {})
+std::optional<ValueType<Container>> max_value(const Container &container, Compare &&compare = {})
 {
     if (container.empty())
         return {};
@@ -206,15 +206,29 @@ std::optional<ValueType<Container>> max_element(const Container &container, Comp
 }
 
 template <typename Container, typename Compare = std::less<ValueType<Container>>>
+[[deprecated("use max_value instead")]] std::optional<ValueType<Container>>
+max_element(const Container &container, Compare &&compare = {})
+{
+    return max_value(container, std::forward<Compare>(compare));
+}
+
+template <typename Container, typename Compare = std::less<ValueType<Container>>>
 #if __cplusplus >= 202002L
     requires BinaryPredicateOnContainerValues<Compare, Container>
 #endif
-std::optional<ValueType<Container>> min_element(const Container &container, Compare &&compare = {})
+std::optional<ValueType<Container>> min_value(const Container &container, Compare &&compare = {})
 {
     if (container.empty())
         return {};
     return *std::min_element(std::cbegin(container), std::cend(container),
                              detail::to_function_object(std::forward<Compare>(compare)));
+}
+
+template <typename Container, typename Compare = std::less<ValueType<Container>>>
+[[deprecated("use max_value instead")]] std::optional<ValueType<Container>>
+min_element(const Container &container, Compare &&compare = {})
+{
+    return min_value(container, std::forward<Compare>(compare));
 }
 #endif
 

@@ -20,7 +20,7 @@ Queries
 - <a href="#value_in">value_in</a>
 - <a href="#find_if">find_if / mutable_find_if</a>
 - <a href="#count">count</a>
-- <a href="#min_max_element">min_element / max_element</a> (C++17)
+- <a href="#min_max_value">min_value / max_value</a> (C++17)
 - <a href="#min_max_with_pivot">min_value_greater_than / max_value_less_than / max_value_less_than_unordered / min_value_greater_than_unordered</a> (C++17)
 - <a href="#is_permutation">is_permutation</a>
 - <a href="#get_match">get_match (C++17) / get_match_or_default</a>
@@ -388,7 +388,7 @@ auto result = kdalgorithms::count_if(vec, [](int i) { return i > 2; });
 
 See [std::count](https://en.cppreference.com/w/cpp/algorithm/count) and [std::count_if](https://en.cppreference.com/w/cpp/algorithm/count_if)  for the algorithm from the standard.
 
-<a name="min_max_element">min_element / max_element</a> (C++17)
+<a name="min_max_value">min_value / max_value</a> (C++17)
 --------------------------------------------------------------
 [std::min](https://en.cppreference.com/w/cpp/algorithm/min) and [std::max](https://en.cppreference.com/w/cpp/algorithm/max)
 can compare two values, and in addition to that it can find the smallest/largest item in a initializer_list. On the other hand,
@@ -399,11 +399,11 @@ Our version works on general containers and returns a [std::optional](https://en
 
 ```
 std::vector<int> ints{4,1,3,2};
-std::optional<int> item = kdalgorithms::max_element(ints);
+std::optional<int> item = kdalgorithms::max_value(ints);
 // item.value() = 4
 
 std::vector<int> ints{};
-std::optional<int> item = kdalgorithms::max_element(ints);
+std::optional<int> item = kdalgorithms::max_value(ints);
 // item.has_value() = false
 ```
 
@@ -411,7 +411,7 @@ It is also possible to provide a comparison function:
 
 ```
 std::vector<int> ints{4,1,3,2};
-auto result = kdalgorithms::min_element(int_vector, std::greater<int>());
+auto result = kdalgorithms::min_value(int_vector, std::greater<int>());
 // result.value() == 4
 ```
 

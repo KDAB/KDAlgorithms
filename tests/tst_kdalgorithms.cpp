@@ -123,8 +123,8 @@ private Q_SLOTS:
     void value_in();
     void count();
     void count_if();
-    void max();
-    void min();
+    void max_value();
+    void min_value();
     void maxValueLessThan();
     void maxValueLessThanCustomComparisor();
     void maxValueLessThanUnordered();
@@ -1108,26 +1108,26 @@ void TestAlgorithms::count_if()
     }
 }
 
-void TestAlgorithms::max()
+void TestAlgorithms::max_value()
 {
 #if __cplusplus >= 201703L
     {
         std::vector<int> unsortedIts{4, 1, 3, 2};
-        auto result = kdalgorithms::max_element(unsortedIts, std::less<int>());
+        auto result = kdalgorithms::max_value(unsortedIts, std::less<int>());
         QCOMPARE(result.value(), 4);
 
-        result = kdalgorithms::max_element(unsortedIts, std::greater<int>());
+        result = kdalgorithms::max_value(unsortedIts, std::greater<int>());
         QCOMPARE(result.value(), 1);
 
-        result = kdalgorithms::max_element(emptyIntVector, std::less<int>());
+        result = kdalgorithms::max_value(emptyIntVector, std::less<int>());
         QVERIFY(!result.has_value());
 
-        result = kdalgorithms::max_element(unsortedIts);
+        result = kdalgorithms::max_value(unsortedIts);
         QCOMPARE(result.value(), 4);
     }
 
     {
-        auto result = kdalgorithms::max_element(structVec, &Struct::lessThanByXY);
+        auto result = kdalgorithms::max_value(structVec, &Struct::lessThanByXY);
         Struct expected{4, 1};
         QCOMPARE(*result, expected);
     }
@@ -1135,36 +1135,35 @@ void TestAlgorithms::max()
     {
         std::map<int, int> map{{1, 1}, {2, 3}, {4, 2}};
         auto lessthan = [](auto x, auto y) { return x.second < y.second; };
-        auto result = kdalgorithms::max_element(map, lessthan);
+        auto result = kdalgorithms::max_value(map, lessthan);
         std::pair<const int, int> expected{2, 3};
         QCOMPARE(*result, expected);
     }
 #endif
 }
 
-void TestAlgorithms::min()
+void TestAlgorithms::min_value()
 {
 #if __cplusplus >= 201703L
     {
-        auto result = kdalgorithms::min_element(intVector, std::less<int>());
+        auto result = kdalgorithms::min_value(intVector, std::less<int>());
         QCOMPARE(result.value(), 1);
 
-        result = kdalgorithms::min_element(intVector, std::greater<int>());
+        result = kdalgorithms::min_value(intVector, std::greater<int>());
         QCOMPARE(result.value(), 4);
 
-        result = kdalgorithms::min_element(emptyIntVector, std::less<int>());
+        result = kdalgorithms::min_value(emptyIntVector, std::less<int>());
         QVERIFY(!result.has_value());
 
-        result = kdalgorithms::min_element(intVector);
+        result = kdalgorithms::min_value(intVector);
         QCOMPARE(result.value(), 1);
     }
 
     {
-        auto result = kdalgorithms::min_element(structVec, &Struct::lessThanByXY);
+        auto result = kdalgorithms::min_value(structVec, &Struct::lessThanByXY);
         Struct expected{1, 4};
         QCOMPARE(*result, expected);
     }
-
 #endif
 }
 
