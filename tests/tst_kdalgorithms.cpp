@@ -77,6 +77,11 @@ struct Struct
 const std::vector<Struct> structVec{{1, 4}, {2, 3}, {3, 2}, {4, 1}};
 const std::vector<Struct> unsortedStructVec{{2, 4}, {1, 3}, {4, 2}, {3, 1}, {5, 4}};
 
+std::vector<Struct> getStruct()
+{
+    return std::vector<Struct>{{1, 2}, {2, 1}, {3, 3}, {4, 4}};
+}
+
 } // namespace
 class TestAlgorithms : public QObject
 {
@@ -151,7 +156,9 @@ private Q_SLOTS:
     void combiningTests();
     void index_of_match();
     void find_if();
+    void find_if_rvalue();
     void find_if_not();
+    void find_if_not_rvalue();
     void iota();
     void iota_single_arg();
     void partition();
@@ -1907,12 +1914,14 @@ void TestAlgorithms::find_if()
         QCOMPARE(dist, 2);
     }
 
-    { // using pointer to member function
+    { // using pointer to member function - no result
         auto result = kdalgorithms::find_if(structVec, &Struct::hasEqualKeyValuePair);
         QVERIFY(!result.has_result());
+    }
 
+    { // using pointer to member function - with a result
         std::vector<Struct> vec{{1, 2}, {2, 1}, {3, 3}, {4, 4}};
-        result = kdalgorithms::find_if(vec, &Struct::hasEqualKeyValuePair);
+        auto result = kdalgorithms::find_if(vec, &Struct::hasEqualKeyValuePair);
         QVERIFY(result.has_result());
         Struct expected{3, 3};
         QCOMPARE(*result, expected);
@@ -1943,6 +1952,23 @@ void TestAlgorithms::find_if()
     }
 }
 
+void TestAlgorithms::find_if_rvalue()
+{
+    { // Simple value
+        auto result = kdalgorithms::find_if(getIntVector(), [](int x) { return x > 2; });
+        QVERIFY(result.has_result());
+        QCOMPARE(*result, 3);
+    }
+
+    { // struct
+        auto result = kdalgorithms::find_if(getStruct(), &Struct::hasEqualKeyValuePair);
+        QVERIFY(result.has_result());
+        Struct expected{3, 3};
+        QCOMPARE(*result, expected);
+        QCOMPARE(result->key, 3);
+    }
+}
+
 void TestAlgorithms::find_if_not()
 {
     { // Non-mutable
@@ -1965,6 +1991,24 @@ void TestAlgorithms::find_if_not()
 
         result = kdalgorithms::mutable_find_if_not(vec, [](int) { return true; });
         QVERIFY(!result);
+    }
+}
+
+void TestAlgorithms::find_if_not_rvalue()
+{
+    { // Simple value
+        auto result = kdalgorithms::find_if_not(getIntVector(), [](int x) { return x <= 2; });
+        QVERIFY(result.has_result());
+        QCOMPARE(*result, 3);
+    }
+
+    { // struct
+        auto result =
+            kdalgorithms::find_if_not(getStruct(), [](const Struct &x) { return x.key < x.value; });
+        QVERIFY(result.has_result());
+        Struct expected{2, 1};
+        QCOMPARE(*result, expected);
+        QCOMPARE(result->key, 2);
     }
 }
 
