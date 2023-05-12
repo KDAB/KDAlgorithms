@@ -132,8 +132,8 @@ auto find_if(Container &&container, UnaryPredicate &&predicate)
     auto it = std::find_if(range.begin(), range.end(),
                            detail::to_function_object(std::forward<UnaryPredicate>(predicate)));
     using Iterator = decltype(range.begin());
-    return detail::create_result<Iterator>(std::move(it), std::move(range.begin()),
-                                           std::move(range.end()),
+    return detail::create_result<Iterator>(std::move(it), range.begin(),
+                                           range.end(),
                                            std::is_lvalue_reference<Container>());
 }
 
