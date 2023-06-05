@@ -127,6 +127,21 @@ Container sorted(Container container, Compare &&compare = {})
     return container;
 }
 
+template <typename Container, typename Member>
+void sort_by(Container &container, Member member)
+{
+    sort(container, [member](const auto &x, const auto &y) {
+        return x.*member < y.*member;
+    });
+}
+
+template <typename Container, typename Member>
+auto sorted_by(Container container, Member member)
+{
+    sort_by(container, member);
+    return container;
+}
+
 // -------------------- is_sorted --------------------
 template <typename Container, typename Compare = std::less<ValueType<Container>>>
 bool is_sorted(const Container &container, Compare &&compare = {})

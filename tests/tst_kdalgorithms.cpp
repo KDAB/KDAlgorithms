@@ -122,6 +122,7 @@ private Q_SLOTS:
     void sortWithCompare();
     void sortedWithCompare();
     void sortedEnsureMoveOnly();
+    void sortBy();
     void is_sorted();
     void lvalue();
     void contains();
@@ -1016,6 +1017,56 @@ void TestAlgorithms::sortedEnsureMoveOnly()
     CopyObserver::reset();
     kdalgorithms::sorted(std::move(vec));
     QCOMPARE(CopyObserver::copies, 0);
+}
+
+void TestAlgorithms::sortBy()
+{
+    { // Simple sort_by
+        std::vector<Struct> vec{{1, 3}, {3, 4}, {3, 2}, {1, 2}};
+        kdalgorithms::sort_by(vec, &Struct::value);
+        std::vector<Struct> expected{{3, 2}, {1, 2}, {1, 3}, {3, 4}};
+        QCOMPARE(vec, expected);
+    }
+
+    { // sorted_by
+        std::vector<Struct> vec{{1, 3}, {3, 4}, {3, 2}, {1, 2}};
+        std::vector<Struct> orig{{1, 3}, {3, 4}, {3, 2}, {1, 2}};
+        auto result = kdalgorithms::sorted_by(vec, &Struct::value);
+        std::vector<Struct> expected{{3, 2}, {1, 2}, {1, 3}, {3, 4}};
+        QCOMPARE(result, expected);
+        QCOMPARE(vec, orig);
+    }
+
+    { // sorted_by lvalue
+        std::vector<CopyObserver> vec;
+        vec.emplace_back(1);
+        vec.emplace_back(3);
+        vec.emplace_back(2);
+
+        CopyObserver::reset();
+        (void)kdalgorithms::sorted_by(vec, &CopyObserver::value);
+        QCOMPARE(CopyObserver::copies, 3);
+    }
+
+    { // sorted_by rvalue
+        CopyObserver::reset();
+        (void)kdalgorithms::sorted_by(getObserverVector(), &CopyObserver::value);
+        QCOMPARE(CopyObserver::copies, 0);
+    }
+
+    { // Example from documentation
+        struct Person
+        {
+            std::string name;
+            int age;
+        };
+        std::vector<Person> people{{"John", 25}, {"Jane", 20}, {"Bob", 27}};
+        kdalgorithms::sort_by(people, &Person::age);
+        // people == {{"Jane", 20}, {"John", 25}, {"Bob", 27}}
+        QCOMPARE(people[0].name, std::string("Jane"));
+        QCOMPARE(people[1].name, std::string("John"));
+        QCOMPARE(people[2].name, std::string("Bob"));
+    }
 }
 
 void TestAlgorithms::is_sorted()
