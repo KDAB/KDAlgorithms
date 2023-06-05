@@ -9,7 +9,8 @@ Modifying algorithms
 - <a href="#transform">transform / transformed</a>
 - <a href="#filtered_transformed">filtered_transformed</a>
 - <a href="#reverse">reverse</a>
-- <a href="#sort">sort</a>
+- <a href="#sort">sort / sorted</a>
+- <a href="#sort_by">sort_by / sorted_by</a>
 - <a href="#remove_duplicates">remove_duplicates</a>
 - <a href="#erase">erase / erase_if</a>
 
@@ -244,6 +245,25 @@ kdalgorithms::sort(ints, std::greater<int>());
 ```
 
 See [std::sort](https://en.cppreference.com/w/cpp/algorithm/sort) for the algorithm from the standard.
+
+<a name="sort_by">sort_by / sorted_by</a>
+------------------------------------------
+**sort** may take a second parameter, which is the predicate for sorting. 
+However, in many situations you simply have a container of struct and want to sort it, by one of the members of the struct.
+This is exactly what **sort_by** does.
+
+```
+struct Person
+{
+    std::string name;
+    int age;
+};
+std::vector<Person> people{{"John", 25}, {"Jane", 20}, {"Bob", 27}};
+kdalgorithms::sort_by(people, &Person::age);
+// people == {{"Jane", 20}, {"John", 25}, {"Bob", 27}}
+```
+
+**sorted_by** returns a sorted copy of the container provided.
 
 <a name="is_sorted">is_sorted</a>
 ---------------------------------
