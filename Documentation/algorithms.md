@@ -249,7 +249,7 @@ See [std::sort](https://en.cppreference.com/w/cpp/algorithm/sort) for the algori
 <a name="sort_by">sort_by / sorted_by</a>
 ------------------------------------------
 **sort** may take a second parameter, which is the predicate for sorting. 
-However, in many situations you simply have a container of struct and want to sort it, by one of the members of the struct.
+However, in many situations you simply have a container of struct, and want to sort it by one of the members of the struct.
 This is exactly what **sort_by** does.
 
 ```
@@ -263,7 +263,36 @@ kdalgorithms::sort_by(people, &Person::age);
 // people == {{"Jane", 20}, {"John", 25}, {"Bob", 27}}
 ```
 
-**sorted_by** returns a sorted copy of the container provided.
+As an alternative to specifying a member variable you may specify a member function:
+
+```
+std::vector<std::string> list{"John", "James", "Bob"};
+kdalgorithms::sort_by(list, &std::string::length);
+// list = Bob, John, James
+```
+
+You may also specify an extraction function as the second parameter:
+
+```
+std::map<std::string, int> scores{{"John", 25}, {"Jane", 20}, {"Bob", 27}};
+std::vector<std::string> list{"John", "Jane", "Bob"};
+auto score = [&](const std::string &name) { return scores[name]; };
+kdalgorithms::sort_by(list, score);
+
+list = Jane, John, Bob
+```
+
+### sort order
+The sort order may be specified for sort_by, using a third argument:
+
+```
+std::vector<Struct> vec{{1, 3}, {3, 4}, {3, 2}, {1, 2}};
+kdalgorithms::sort_by(vec, &Struct::value, kdalgorithms::descending);
+// vec = {3, 4}, {1, 3}, {3, 2}, {1, 2}
+```
+
+**sorted_by** is similar to sort_by, except that it returns a sorted copy of the container provided.
+
 
 <a name="is_sorted">is_sorted</a>
 ---------------------------------

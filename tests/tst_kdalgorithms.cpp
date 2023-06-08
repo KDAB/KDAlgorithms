@@ -168,6 +168,7 @@ private Q_SLOTS:
     void isSame();
     void zip();
     void for_each();
+    void invoke();
 };
 
 void TestAlgorithms::copy()
@@ -1066,6 +1067,39 @@ void TestAlgorithms::sortBy()
         QCOMPARE(people[0].name, std::string("Jane"));
         QCOMPARE(people[1].name, std::string("John"));
         QCOMPARE(people[2].name, std::string("Bob"));
+    }
+
+    { // Using function to extract the values to compare by
+        std::map<std::string, int> scores{{"John", 25}, {"Jane", 20}, {"Bob", 27}};
+        std::vector<std::string> list{"John", "Jane", "Bob"};
+        auto score = [&](const std::string &name) { return scores[name]; };
+        kdalgorithms::sort_by(list, score);
+
+        std::vector<std::string> expected{"Jane", "John", "Bob"};
+        QCOMPARE(list, expected);
+    }
+
+    { // Sort by function
+        std::vector<std::string> list{"John", "James", "Bob"};
+        kdalgorithms::sort_by(list, &std::string::length);
+        std::vector<std::string> expected{"Bob", "John", "James"};
+        QCOMPARE(list, expected);
+    }
+
+    { // sort descending
+        std::vector<Struct> vec{{1, 3}, {3, 4}, {3, 2}, {1, 2}};
+        kdalgorithms::sort_by(vec, &Struct::value, kdalgorithms::descending);
+        std::vector<Struct> expected{{3, 4}, {1, 3}, {3, 2}, {1, 2}};
+        QCOMPARE(vec, expected);
+    }
+
+    { // sorted descending
+        std::vector<Struct> vec{{1, 3}, {3, 4}, {3, 2}, {1, 2}};
+        std::vector<Struct> orig{{1, 3}, {3, 4}, {3, 2}, {1, 2}};
+        auto result = kdalgorithms::sorted_by(vec, &Struct::value, kdalgorithms::descending);
+        std::vector<Struct> expected{{3, 4}, {1, 3}, {3, 2}, {1, 2}};
+        QCOMPARE(result, expected);
+        QCOMPARE(vec, orig);
     }
 }
 
@@ -2531,6 +2565,30 @@ void TestAlgorithms::for_each()
     { // member function
         kdalgorithms::for_each(structVec, &Struct::print);
     }
+}
+
+struct InvokableStruct
+{
+    int x;
+    int go() { return x; }
+    int go2(int y) { return x * y; }
+};
+
+void TestAlgorithms::invoke()
+{
+    InvokableStruct foo{42};
+    InvokableStruct *ptr = &foo;
+    auto func = [](InvokableStruct &foo) { return foo.x; };
+    auto func2 = [](InvokableStruct &foo, int y) { return foo.x * y; };
+
+    QCOMPARE(kdalgorithms::detail::invoke(func, foo), 42);
+    QCOMPARE(kdalgorithms::detail::invoke(func2, foo, 2), 84);
+    QCOMPARE(kdalgorithms::detail::invoke(&InvokableStruct::x, foo), 42);
+    QCOMPARE(kdalgorithms::detail::invoke(&InvokableStruct::x, ptr), 42);
+    QCOMPARE(kdalgorithms::detail::invoke(&InvokableStruct::go, foo), 42);
+    QCOMPARE(kdalgorithms::detail::invoke(&InvokableStruct::go, ptr), 42);
+    QCOMPARE(kdalgorithms::detail::invoke(&InvokableStruct::go2, foo, 2), 84);
+    QCOMPARE(kdalgorithms::detail::invoke(&InvokableStruct::go2, ptr, 2), 84);
 }
 QTEST_MAIN(TestAlgorithms)
 
