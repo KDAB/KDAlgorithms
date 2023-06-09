@@ -2570,25 +2570,121 @@ void TestAlgorithms::for_each()
 struct InvokableStruct
 {
     int x;
-    int go() { return x; }
-    int go2(int y) { return x * y; }
+    int go() const { return x; }
+    int go2(int y) const { return x * y; }
+    int goL() const & { return x; }
+    int goR() const && { return x; }
+};
+
+auto getFoo()
+{
+    return InvokableStruct{42};
+}
+
+auto getPtr()
+{
+    return new InvokableStruct{42};
+}
+
+struct MoveOnlyStruct
+{
+    int x;
+    int go() const { return x; }
+    int go2(int y) const { return x * y; }
+
+    MoveOnlyStruct(int x = -1)
+        : x(x)
+    {
+    }
+    MoveOnlyStruct(const MoveOnlyStruct &other) = delete;
+    MoveOnlyStruct &operator=(const MoveOnlyStruct &other) = delete;
+    MoveOnlyStruct(MoveOnlyStruct &&other)
+    {
+        x = other.x;
+        other.x = -1;
+    }
+    MoveOnlyStruct &operator=(MoveOnlyStruct &&other)
+    {
+        x = other.x;
+        other.x = -1;
+        return *this;
+    }
 };
 
 void TestAlgorithms::invoke()
 {
-    InvokableStruct foo{42};
-    InvokableStruct *ptr = &foo;
-    auto func = [](InvokableStruct &foo) { return foo.x; };
-    auto func2 = [](InvokableStruct &foo, int y) { return foo.x * y; };
+    { // l-value
+        InvokableStruct foo{42};
+        InvokableStruct *ptr = &foo;
+        auto func = [](InvokableStruct foo) { return foo.x; };
+        auto func2 = [](InvokableStruct foo, int y) { return foo.x * y; };
 
-    QCOMPARE(kdalgorithms::detail::invoke(func, foo), 42);
-    QCOMPARE(kdalgorithms::detail::invoke(func2, foo, 2), 84);
-    QCOMPARE(kdalgorithms::detail::invoke(&InvokableStruct::x, foo), 42);
-    QCOMPARE(kdalgorithms::detail::invoke(&InvokableStruct::x, ptr), 42);
-    QCOMPARE(kdalgorithms::detail::invoke(&InvokableStruct::go, foo), 42);
-    QCOMPARE(kdalgorithms::detail::invoke(&InvokableStruct::go, ptr), 42);
-    QCOMPARE(kdalgorithms::detail::invoke(&InvokableStruct::go2, foo, 2), 84);
-    QCOMPARE(kdalgorithms::detail::invoke(&InvokableStruct::go2, ptr, 2), 84);
+        QCOMPARE(kdalgorithms::detail::invoke(func, foo), 42);
+        QCOMPARE(kdalgorithms::detail::invoke(func2, foo, 2), 84);
+        QCOMPARE(kdalgorithms::detail::invoke(&InvokableStruct::x, foo), 42);
+        QCOMPARE(kdalgorithms::detail::invoke(&InvokableStruct::x, ptr), 42);
+        QCOMPARE(kdalgorithms::detail::invoke(&InvokableStruct::go, foo), 42);
+        QCOMPARE(kdalgorithms::detail::invoke(&InvokableStruct::go, ptr), 42);
+        QCOMPARE(kdalgorithms::detail::invoke(&InvokableStruct::go2, foo, 2), 84);
+        QCOMPARE(kdalgorithms::detail::invoke(&InvokableStruct::go2, ptr, 2), 84);
+    }
+
+    { // const l-value
+        const InvokableStruct foo{42};
+        const InvokableStruct *ptr = &foo;
+        auto func = [](InvokableStruct foo) { return foo.x; };
+        auto func2 = [](InvokableStruct foo, int y) { return foo.x * y; };
+
+        QCOMPARE(kdalgorithms::detail::invoke(func, foo), 42);
+        QCOMPARE(kdalgorithms::detail::invoke(func2, foo, 2), 84);
+        QCOMPARE(kdalgorithms::detail::invoke(&InvokableStruct::x, foo), 42);
+        QCOMPARE(kdalgorithms::detail::invoke(&InvokableStruct::x, ptr), 42);
+        QCOMPARE(kdalgorithms::detail::invoke(&InvokableStruct::go, foo), 42);
+        QCOMPARE(kdalgorithms::detail::invoke(&InvokableStruct::go, ptr), 42);
+        QCOMPARE(kdalgorithms::detail::invoke(&InvokableStruct::go2, foo, 2), 84);
+        QCOMPARE(kdalgorithms::detail::invoke(&InvokableStruct::go2, ptr, 2), 84);
+    }
+
+    { // r-value
+        auto func = [](InvokableStruct foo) { return foo.x; };
+        auto func2 = [](InvokableStruct foo, int y) { return foo.x * y; };
+
+        QCOMPARE(kdalgorithms::detail::invoke(func, getFoo()), 42);
+        QCOMPARE(kdalgorithms::detail::invoke(func2, getFoo(), 2), 84);
+        QCOMPARE(kdalgorithms::detail::invoke(&InvokableStruct::x, getFoo()), 42);
+        QCOMPARE(kdalgorithms::detail::invoke(&InvokableStruct::x, getPtr()), 42);
+        QCOMPARE(kdalgorithms::detail::invoke(&InvokableStruct::go, getFoo()), 42);
+        QCOMPARE(kdalgorithms::detail::invoke(&InvokableStruct::go, getPtr()), 42);
+        QCOMPARE(kdalgorithms::detail::invoke(&InvokableStruct::go2, getFoo(), 2), 84);
+        QCOMPARE(kdalgorithms::detail::invoke(&InvokableStruct::go2, getPtr(), 2), 84);
+    }
+
+    //    { // move only type
+    //        MoveOnlyStruct foo{42};
+    //        MoveOnlyStruct *ptr = &foo;
+    //        auto func = [](const MoveOnlyStruct &foo) { return foo.x; };
+    //        auto func2 = [](const MoveOnlyStruct &foo, int y) { return foo.x * y; };
+
+    //        QCOMPARE(kdalgorithms::detail::invoke(func, foo), 42);
+    //        QCOMPARE(kdalgorithms::detail::invoke(func2, foo, 2), 84);
+    //        QCOMPARE(kdalgorithms::detail::invoke(&InvokableStruct::x, foo), 42);
+    //        QCOMPARE(kdalgorithms::detail::invoke(&InvokableStruct::x, ptr), 42);
+    //        QCOMPARE(kdalgorithms::detail::invoke(&InvokableStruct::go, foo), 42);
+    //        QCOMPARE(kdalgorithms::detail::invoke(&InvokableStruct::go, ptr), 42);
+    //        QCOMPARE(kdalgorithms::detail::invoke(&InvokableStruct::go2, foo, 2), 84);
+    //        QCOMPARE(kdalgorithms::detail::invoke(&InvokableStruct::go2, ptr, 2), 84);
+    //    }
+
+    { // l/r-value functions
+        InvokableStruct foo{42};
+        InvokableStruct *ptr = &foo;
+
+        QCOMPARE(kdalgorithms::detail::invoke(&InvokableStruct::goL, foo), 42);
+        QCOMPARE(kdalgorithms::detail::invoke(&InvokableStruct::goL, ptr), 42);
+
+        QCOMPARE(kdalgorithms::detail::invoke(&InvokableStruct::goR, getFoo()), 42);
+        QCOMPARE(kdalgorithms::detail::invoke(&InvokableStruct::goR, getPtr()), 42);
+    }
 }
 QTEST_MAIN(TestAlgorithms)
 

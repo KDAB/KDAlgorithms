@@ -28,38 +28,46 @@ namespace kdalgorithms {
 namespace detail {
     template <typename Function, typename Object, typename DontCare1, typename DontCare2,
               typename... Args>
-    decltype(auto) invoke_helper(Function function, Object &&object, std::false_type, DontCare1,
-                                 DontCare2, Args &&...args)
+    decltype(auto) invoke_helper(Function function, Object &&object,
+                                 std::false_type /* is member pointer*/, DontCare1, DontCare2,
+                                 Args &&...args)
     {
         return function(object, std::forward<Args>(args)...);
     }
 
     template <typename Member, typename Object, typename... Args>
-    decltype(auto) invoke_helper(Member member, Object &&object, std::true_type, std::true_type,
-                                 std::true_type, Args &&...args)
+    decltype(auto) invoke_helper(Member member, Object &&object,
+                                 std::true_type /* is member pointer */,
+                                 std::true_type /* is member function */,
+                                 std::true_type /* is object a pointer */, Args &&...args)
     {
-        return (object->*member)(std::forward<Args>(args)...);
+        return (std::forward<Object>(object)->*member)(std::forward<Args>(args)...);
     }
 
     template <typename Member, typename Object>
-    decltype(auto) invoke_helper(Member member, Object &&object, std::true_type, std::false_type,
-                                 std::true_type)
+    decltype(auto)
+    invoke_helper(Member member, Object &&object, std::true_type /* is member pointer */,
+                  std::false_type /* is member function */, std::true_type /* is object a pointer*/)
     {
-        return object->*member;
+        return std::forward<Object>(object)->*member;
     }
 
     template <typename Member, typename Object, typename... Args>
-    decltype(auto) invoke_helper(Member member, Object &&object, std::true_type, std::true_type,
-                                 std::false_type, Args &&...args)
+    decltype(auto) invoke_helper(Member member, Object &&object,
+                                 std::true_type /* is member pointer */,
+                                 std::true_type /* is member function */,
+                                 std::false_type /* is object a pointer */, Args &&...args)
     {
-        return (object.*member)(std::forward<Args>(args)...);
+        return (std::forward<Object>(object).*member)(std::forward<Args>(args)...);
     }
 
     template <typename Member, typename Object>
-    decltype(auto) invoke_helper(Member member, Object &&object, std::true_type, std::false_type,
-                                 std::false_type)
+    decltype(auto) invoke_helper(Member member, Object &&object,
+                                 std::true_type /* is member pointer */,
+                                 std::false_type /* is member function */,
+                                 std::false_type /* is object a pointer */)
     {
-        return object.*member;
+        return std::forward<Object>(object).*member;
     }
 
     template <typename Function, typename Object, typename... Args>
