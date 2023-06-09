@@ -2659,21 +2659,21 @@ void TestAlgorithms::invoke()
         QCOMPARE(kdalgorithms::detail::invoke(&InvokableStruct::go2, getPtr(), 2), 84);
     }
 
-    //    { // move only type
-    //        MoveOnlyStruct foo{42};
-    //        MoveOnlyStruct *ptr = &foo;
-    //        auto func = [](const MoveOnlyStruct &foo) { return foo.x; };
-    //        auto func2 = [](const MoveOnlyStruct &foo, int y) { return foo.x * y; };
+    { // move only type
+        MoveOnlyStruct foo{42};
+        MoveOnlyStruct *ptr = &foo;
+        auto func = [](const MoveOnlyStruct &foo) { return foo.x; };
+        auto func2 = [](const MoveOnlyStruct &foo, int y) { return foo.x * y; };
 
-    //        QCOMPARE(kdalgorithms::detail::invoke(func, foo), 42);
-    //        QCOMPARE(kdalgorithms::detail::invoke(func2, foo, 2), 84);
-    //        QCOMPARE(kdalgorithms::detail::invoke(&InvokableStruct::x, foo), 42);
-    //        QCOMPARE(kdalgorithms::detail::invoke(&InvokableStruct::x, ptr), 42);
-    //        QCOMPARE(kdalgorithms::detail::invoke(&InvokableStruct::go, foo), 42);
-    //        QCOMPARE(kdalgorithms::detail::invoke(&InvokableStruct::go, ptr), 42);
-    //        QCOMPARE(kdalgorithms::detail::invoke(&InvokableStruct::go2, foo, 2), 84);
-    //        QCOMPARE(kdalgorithms::detail::invoke(&InvokableStruct::go2, ptr, 2), 84);
-    //    }
+        QCOMPARE(kdalgorithms::detail::invoke(func, foo), 42);
+        QCOMPARE(kdalgorithms::detail::invoke(func2, foo, 2), 84);
+        QCOMPARE(kdalgorithms::detail::invoke(&MoveOnlyStruct::x, foo), 42);
+        QCOMPARE(kdalgorithms::detail::invoke(&MoveOnlyStruct::x, ptr), 42);
+        QCOMPARE(kdalgorithms::detail::invoke(&MoveOnlyStruct::go, foo), 42);
+        QCOMPARE(kdalgorithms::detail::invoke(&MoveOnlyStruct::go, ptr), 42);
+        QCOMPARE(kdalgorithms::detail::invoke(&MoveOnlyStruct::go2, foo, 2), 84);
+        QCOMPARE(kdalgorithms::detail::invoke(&MoveOnlyStruct::go2, ptr, 2), 84);
+    }
 
     { // l/r-value functions
         InvokableStruct foo{42};
@@ -2683,7 +2683,6 @@ void TestAlgorithms::invoke()
         QCOMPARE(kdalgorithms::detail::invoke(&InvokableStruct::goL, ptr), 42);
 
         QCOMPARE(kdalgorithms::detail::invoke(&InvokableStruct::goR, getFoo()), 42);
-        QCOMPARE(kdalgorithms::detail::invoke(&InvokableStruct::goR, getPtr()), 42);
     }
 }
 QTEST_MAIN(TestAlgorithms)
