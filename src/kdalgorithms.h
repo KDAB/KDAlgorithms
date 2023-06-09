@@ -10,20 +10,20 @@
 
 #pragma once
 
-#include "bits/filter.h"
-#include "bits/find_if.h"
-#include "bits/generate.h"
-#include "bits/insert_wrapper.h"
-#include "bits/invoke.h"
-#include "bits/method_tests.h"
-#include "bits/operators.h"
-#include "bits/read_iterator_wrapper.h"
-#include "bits/reserve_helper.h"
-#include "bits/return_type_trait.h"
-#include "bits/shared.h"
-#include "bits/to_function_object.h"
-#include "bits/transform.h"
-#include "bits/zip.h"
+#include "kdalgorithms_bits/filter.h"
+#include "kdalgorithms_bits/find_if.h"
+#include "kdalgorithms_bits/generate.h"
+#include "kdalgorithms_bits/insert_wrapper.h"
+#include "kdalgorithms_bits/invoke.h"
+#include "kdalgorithms_bits/method_tests.h"
+#include "kdalgorithms_bits/operators.h"
+#include "kdalgorithms_bits/read_iterator_wrapper.h"
+#include "kdalgorithms_bits/reserve_helper.h"
+#include "kdalgorithms_bits/return_type_trait.h"
+#include "kdalgorithms_bits/shared.h"
+#include "kdalgorithms_bits/to_function_object.h"
+#include "kdalgorithms_bits/transform.h"
+#include "kdalgorithms_bits/zip.h"
 #include <algorithm>
 #include <numeric>
 #include <type_traits>

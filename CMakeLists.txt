@@ -51,23 +51,23 @@ if(BUILD_TESTING AND ${KDALGORITHMS_BUILD_TEST})
     add_executable(tst_kdalgorithms
         src/kdalgorithms.h
 
-        src/bits/read_iterator_wrapper.h
-        src/bits/find_if.h
-        src/bits/filter.h
-        src/bits/generate.h
-        src/bits/insert_wrapper.h
-        src/bits/is_const_method.h
-        src/bits/is_detected.h
-        src/bits/method_tests.h
-        src/bits/operators.h
-        src/bits/reserve_helper.h
-        src/bits/return_type_trait.h
-        src/bits/shared.h
-        src/bits/to_function_object.h
-        src/bits/transform.h
-        src/bits/zip.h
-        src/bits/tuple_utils.h
-        src/bits/invoke.h
+        src/kdalgorithms_bits/read_iterator_wrapper.h
+        src/kdalgorithms_bits/find_if.h
+        src/kdalgorithms_bits/filter.h
+        src/kdalgorithms_bits/generate.h
+        src/kdalgorithms_bits/insert_wrapper.h
+        src/kdalgorithms_bits/is_const_method.h
+        src/kdalgorithms_bits/is_detected.h
+        src/kdalgorithms_bits/method_tests.h
+        src/kdalgorithms_bits/operators.h
+        src/kdalgorithms_bits/reserve_helper.h
+        src/kdalgorithms_bits/return_type_trait.h
+        src/kdalgorithms_bits/shared.h
+        src/kdalgorithms_bits/to_function_object.h
+        src/kdalgorithms_bits/transform.h
+        src/kdalgorithms_bits/zip.h
+        src/kdalgorithms_bits/tuple_utils.h
+        src/kdalgorithms_bits/invoke.h
 
         tests/tst_kdalgorithms.cpp
         tests/tst_constraints.cpp

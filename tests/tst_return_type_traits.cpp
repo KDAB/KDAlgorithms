@@ -8,7 +8,7 @@
 **
 ****************************************************************************/
 
-#include "../src/bits/return_type_trait.h"
+#include "../src/kdalgorithms_bits/return_type_trait.h"
 #include <functional>
 #include <string>
 #include <type_traits>
