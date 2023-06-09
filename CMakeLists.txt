@@ -67,6 +67,7 @@ if(BUILD_TESTING AND ${KDALGORITHMS_BUILD_TEST})
         src/bits/transform.h
         src/bits/zip.h
         src/bits/tuple_utils.h
+        src/bits/invoke.h
 
         tests/tst_kdalgorithms.cpp
         tests/tst_constraints.cpp

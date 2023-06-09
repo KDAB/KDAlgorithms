@@ -14,6 +14,7 @@
 #include "bits/find_if.h"
 #include "bits/generate.h"
 #include "bits/insert_wrapper.h"
+#include "bits/invoke.h"
 #include "bits/method_tests.h"
 #include "bits/operators.h"
 #include "bits/read_iterator_wrapper.h"
@@ -127,18 +128,23 @@ Container sorted(Container container, Compare &&compare = {})
     return container;
 }
 
+enum sort_direction {ascending, descending};
+
 template <typename Container, typename Member>
-void sort_by(Container &container, Member member)
+void sort_by(Container &container, Member member, sort_direction direction = ascending)
 {
-    sort(container, [member](const auto &x, const auto &y) {
-        return x.*member < y.*member;
+    sort(container, [member, direction](const auto &x, const auto &y) {
+        if (direction == ascending)
+            return detail::invoke(member, x) < detail::invoke(member, y);
+        else
+            return detail::invoke(member, x) > detail::invoke(member, y);
     });
 }
 
 template <typename Container, typename Member>
-auto sorted_by(Container container, Member member)
+auto sorted_by(Container container, Member member, sort_direction direction = ascending)
 {
-    sort_by(container, member);
+    sort_by(container, member, direction);
     return container;
 }
 
