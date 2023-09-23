@@ -38,6 +38,7 @@ Other
 - <a href="#generate_until">generate_until</a>
 - <a href="#for_each">for_each</a>
 - <a href="#partitioned">partitioned</a>
+- <a href="#multi_partitioned">multi_partitioned</a>
 - <a href="#zip">zip</a>
 
 
@@ -855,6 +856,38 @@ const auto& [in, out] =
 ```
 
 See [std::partition](https://en.cppreference.com/w/cpp/algorithm/partition) for the algorithm from the standard.
+
+<a name="multi_partitioned">multi_partitioned</a>
+-------------------------------------------------
+While the <a href="#partitioned">partitioned</a> algorithm splits a container into two parts, the multi_partitioned algorithm splits a
+sequential container into a map based on a key function.
+
+```
+struct Person
+{
+    QString name;
+    int age;
+};
+
+auto partitioningFunction = [](const Person &p) {
+    auto floor = 10 * (p.age / 10);
+    return QString("%1-%2").arg(floor).arg(floor + 9);
+};
+
+auto result = kdalgorithms::multi_partitioned(people, partitioningFunction);
+// result is now a std::map<QString, std::vector<Person>> with these entries;
+// {"40-49", {{"Ivan", 42}, {"Till", 44}}}
+// {"50-59", {{"Jesper", 52}, {"Kalle", 53}}}
+```
+
+As always, the items will be moved over if they are x-values. Also, you may use the member variables as the split function:
+
+```
+auto result = kdalgorithms::multi_partitioned(people, &Person::age);
+```
+
+Observe: There are no standard algorithms matching this one.
+
 
 <a name="zip">zip</a>
 ---------------------

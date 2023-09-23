@@ -12,6 +12,7 @@
 
 #include "../src/kdalgorithms.h"
 #include <list>
+#include <map>
 #include <string>
 #include <vector>
 
@@ -81,13 +82,12 @@ FAIL_2_ARG(transform_wrong_predicate, transform, vector<int>, std::function<bool
 FAIL_2_ARG(transformed_wrong_predicate, transformed, vector<int>, std::function<string()>)
 FAIL_2_ARG(for_each_wrong_predicate, for_each, vector<int>, std::function<void(string)>)
 FAIL_2_ARG(for_each_wrong_parameter_count, for_each, vector<int>, std::function<void(int, bool)>)
-
 template <typename ResultContainer, typename Container, typename UnaryPredicate>
 void err_partitioned()
 {
     static_assert(!requires(Container container, UnaryPredicate pred) {
-                       kdalgorithms::partitioned<ResultContainer>(container, pred);
-                   });
+        kdalgorithms::partitioned<ResultContainer>(container, pred);
+    });
 }
 
 template <typename Container, typename Generator>
@@ -104,9 +104,9 @@ void err_filtered_transformed1()
 {
     static_assert(!requires(InputContainer inputContainer, Transform transform,
                             UnaryPredicate unaryPredicate) {
-                       kdalgorithms::filtered_transformed<ResultContainer>(
-                           inputContainer, transform, unaryPredicate);
-                   });
+        kdalgorithms::filtered_transformed<ResultContainer>(inputContainer, transform,
+                                                            unaryPredicate);
+    });
 }
 
 template <typename ResultContainer, typename InputContainer, typename Transform,
@@ -115,27 +115,34 @@ void err_filtered_transformed2()
 {
     static_assert(!requires(InputContainer inputContainer, Transform transform,
                             UnaryPredicate unaryPredicate) {
-                       kdalgorithms::filtered_transformed<ResultContainer>(
-                           inputContainer, transform, unaryPredicate);
-                   });
+        kdalgorithms::filtered_transformed<ResultContainer>(inputContainer, transform,
+                                                            unaryPredicate);
+    });
 }
 
 template <template <typename...> class ResultContainer, typename InputContainer, typename Transform>
 void err_transformed1()
 {
     static_assert(!requires(InputContainer inputContainer, Transform transform) {
-                       kdalgorithms::transformed<ResultContainer>(inputContainer, transform);
-                   });
+        kdalgorithms::transformed<ResultContainer>(inputContainer, transform);
+    });
 }
 
 template <typename ResultContainer, typename InputContainer, typename Transform>
 void err_transformed2()
 {
     static_assert(!requires(InputContainer inputContainer, Transform transform) {
-                       kdalgorithms::transformed<ResultContainer>(inputContainer, transform);
-                   });
+        kdalgorithms::transformed<ResultContainer>(inputContainer, transform);
+    });
 }
 
+template <typename ResultContainer, typename InputContainer, typename KeyFunction>
+void err_multi_partitioned()
+{
+    static_assert(!requires(InputContainer inputContainer, KeyFunction keyFunction) {
+        kdalgorithms::multi_partitioned<ResultContainer>(inputContainer, keyFunction);
+    });
+}
 void test_constraints()
 {
     // wrong type of items of result vector
@@ -170,6 +177,11 @@ void test_constraints()
                               std::function<string(int)>>();
     err_filtered_transformed2<vector<string>, vector<int>, std::function<string(int)>,
                               std::function<bool(string)>>();
+
+    // multi_partition
+    err_multi_partitioned<map<int, vector<int>>, vector<int>, std::function<string(int)>>();
+    err_multi_partitioned<map<string, vector<int>>, vector<int>, std::function<int(int)>>();
+    err_multi_partitioned<map<int, vector<string>>, vector<int>, std::function<int(int)>>();
 }
 
 #endif // C++ 20
