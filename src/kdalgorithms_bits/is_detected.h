@@ -9,7 +9,7 @@
 ****************************************************************************/
 
 #pragma once
-
+#include "shared.h"
 #include <type_traits>
 
 // Inspired from std::experimental::is_detected
@@ -23,7 +23,7 @@ namespace detail {
     };
 
     template <template <class...> class Op, typename... Args>
-    struct detector<std::void_t<Op<Args...>>, Op, Args...> : std::true_type
+    struct detector<void_t<Op<Args...>>, Op, Args...> : std::true_type
     {
     };
 

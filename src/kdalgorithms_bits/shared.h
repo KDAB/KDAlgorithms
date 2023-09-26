@@ -28,6 +28,9 @@ using remove_cvref_t = typename std::remove_const<typename std::remove_reference
 
 // -------------------- general helpers --------------------
 namespace detail {
+    template <class...>
+    using void_t = void; // Is only introduced in C++17
+
     template <typename T, typename = void>
     struct ValueTypeHelper
     {
@@ -36,7 +39,7 @@ namespace detail {
 
     // QMap doesn't have the value_type typedef, so we have to build that ourselves.
     template <typename T>
-    struct ValueTypeHelper<T, std::void_t<typename T::mapped_type>>
+    struct ValueTypeHelper<T, void_t<typename T::mapped_type>>
     {
         using value_type = std::pair<const typename T::key_type, typename T::mapped_type>;
     };
