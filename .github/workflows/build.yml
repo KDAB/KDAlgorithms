@@ -4,21 +4,24 @@
 
 name: CI
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
   build:
     runs-on: ${{ matrix.os }}
     strategy:
-      fail-fast: false #true
+      fail-fast: true
       matrix:
         os:
-          #- ubuntu-22.04 # Builds/test fine
-          #- windows-2022 # Builds/test fine
+          - ubuntu-22.04
+          - windows-2022
           - macos-12
-        build_type:
-          - Debug
-          #- Release
         preset:
           - cpp14
           - cpp17
@@ -27,12 +30,11 @@ jobs:
         qt:
           - version: "5.15.2"
             requested: "5.15"
-          #- version: "6.3.2"  # Qt 6.3 is not an LTS version, so '6.3.*' always resolves to '6.3.2'
-            #requested: "6.3.*"
+          - version: "6.3.2"  # Qt 6.3 is not an LTS version, so '6.3.*' always resolves to '6.3.2'
+            requested: "6.3.*"
 
     steps:
       - name: Install Qt with options and default aqtversion
-        if: ${{ matrix.build_type == 'Debug' }} # Only Tests require Qt
         uses: jurplel/install-qt-action@v3
         with:
           aqtversion: null # use whatever the default is
@@ -43,37 +45,51 @@ jobs:
       - name: Checkout sources
         uses: actions/checkout@v4
 
-      - name: Create build directory
-        run: mkdir build
-
       - name: Install ninja-build tool (must be after Qt due PATH changes)
         uses: turtlesec-no/get-ninja@main
 
       - name: Make sure MSVC is found when Ninja generator is in use
+        if: ${{ runner.os == 'Windows' }}
         uses: ilammy/msvc-dev-cmd@v1
 
-      - name: Configure project
+      - name: Create Debug build directory
+        run: mkdir build-debug
+
+      - name: Configure Debug Build
         run: >
-          cmake -S . -B ./build -G Ninja --preset ${{ matrix.preset }}
-          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
-          -DBUILD_TESTING=${{ matrix.build_type == 'Debug' }}
-          -DKDALGORITHMS_BUILD_TEST=${{ matrix.build_type == 'Debug' }}
+          cmake -S . -B ./build-debug -G Ninja --preset ${{ matrix.preset }}
+          -DCMAKE_BUILD_TYPE=Debug
+          -DBUILD_TESTING=ON
+          -DKDALGORITHMS_BUILD_TEST=ON
 
-      - name: Build Project
-        run: cmake --build ./build
+      - name: Build Project (Debug)
+        run: cmake --build ./build-debug
 
-      - name: Run tests on Linux (offscreen)
-        if: ${{ matrix.build_type == 'Debug' && runner.os == 'Linux' }}
-        run: ctest --test-dir ./build -C ${{ matrix.build_type }} --output-on-failure
-        env:
-          QT_QPA_PLATFORM: offscreen
+      - name: Run Debug tests
+        run: ctest --test-dir ./build-debug -C Debug --output-on-failure
 
-      - name: Run tests on Windown/macOS
-        if: ${{ matrix.build_type == 'Debug' && runner.os != 'Linux' }}
-        run: ctest --test-dir ./build -C ${{ matrix.build_type }} --output-on-failure
+        # KDAlgorithms CI only matters (and builds) for the tests and since
+        # the only value of a Release build is that maybe the compiler
+        # does some optimization that breaks them we do both builds
+        # in the same worker.
+      - name: Create Release build directory
+        run: mkdir build-release
+
+      - name: Configure Release Build
+        run: >
+          cmake -S . -B ./build-release -G Ninja --preset ${{ matrix.preset }}
+          -DCMAKE_BUILD_TYPE=Release
+          -DBUILD_TESTING=ON
+          -DKDALGORITHMS_BUILD_TEST=ON
+
+      - name: Build Project (Release)
+        run: cmake --build ./build-release
+
+      - name: Run Release tests
+        run: ctest --test-dir ./build-release -C Release --output-on-failure
 
       - name: Read tests log when it fails
         uses: andstor/file-reader-action@v1
-        if: ${{ failure() && matrix.build_type == 'Debug' }}
+        if: ${{ failure() }}
         with:
           path: "./build/Testing/Temporary/LastTest.log"
