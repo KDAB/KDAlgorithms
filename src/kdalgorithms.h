@@ -610,7 +610,17 @@ auto multi_partitioned(InputContainer &&container, KeyFunction keyFunction)
     ResultContainer result;
     auto iterators = read_iterator_wrapper(std::forward<InputContainer>(container));
     for (auto it = iterators.begin(); it != iterators.end(); ++it) {
-        result[detail::invoke(keyFunction, *it)].push_back(*it);
+        // Originally the code below simply gave *it to `invoke`:
+        // result[detail::invoke(keyFunction, *it)].push_back(*it);
+        // Now imagine two things:
+        // 1) `container` is an r-value
+        // 2) keyFunction takes it's one parameter as a value (in contrast to a reference)
+        // *it would yield an rvalue (due to the move iterators returned by read_iterator_wrapper
+        // so the call to the function would move over the value, with the result that
+        // what is pushed to `result` would be a default constructed value
+        // This is tested in multi_partitioned_with_function_taking_a_value
+        const auto &cvalue = *it;
+        result[detail::invoke(keyFunction, cvalue)].push_back(*it);
     }
     return result;
 }

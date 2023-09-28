@@ -82,6 +82,14 @@ std::vector<Struct> getStruct()
     return std::vector<Struct>{{1, 2}, {2, 1}, {3, 3}, {4, 4}};
 }
 
+struct Person
+{
+    QString name;
+    int age;
+    QString yearsToBigBirthday() const { return QString("%1 years").arg(100 - age); }
+    bool operator==(const Person &other) const { return name == other.name && age == other.age; }
+};
+
 } // namespace
 class TestAlgorithms : public QObject
 {
@@ -170,6 +178,7 @@ private Q_SLOTS:
     void for_each();
     void invoke();
     void multi_partitioned();
+    void multi_partitioned_with_function_taking_a_value();
 };
 
 void TestAlgorithms::copy()
@@ -1057,17 +1066,12 @@ void TestAlgorithms::sortBy()
     }
 
     { // Example from documentation
-        struct Person
-        {
-            std::string name;
-            int age;
-        };
         std::vector<Person> people{{"John", 25}, {"Jane", 20}, {"Bob", 27}};
         kdalgorithms::sort_by(people, &Person::age);
         // people == {{"Jane", 20}, {"John", 25}, {"Bob", 27}}
-        QCOMPARE(people[0].name, std::string("Jane"));
-        QCOMPARE(people[1].name, std::string("John"));
-        QCOMPARE(people[2].name, std::string("Bob"));
+        QCOMPARE(people[0].name, "Jane");
+        QCOMPARE(people[1].name, "John");
+        QCOMPARE(people[2].name, "Bob");
     }
 
     { // Using function to extract the values to compare by
@@ -2689,17 +2693,6 @@ void TestAlgorithms::invoke()
 
 void TestAlgorithms::multi_partitioned()
 {
-    struct Person
-    {
-        QString name;
-        int age;
-        QString yearsToBigBirthday() const { return QString("%1 years").arg(100 - age); }
-        bool operator==(const Person &other) const
-        {
-            return name == other.name && age == other.age;
-        }
-    };
-
     auto partitioningFunction = [](const Person &p) {
         auto floor = 10 * (p.age / 10);
         return QString("%1-%2").arg(floor).arg(floor + 9);
@@ -2775,6 +2768,23 @@ void TestAlgorithms::multi_partitioned()
                                                       {"50-59", {{"Jesper", 52}, {"Kalle", 53}}}};
         QCOMPARE(result, expected);
     }
+}
+
+void TestAlgorithms::multi_partitioned_with_function_taking_a_value()
+{
+    // Observe it is a Person instance, not a reference!
+    // See kdalgorithms.h for details
+    auto copyingPartitioningFunction = [](Person p) {
+        auto floor = 10 * (p.age / 10);
+        return QString("%1-%2").arg(floor).arg(floor + 9);
+    };
+
+    std::vector<Person> people{{"Jesper", 52}, {"Ivan", 42}, {"Kalle", 53}, {"Till", 44}};
+    auto result =
+        kdalgorithms::multi_partitioned<QMap>(std::move(people), copyingPartitioningFunction);
+    QMap<QString, std::vector<Person>> expected{{"40-49", {{"Ivan", 42}, {"Till", 44}}},
+                                                {"50-59", {{"Jesper", 52}, {"Kalle", 53}}}};
+    QCOMPARE(result, expected);
 }
 QTEST_MAIN(TestAlgorithms)
 
