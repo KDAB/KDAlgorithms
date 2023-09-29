@@ -82,6 +82,14 @@ std::vector<Struct> getStruct()
     return std::vector<Struct>{{1, 2}, {2, 1}, {3, 3}, {4, 4}};
 }
 
+struct Person
+{
+    QString name;
+    int age;
+    QString yearsToBigBirthday() const { return QString("%1 years").arg(100 - age); }
+    bool operator==(const Person &other) const { return name == other.name && age == other.age; }
+};
+
 } // namespace
 class TestAlgorithms : public QObject
 {
@@ -169,6 +177,8 @@ private Q_SLOTS:
     void zip();
     void for_each();
     void invoke();
+    void multi_partitioned();
+    void multi_partitioned_with_function_taking_a_value();
 };
 
 void TestAlgorithms::copy()
@@ -1056,17 +1066,12 @@ void TestAlgorithms::sortBy()
     }
 
     { // Example from documentation
-        struct Person
-        {
-            std::string name;
-            int age;
-        };
         std::vector<Person> people{{"John", 25}, {"Jane", 20}, {"Bob", 27}};
         kdalgorithms::sort_by(people, &Person::age);
         // people == {{"Jane", 20}, {"John", 25}, {"Bob", 27}}
-        QCOMPARE(people[0].name, std::string("Jane"));
-        QCOMPARE(people[1].name, std::string("John"));
-        QCOMPARE(people[2].name, std::string("Bob"));
+        QCOMPARE(people[0].name, "Jane");
+        QCOMPARE(people[1].name, "John");
+        QCOMPARE(people[2].name, "Bob");
     }
 
     { // Using function to extract the values to compare by
@@ -2684,6 +2689,102 @@ void TestAlgorithms::invoke()
 
         QCOMPARE(kdalgorithms::detail::invoke(&InvokableStruct::goR, getFoo()), 42);
     }
+}
+
+void TestAlgorithms::multi_partitioned()
+{
+    auto partitioningFunction = [](const Person &p) {
+        auto floor = 10 * (p.age / 10);
+        return QString("%1-%2").arg(floor).arg(floor + 9);
+    };
+
+    std::vector<Person> people{{"Jesper", 52}, {"Ivan", 42}, {"Kalle", 53}, {"Till", 44}};
+    std::map<QString, std::vector<Person>> expected{{"40-49", {{"Ivan", 42}, {"Till", 44}}},
+                                                    {"50-59", {{"Jesper", 52}, {"Kalle", 53}}}};
+
+    { // type inferred + lambda expression
+        auto result = kdalgorithms::multi_partitioned(people, partitioningFunction);
+        std::map<QString, std::vector<Person>> expected{{"40-49", {{"Ivan", 42}, {"Till", 44}}},
+                                                        {"50-59", {{"Jesper", 52}, {"Kalle", 53}}}};
+        QCOMPARE(result, expected);
+    }
+
+    { // type fully specified
+        auto result = kdalgorithms::multi_partitioned<QMap<QString, std::vector<Person>>>(
+            people, partitioningFunction);
+        QMap<QString, std::vector<Person>> expected{{"40-49", {{"Ivan", 42}, {"Till", 44}}},
+                                                    {"50-59", {{"Jesper", 52}, {"Kalle", 53}}}};
+        QCOMPARE(result, expected);
+    }
+
+    { // type partially specified
+        auto result = kdalgorithms::multi_partitioned<QMap>(people, partitioningFunction);
+        QMap<QString, std::vector<Person>> expected{{"40-49", {{"Ivan", 42}, {"Till", 44}}},
+                                                    {"50-59", {{"Jesper", 52}, {"Kalle", 53}}}};
+        QCOMPARE(result, expected);
+    }
+
+    { // Function is a pointer to a member function
+        std::vector<Person> people{{"Jesper", 52}, {"Ivan", 42}, {"Kalle", 52}, {"Till", 44}};
+
+        auto result = kdalgorithms::multi_partitioned<std::map<QString, std::vector<Person>>>(
+            people, &Person::yearsToBigBirthday);
+        std::map<QString, std::vector<Person>> expected{
+            {"58 years", {{"Ivan", 42}}},
+            {"56 years", {{"Till", 44}}},
+            {"48 years", {{"Jesper", 52}, {"Kalle", 52}}}};
+        QCOMPARE(result, expected);
+    }
+
+    { // Function is a pointer to a member variable + result type fully specified
+        std::vector<Person> people{{"Jesper", 52}, {"Ivan", 42}, {"Kalle", 52}, {"Till", 44}};
+
+        auto result = kdalgorithms::multi_partitioned<std::map<int, std::vector<Person>>>(
+            people, &Person::age);
+        std::map<int, std::vector<Person>> expected{
+            {42, {{"Ivan", 42}}}, {44, {{"Till", 44}}}, {52, {{"Jesper", 52}, {"Kalle", 52}}}};
+        QCOMPARE(result, expected);
+    }
+
+    { // Function is a pointer to a member variable + result is inferred
+        std::vector<Person> people{{"Jesper", 52}, {"Ivan", 42}, {"Kalle", 52}, {"Till", 44}};
+
+        auto result = kdalgorithms::multi_partitioned(people, &Person::age);
+        std::map<int, std::vector<Person>> expected{
+            {42, {{"Ivan", 42}}}, {44, {{"Till", 44}}}, {52, {{"Jesper", 52}, {"Kalle", 52}}}};
+        QCOMPARE(result, expected);
+    }
+
+    { // Count number of copies when container is an x-value
+        CopyObserver::reset();
+        auto result = kdalgorithms::multi_partitioned(getObserverVector(), &CopyObserver::value);
+        QCOMPARE(CopyObserver::copies, 0);
+    }
+
+    { // std::list
+        std::list<Person> people{{"Jesper", 52}, {"Ivan", 42}, {"Kalle", 53}, {"Till", 44}};
+        auto result = kdalgorithms::multi_partitioned(people, partitioningFunction);
+        std::map<QString, std::list<Person>> expected{{"40-49", {{"Ivan", 42}, {"Till", 44}}},
+                                                      {"50-59", {{"Jesper", 52}, {"Kalle", 53}}}};
+        QCOMPARE(result, expected);
+    }
+}
+
+void TestAlgorithms::multi_partitioned_with_function_taking_a_value()
+{
+    // Observe it is a Person instance, not a reference!
+    // See kdalgorithms.h for details
+    auto copyingPartitioningFunction = [](Person p) {
+        auto floor = 10 * (p.age / 10);
+        return QString("%1-%2").arg(floor).arg(floor + 9);
+    };
+
+    std::vector<Person> people{{"Jesper", 52}, {"Ivan", 42}, {"Kalle", 53}, {"Till", 44}};
+    auto result =
+        kdalgorithms::multi_partitioned<QMap>(std::move(people), copyingPartitioningFunction);
+    QMap<QString, std::vector<Person>> expected{{"40-49", {{"Ivan", 42}, {"Till", 44}}},
+                                                {"50-59", {{"Jesper", 52}, {"Kalle", 53}}}};
+    QCOMPARE(result, expected);
 }
 QTEST_MAIN(TestAlgorithms)
 
