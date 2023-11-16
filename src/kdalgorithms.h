@@ -246,7 +246,7 @@ requires BinaryPredicateOnContainerValues<Compare, Container>
 }
 
 template <typename Container, typename Compare = std::less<ValueType<Container>>>
-[[deprecated("use max_value instead")]] std::optional<ValueType<Container>>
+[[deprecated("use min_value instead")]] std::optional<ValueType<Container>>
 min_element(const Container &container, Compare &&compare = {})
 {
     return min_value(container, std::forward<Compare>(compare));
