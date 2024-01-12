@@ -415,12 +415,33 @@ ValueType<Container> get_match_or_default(const Container &container, UnaryPredi
 }
 
 // -------------------- remove_duplicates --------------------
+namespace detail {
+    template <typename Container>
+    void sort_if_available_helper(Container &container, std::true_type)
+    {
+        kdalgorithms::sort(container);
+    }
+
+    template <typename Container>
+    void sort_if_available_helper(Container &, std::false_type)
+    {
+        assert(false && "Container does not support sorting - as item doesn't have an operator<");
+    }
+
+    template <typename Container>
+    void sort_if_available(Container &container)
+    {
+        sort_if_available_helper(
+            container, std::integral_constant<bool, has_operator_lt_v<ValueType<Container>>>());
+    }
+} // namespace detail
+
 enum SortOption { do_sort, do_not_sort };
 template <typename Container>
 auto remove_duplicates(Container &container, SortOption sort)
 {
     if (sort == do_sort)
-        kdalgorithms::sort(container);
+        detail::sort_if_available(container);
     auto it = std::unique(std::begin(container), std::end(container));
     auto count = std::distance(it, std::end(container));
     container.erase(it, std::end(container));

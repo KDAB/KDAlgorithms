@@ -1795,6 +1795,24 @@ void TestAlgorithms::remove_duplicates()
         QCOMPARE(vec, expected);
         QCOMPARE(count, 2);
     }
+    // Item type doesn't have operator< so we can't sort, but that isn't requested anyway
+    {
+        QVector<QPoint> points{{1, 2}, {1, 2}, {3, 4}, {5, 6}};
+        auto count = kdalgorithms::remove_duplicates(points, kdalgorithms::do_not_sort);
+        QVector<QPoint> expected{{1, 2}, {3, 4}, {5, 6}};
+        QCOMPARE(points, expected);
+        QCOMPARE(count, 1);
+    }
+    // Item type doesn't have operator< so we should fail
+#if 0
+    {
+        QVector<QPoint> points{{1, 2}, {1, 2}, {3, 4}, {5, 6}};
+        auto count = kdalgorithms::remove_duplicates(points, kdalgorithms::do_sort);
+        QVector<QPoint> expected{{1, 2}, {3, 4}, {5, 6}};
+        QCOMPARE(points, expected);
+        QCOMPARE(count, 1);
+    }
+#endif
 }
 
 void TestAlgorithms::has_duplicates()

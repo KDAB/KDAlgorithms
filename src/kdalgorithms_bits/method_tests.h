@@ -25,6 +25,9 @@ namespace detail {
 
         template <typename Generator, typename Size>
         using has_generator_with_index = invoke_result_t<Generator, Size>;
+
+        template <typename Item>
+        using has_operator_lt = decltype(std::declval<Item>() < std::declval<Item>());
     }
 
     template <typename Container>
@@ -39,6 +42,9 @@ namespace detail {
     template <typename Generator, typename Size>
     constexpr bool has_generator_with_index_v =
         detail::is_detected_v<tests::has_generator_with_index, Generator, Size>;
+
+    template <typename Item>
+    constexpr bool has_operator_lt_v = detail::is_detected_v<tests::has_operator_lt, Item>;
 
 } // namespace detail
 } // namespace kdalgorithms
