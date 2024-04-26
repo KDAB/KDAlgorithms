@@ -382,6 +382,46 @@ ReturnType accumulate_if(const Container &container, BinaryOperation &&accumulat
 
     return kdalgorithms::accumulate(container, fn, initialValue);
 }
+
+// -------------------- sum --------------------
+template <
+    typename Container, typename Projection,
+    typename ReturnType = remove_cvref_t<detail::invoke_result_t<Projection, ValueType<Container>>>>
+#if __cplusplus >= 202002L
+    requires std::is_invocable_r_v<ReturnType, Projection, ValueType<Container>>
+#endif
+ReturnType sum(const Container &container, Projection &&projection, ReturnType initialValue = {})
+{
+    auto fn = [&](const ReturnType &subResult, const ValueType<Container> &item) -> ReturnType {
+        return subResult + detail::invoke(projection, item);
+    };
+
+    return kdalgorithms::accumulate(container, fn, initialValue);
+}
+
+// -------------------- sum_if --------------------
+template <
+    typename Container, typename Projection,
+    typename UnaryPredicate = bool(const ValueType<Container> &),
+    typename ReturnType = remove_cvref_t<detail::invoke_result_t<Projection, ValueType<Container>>>>
+#if __cplusplus >= 202002L
+    requires UnaryPredicateOnContainerValues<UnaryPredicate, Container>
+    && std::is_invocable_r_v<ReturnType, Projection, ValueType<Container>>
+#endif
+ReturnType sum_if(const Container &container, Projection &&projection, UnaryPredicate &&predicate,
+                  ReturnType initialValue = {})
+{
+    auto predicateFunction = detail::to_function_object(std::forward<UnaryPredicate>(predicate));
+    auto fn = [&](const ReturnType &subResult, const ValueType<Container> &item) -> ReturnType {
+        if (predicateFunction(item))
+            return subResult + detail::invoke(projection, item);
+        else
+            return subResult;
+    };
+
+    return kdalgorithms::accumulate(container, fn, initialValue);
+}
+
 // -------------------- get_first_match --------------------
 #if __cplusplus >= 201703L
 template <typename Container, typename UnaryPredicate>
