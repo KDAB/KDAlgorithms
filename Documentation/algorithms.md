@@ -33,6 +33,7 @@ Other
 
 - <a href="#accumulate">accumulate</a>
 - <a href="#accumulate_if">accumulate_if</a>
+- <a href="#sum">sum / sum_if</a>
 - <a href="#iota">iota</a>
 - <a href="#generate_n">generate_n</a>
 - <a href="#generate_until">generate_until</a>
@@ -630,6 +631,47 @@ auto sumDoubles = [](int x, int y) { return x + y * y; };
 auto greaterThan = [](int value) { return [value](int test) { return test > value; }; };
 int result = kdalgorithms::accumulate_if(ints, sumDoubles, greatherThan(2));
 // result = 25
+```
+
+<a name="sum">sum / sum_if</a>
+------------------------------
+The <a href="#accumulate">accumulate</a> function above allows you to specify an alternative to **operator+**, however
+in most cases the only reason you have for that is to extract a value from a struct or class, as is the case here:
+```
+struct Struct
+{
+    int key;
+    int value;
+};
+const std::vector<Struct> structVec{{1, 4}, {2, 3}, {3, 2}, {4, 1}};
+auto result = kdalgorithms::accumulate( structVec, 
+                                        [](int subResult, const Struct &s) { return subResult + s.value; }, 
+                                        0);
+// result is now 10
+```
+
+This is cumbersome to the extend that a regular for loop is more readable. To the rescue comes **sum** and **sum_if**,
+which instead of a function to build the result, takes a function to extract the values to be summed:
+
+```
+// Same Struct as above
+auto result = kdalgorithms::sum(structVec, [](const Struct &s) { return s.value; });
+```
+
+Taking advantage of the fact that kdalgorithms allows you to specify a pointer to a member variable in place of the function above,
+reduced the code to this:
+
+```
+auto result = kdalgorithms::sum(structVec, &Struct::value);
+```
+
+Similar to <a href="#accumulate_if">accumulate_if</a>, there is a version of **sum** called **sum_if**, which takes a predicate, to 
+decide if a given item should be included in the result:
+
+```
+auto result = kdalgorithms::sum_if(structVec, &Struct::value, 
+                                   [](const Struct &s) { return s.key > 1; });
+// result is now 6
 ```
 
 <a name="get_match">get_match (C++17) / get_match_or_default</a>

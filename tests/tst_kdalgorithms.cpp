@@ -155,6 +155,8 @@ private Q_SLOTS:
     void accumulateDifferentReturnType();
     void accumulateWithAuto();
     void accumulateWithMap();
+    void sum();
+    void sum_if();
     void get_match();
     void get_match_or_default();
     void remove_duplicates();
@@ -1694,6 +1696,86 @@ void TestAlgorithms::accumulateWithMap()
         };
         auto result = kdalgorithms::accumulate(map, concatenate);
         QCOMPARE(result, "/abc/def/hij");
+    }
+}
+
+void TestAlgorithms::sum()
+{
+    { // Motivating example from documentation
+        auto result = kdalgorithms::accumulate(
+            structVec, [](int subResult, const Struct &s) { return subResult + s.value; }, 0);
+        QCOMPARE(result, 10);
+    }
+
+    { // Fully specified arguments
+        auto result = kdalgorithms::sum(
+            structVec, [](const Struct &s) { return s.value; }, 0);
+        QCOMPARE(result, 10);
+    }
+
+    { // Default values for initial value
+        auto result = kdalgorithms::sum(structVec, [](const Struct &s) { return s.value; });
+        QCOMPARE(result, 10);
+    }
+
+    { // Projection being a pointer to member function
+        auto result = kdalgorithms::sum(structVec, &Struct::sumPairs);
+        QCOMPARE(result, 20);
+    }
+
+    { // Projection being a pointer to member variable
+        auto result = kdalgorithms::sum(structVec, &Struct::value);
+        QCOMPARE(result, 10);
+    }
+
+    { // Container is a QMap's
+        QMap<int, int> map{{1, 4}, {2, 3}, {3, 2}, {4, 1}};
+        auto result = kdalgorithms::sum(
+            map, [](const auto &pair) { return pair.second; }, 0);
+        QCOMPARE(result, 10);
+    }
+}
+
+void TestAlgorithms::sum_if()
+{
+    { // Fully specified arguments
+        auto result = kdalgorithms::sum_if(
+            structVec, [](const Struct &s) { return s.value; },
+            [](const Struct &s) { return s.key > 1; }, 0);
+        QCOMPARE(result, 6);
+    }
+
+    { // Default values for initial value
+        auto result = kdalgorithms::sum_if(
+            structVec, [](const Struct &s) { return s.value; },
+            [](const Struct &s) { return s.key > 1; });
+        QCOMPARE(result, 6);
+    }
+
+    { // Predicate being a function pointer
+        auto result = kdalgorithms::sum_if(
+            structVec, [](const Struct &s) { return s.value; }, &Struct::isKeyGreaterThanValue);
+        QCOMPARE(result, 3);
+    }
+
+    { // Projection being a pointer to member function
+        auto result =
+            kdalgorithms::sum_if(structVec, &Struct::sumPairs, &Struct::isKeyGreaterThanValue);
+        QCOMPARE(result, 10);
+    }
+
+    { // Projection being a pointer to member variable
+        auto result =
+            kdalgorithms::sum_if(structVec, &Struct::value, &Struct::isKeyGreaterThanValue);
+        QCOMPARE(result, 3);
+    }
+
+    { // Container is a QMap's
+        QMap<int, int> map{{1, 4}, {2, 3}, {3, 2}, {4, 1}};
+        auto result = kdalgorithms::sum_if(
+            map, [](const auto &pair) { return pair.second; },
+            [](const auto &pair) { return pair.first > pair.second; }, 0);
+        QCOMPARE(result, 3);
     }
 }
 
