@@ -4,6 +4,6 @@ ci:
   autoupdate_schedule: monthly
 repos:
 - repo: https://github.com/fsfe/reuse-tool
-  rev: v3.0.1
+  rev: v3.1.0a1
   hooks:
   - id: reuse
