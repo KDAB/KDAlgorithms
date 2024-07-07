@@ -179,6 +179,7 @@ private Q_SLOTS:
     void invoke();
     void multi_partitioned();
     void multi_partitioned_with_function_taking_a_value();
+    void sub_range();
 };
 
 void TestAlgorithms::copy()
@@ -2804,6 +2805,48 @@ void TestAlgorithms::multi_partitioned_with_function_taking_a_value()
                                                 {"50-59", {{"Jesper", 52}, {"Kalle", 53}}}};
     QCOMPARE(result, expected);
 }
+
+void TestAlgorithms::sub_range()
+{
+#if __cplusplus >= 202302L || (!defined(__APPLE__) && __cplusplus >= 202002L)
+    std::vector<int> test{1, 2, 3};
+    { // all of works with simple subrange, based on two iterators
+        auto result = kdalgorithms::all_of(std::ranges::subrange(test.cbegin(), test.cend()),
+                                           [](const int i) -> bool { return i > 0; });
+        QCOMPARE(result, true);
+    }
+
+    { // So does transformed, again, the sentinel is just the end iterator
+        auto result = kdalgorithms::transformed<std::vector<int>>(
+            std::ranges::subrange(test.cbegin(), test.cend()),
+            [](const int i) -> int { return i + 1; });
+
+        const std::vector<int> expected{2, 3, 4};
+        QCOMPARE(result, expected);
+    }
+
+    { // With the sentinel being the end iterator it fails, and after changing multiple things, I
+      // gave up getting it to work.
+        struct Sentinel
+        {
+            bool operator==(std::vector<int>::const_iterator Iter) const { return *Iter < 0; }
+        };
+
+        std::vector vec{1, 4, 3, 8, -2, 5};
+        Sentinel S{};
+        std::ranges::subrange range(vec.cbegin(), S);
+
+#if 0 // Doesn't compile
+        auto result = kdalgorithms::transformed<std::vector<int>>(
+            range, [](const int i) -> int { return i + 1; });
+
+        const std::vector<int> expected{2, 5, 4, 9};
+        QCOMPARE(result, expected);
+#endif
+    }
+#endif
+}
+
 QTEST_MAIN(TestAlgorithms)
 
 #include "tst_kdalgorithms.moc"
