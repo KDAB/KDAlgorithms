@@ -16,6 +16,10 @@
 #include <concepts>
 #endif
 
+#if __cplusplus >= 202302L || (!defined(__APPLE__) && __cplusplus >= 202002L)
+#include <ranges>
+#endif
+
 namespace kdalgorithms {
 // ----- helper functions for older C++ versions -----
 #if __cplusplus >= 202002L
@@ -43,6 +47,14 @@ namespace detail {
     {
         using value_type = std::pair<const typename T::key_type, typename T::mapped_type>;
     };
+
+#if __cplusplus >= 202302L || (!defined(__APPLE__) && __cplusplus >= 202002L)
+    template <typename I, typename S>
+    struct ValueTypeHelper<std::ranges::subrange<I, S>>
+    {
+        using value_type = std::iter_value_t<I>;
+    };
+#endif
 
 // Wrapper around result_of and invoke_result
 #if __cplusplus < 201703L
