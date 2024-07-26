@@ -33,7 +33,6 @@
         "name": "gcc",
         "hidden": true,
         "cacheVariables": {
-            "CMAKE_C_COMPILER": "gcc",
             "CMAKE_CXX_COMPILER": "g++"
         },
         "binaryDir": "${sourceDir}/build/${presetName}"
@@ -42,7 +41,6 @@
         "name": "clang",
         "hidden": true,
         "cacheVariables": {
-            "CMAKE_C_COMPILER": "clang",
             "CMAKE_CXX_COMPILER": "clang++"
         },
         "binaryDir": "${sourceDir}/build/${presetName}"
