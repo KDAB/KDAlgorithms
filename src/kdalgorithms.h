@@ -10,6 +10,7 @@
 
 #pragma once
 
+#include "kdalgorithms_bits/cartesian_product.h"
 #include "kdalgorithms_bits/filter.h"
 #include "kdalgorithms_bits/find_if.h"
 #include "kdalgorithms_bits/generate.h"
