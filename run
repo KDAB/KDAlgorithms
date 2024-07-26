@@ -1,9 +1,14 @@
-#! /bin/sh
+#! /bin/bash
+
+if [[ $PATH != *"5.15"* ]]; then
+  echo "Please setup Qt5, as Qt6 will force C++17"
+  exit
+fi
 
 rm -rf build
 for compiler in gcc clang; do
   for cpp in cpp14 cpp17 cpp20 cpp23; do
-     echo "========= $compiler - $cpp ==========="
+     echo -e "\n\n========= $compiler - $cpp ==========="
      cmake --preset $cpp-$compiler .
      cd build/$cpp-$compiler
      ninja || exit 1
@@ -13,12 +18,12 @@ done
 
 for compiler in gcc clang; do
   for cpp in cpp14 cpp17 cpp20 cpp23; do
-    echo "\n\n========= $compiler - $cpp ==========="
+    echo -e "\n\n========= $compiler - $cpp ==========="
     cd build/$cpp-$compiler
     ./tst_kdalgorithms -silent
 
     if [ ! $? -eq 0 ]; then
-      echo "\n\n\n FAILURE \n\n\n"
+      echo -e "\n\n\n FAILURE \n\n\n"
       exit 1
     fi
 
