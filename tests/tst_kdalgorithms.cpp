@@ -15,6 +15,7 @@
 #include <QTest>
 #include <QVector>
 #include <algorithm>
+#include <array>
 #include <deque>
 #include <forward_list>
 #include <iostream>
@@ -182,6 +183,7 @@ private Q_SLOTS:
     void multi_partitioned();
     void multi_partitioned_with_function_taking_a_value();
     void sub_range();
+    void product();
 };
 
 void TestAlgorithms::copy()
@@ -2927,6 +2929,68 @@ void TestAlgorithms::sub_range()
 #endif
     }
 #endif
+}
+
+void TestAlgorithms::product()
+{
+    { // Base case
+        std::vector<int> v{1, 2, 3};
+        std::vector<std::tuple<int>> expected{{1}, {2}, {3}};
+        auto result = kdalgorithms::cartesian_product(v);
+        QCOMPARE(result, expected);
+    }
+
+    { // Two lists
+        std::vector<int> v1{1, 2};
+        std::vector<int> v2{3, 4};
+        std::vector<std::tuple<int, int>> expected{{1, 3}, {1, 4}, {2, 3}, {2, 4}};
+        auto result = kdalgorithms::cartesian_product(v1, v2);
+        QCOMPARE(result, expected);
+    }
+
+    { // Three lists
+        std::vector<int> v1{1, 2};
+        std::vector<int> v2{3, 4};
+        std::vector<int> v3{5, 6, 7};
+        std::vector<std::tuple<int, int, int>> expected{{1, 3, 5}, {1, 3, 6}, {1, 3, 7}, {1, 4, 5},
+                                                        {1, 4, 6}, {1, 4, 7}, {2, 3, 5}, {2, 3, 6},
+                                                        {2, 3, 7}, {2, 4, 5}, {2, 4, 6}, {2, 4, 7}};
+        auto result = kdalgorithms::cartesian_product(v1, v2, v3);
+        QCOMPARE(result, expected);
+    }
+
+    { // Different types
+        std::vector<int> v1{1, 2};
+        std::vector<bool> v2{true, false};
+        std::vector<std::tuple<int, bool>> expected{{1, true}, {1, false}, {2, true}, {2, false}};
+        auto result = kdalgorithms::cartesian_product(v1, v2);
+        QCOMPARE(result, expected);
+    }
+
+    { // Different container types
+        // Example from https://en.cppreference.com/w/cpp/ranges/cartesian_product_view
+        const std::array<char, 2> x = {'A', 'B'};
+        const std::vector<int> y = {1, 2, 3};
+        const std::list<std::string> z = {"α", "β", "γ", "δ"};
+
+        const auto expected = std::vector<std::tuple<char, int, std::string>>{
+            {'A', 1, "α"}, {'A', 1, "β"}, {'A', 1, "γ"}, {'A', 1, "δ"}, {'A', 2, "α"},
+            {'A', 2, "β"}, {'A', 2, "γ"}, {'A', 2, "δ"}, {'A', 3, "α"}, {'A', 3, "β"},
+            {'A', 3, "γ"}, {'A', 3, "δ"}, {'B', 1, "α"}, {'B', 1, "β"}, {'B', 1, "γ"},
+            {'B', 1, "δ"}, {'B', 2, "α"}, {'B', 2, "β"}, {'B', 2, "γ"}, {'B', 2, "δ"},
+            {'B', 3, "α"}, {'B', 3, "β"}, {'B', 3, "γ"}, {'B', 3, "δ"},
+        };
+        auto result = kdalgorithms::cartesian_product(x, y, z);
+        QCOMPARE(result, expected);
+    }
+
+    { // Result Type given
+        std::vector<int> v1{1, 2};
+        std::list<bool> v2{true, false};
+        std::deque<std::tuple<int, bool>> expected{{1, true}, {1, false}, {2, true}, {2, false}};
+        auto result = kdalgorithms::cartesian_product<std::deque>(v1, v2);
+        QCOMPARE(result, expected);
+    }
 }
 
 QTEST_MAIN(TestAlgorithms)

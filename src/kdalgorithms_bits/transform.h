@@ -11,6 +11,7 @@
 #pragma once
 
 #include "insert_wrapper.h"
+#include "read_iterator_wrapper.h"
 #include "reserve_helper.h"
 #include "shared.h"
 #include "to_function_object.h"

@@ -41,6 +41,7 @@ Other
 - <a href="#partitioned">partitioned</a>
 - <a href="#multi_partitioned">multi_partitioned</a>
 - <a href="#zip">zip</a>
+- <a href="#cartesian_product">product</a>
 
 
 
@@ -953,3 +954,34 @@ auto result = kdalgorithms::zip<std::deque>(v1, v2);
 ```
 
 See [boost::compine](https://www.boost.org/doc/libs/1_81_0/libs/range/doc/html/range/reference/utilities/combine.html) for similar algorithm in boost, and [std::ranges::views::zip](https://en.cppreference.com/w/cpp/ranges/zip_view) for the C++23 version.
+
+
+<a name="cartesian_product">cartesian_product</a>
+-----------------------------
+cartesian_product takes a number of containers and returns a cartesian product of the items.
+
+```
+const std::array<char, 2> x = {'A', 'B'};
+const std::vector<int> y = {1, 2, 3};
+const std::list<std::string> z = {"α", "β", "γ", "δ"};
+
+auto result = kdalgorithms::product(x, y, z);
+// result is:
+//   std::vector<std::tuple<char, int, std::string>>{
+//      {'A', 1, "α"}, {'A', 1, "β"}, {'A', 1, "γ"}, {'A', 1, "δ"}, 
+//      {'A', 2, "α"}, {'A', 2, "β"}, {'A', 2, "γ"}, {'A', 2, "δ"}, 
+//      {'A', 3, "α"}, {'A', 3, "β"}, {'A', 3, "γ"}, {'A', 3, "δ"}, 
+//      {'B', 1, "α"}, {'B', 1, "β"}, {'B', 1, "γ"}, {'B', 1, "δ"}, 
+//      {'B', 2, "α"}, {'B', 2, "β"}, {'B', 2, "γ"}, {'B', 2, "δ"},
+//      {'B', 3, "α"}, {'B', 3, "β"}, {'B', 3, "γ"}, {'B', 3, "δ"},
+//   };
+```
+
+It is also possible to specify the return type:
+```
+auto result = kdalgorithms::cartesian_product<std::deque>( x, y, z );
+// result is:
+//   std::deque<std::tuple<char, int, std::string>>{ ... }
+```
+
+See [std::cartesian_product](https://en.cppreference.com/w/cpp/ranges/cartesian_product_view)

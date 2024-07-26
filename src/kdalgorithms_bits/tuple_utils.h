@@ -40,5 +40,16 @@ namespace detail {
                                               fn);
     }
 
+    template <typename T1, typename T2>
+    struct merge_tuple_types;
+
+    template <typename T, typename... TupleItems>
+    struct merge_tuple_types<T, std::tuple<TupleItems...>>
+    {
+        using type = std::tuple<T, TupleItems...>;
+    };
+
+    template <typename T, typename Tuple>
+    using merge_tuple_types_t = typename merge_tuple_types<T, Tuple>::type;
 } // namespace detail
 } // namespace kdalgorithms
