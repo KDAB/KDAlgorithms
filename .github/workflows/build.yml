@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2023 Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
+# SPDX-FileCopyrightText: 2023-2024 Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
 #
 # SPDX-License-Identifier: MIT
 
@@ -16,30 +16,29 @@ jobs:
   build:
     runs-on: ${{ matrix.os }}
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
         os:
-          - ubuntu-22.04
-          - windows-2022
-          - macos-12
+          - ubuntu-latest
+          - windows-latest
+          - macos-latest
         preset:
           - cpp14
           - cpp17
           - cpp20
           - cpp23
-        qt:
-          - version: "5.15.2"
-            requested: "5.15"
-          - version: "6.3.2"  # Qt 6.3 is not an LTS version, so '6.3.*' always resolves to '6.3.2'
-            requested: "6.3.*"
+        config:
+          - qt_version: 5.15.2
+            macos_architectures: "x86_64"
+          - qt_version: 6.6.2
+            macos_architectures: "x86_64;arm64"
 
     steps:
       - name: Install Qt with options and default aqtversion
         uses: jurplel/install-qt-action@v3
         with:
           aqtversion: null # use whatever the default is
-          modules: ${{ matrix.qt.modules }}
-          version: ${{ matrix.qt.requested }}
+          version: ${{ matrix.config.qt_version }}
           cache: true
 
       - name: Checkout sources
@@ -52,12 +51,10 @@ jobs:
         if: ${{ runner.os == 'Windows' }}
         uses: ilammy/msvc-dev-cmd@v1
 
-      - name: Create Debug build directory
-        run: mkdir build-debug
-
       - name: Configure Debug Build
         run: >
-          cmake -S . -B ./build-debug -G Ninja --preset ${{ matrix.preset }}
+          cmake -S . -B ./build-debug --preset ${{ matrix.preset }}
+          -DCMAKE_OSX_ARCHITECTURES="${{ matrix.config.macos_architectures }}"
           -DCMAKE_BUILD_TYPE=Debug
           -DBUILD_TESTING=ON
           -DKDALGORITHMS_BUILD_TEST=ON
@@ -66,18 +63,17 @@ jobs:
         run: cmake --build ./build-debug
 
       - name: Run Debug tests
+        id: tests1
         run: ctest --test-dir ./build-debug -C Debug --output-on-failure
 
         # KDAlgorithms CI only matters (and builds) for the tests and since
         # the only value of a Release build is that maybe the compiler
         # does some optimization that breaks them we do both builds
         # in the same worker.
-      - name: Create Release build directory
-        run: mkdir build-release
-
       - name: Configure Release Build
         run: >
-          cmake -S . -B ./build-release -G Ninja --preset ${{ matrix.preset }}
+          cmake -S . -B ./build-release --preset ${{ matrix.preset }}
+          -DCMAKE_OSX_ARCHITECTURES="${{ matrix.config.macos_architectures }}"
           -DCMAKE_BUILD_TYPE=Release
           -DBUILD_TESTING=ON
           -DKDALGORITHMS_BUILD_TEST=ON
@@ -86,10 +82,11 @@ jobs:
         run: cmake --build ./build-release
 
       - name: Run Release tests
+        id: tests2
         run: ctest --test-dir ./build-release -C Release --output-on-failure
 
       - name: Read tests log when it fails
         uses: andstor/file-reader-action@v1
-        if: ${{ failure() }}
+        if: ${{ steps.tests1.outcome == 'failure' || steps.tests2.outcome == 'failure' }}
         with:
           path: "./build/Testing/Temporary/LastTest.log"
