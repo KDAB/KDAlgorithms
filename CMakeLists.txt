@@ -9,7 +9,10 @@ endif()
 
 add_library(kdalgorithms INTERFACE)
 add_library(KDAB::KDAlgorithms ALIAS kdalgorithms)
-target_include_directories(kdalgorithms INTERFACE src/)
+target_include_directories(kdalgorithms INTERFACE
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
+    $<INSTALL_INTERFACE:include>
+)
 
 if(MSVC)
     target_compile_options(kdalgorithms INTERFACE /Zc:__cplusplus)
@@ -95,3 +98,51 @@ if(BUILD_TESTING AND ${KDALGORITHMS_BUILD_TEST})
 
     add_subdirectory(Inspiration)
 endif()
+
+install(TARGETS kdalgorithms EXPORT KDAlgorithmsTargets)
+
+install(EXPORT KDAlgorithmsTargets
+    FILE KDAlgorithmsTargets.cmake
+    NAMESPACE KDAB::
+    DESTINATION lib/cmake/KDAlgorithms
+)
+
+install(FILES
+    src/kdalgorithms.h
+    DESTINATION include/kdalgorithms
+)
+
+install(FILES
+    src/kdalgorithms_bits/read_iterator_wrapper.h
+    src/kdalgorithms_bits/find_if.h
+    src/kdalgorithms_bits/filter.h
+    src/kdalgorithms_bits/generate.h
+    src/kdalgorithms_bits/insert_wrapper.h
+    src/kdalgorithms_bits/is_const_method.h
+    src/kdalgorithms_bits/is_detected.h
+    src/kdalgorithms_bits/method_tests.h
+    src/kdalgorithms_bits/operators.h
+    src/kdalgorithms_bits/reserve_helper.h
+    src/kdalgorithms_bits/return_type_trait.h
+    src/kdalgorithms_bits/shared.h
+    src/kdalgorithms_bits/to_function_object.h
+    src/kdalgorithms_bits/transform.h
+    src/kdalgorithms_bits/zip.h
+    src/kdalgorithms_bits/tuple_utils.h
+    src/kdalgorithms_bits/invoke.h
+    src/kdalgorithms_bits/cartesian_product.h
+    DESTINATION include/kdalgorithms/kdalgorithms_bits
+)
+
+include(CMakePackageConfigHelpers)
+
+configure_package_config_file(
+    KDAlgorithmsConfig.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/KDAlgorithmsConfig.cmake
+    INSTALL_DESTINATION lib/cmake/KDAlgorithms
+)
+
+install(FILES
+    ${CMAKE_CURRENT_BINARY_DIR}/KDAlgorithmsConfig.cmake
+    DESTINATION lib/cmake/KDAlgorithms
+)
