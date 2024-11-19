@@ -77,6 +77,7 @@ jobs:
           -DCMAKE_BUILD_TYPE=Release
           -DBUILD_TESTING=ON
           -DKDALGORITHMS_BUILD_TEST=ON
+          -DCMAKE_INSTALL_PREFIX=installed
 
       - name: Build Project (Release)
         run: cmake --build ./build-release
@@ -84,6 +85,15 @@ jobs:
       - name: Run Release tests
         id: tests2
         run: ctest --test-dir ./build-release -C Release --output-on-failure
+
+      - name: Install Project
+        run: cmake --install ./build-release
+
+      - name: Build standalone example against systemwide KDAlgorithms
+        run: |
+          cd tests/test_install
+          cmake -DCMAKE_PREFIX_PATH="../../installed" .
+          cmake --build .
 
       - name: Read tests log when it fails
         uses: andstor/file-reader-action@v1
