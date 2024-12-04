@@ -119,6 +119,7 @@ private Q_SLOTS:
     void transformedStaticFunctions();
     void transform();
     void filtered_transformed();
+    void transformed_map_values();
     void anyOf();
     void allOf();
     void noneOf();
@@ -868,6 +869,80 @@ void TestAlgorithms::filtered_transformed()
             intVector, [](int i) { return QString::number(i); }, isOdd);
         QStringList expected{"1", "3"};
         QCOMPARE(result, expected);
+    }
+}
+
+void TestAlgorithms::transformed_map_values()
+{
+    std::map<int, int> map{{1, 2}, {2, 3}, {3, 4}};
+
+    { // Simple version specifying the result type
+        std::map<int, int> expected{{1, 4}, {2, 9}, {3, 16}};
+        auto result = kdalgorithms::transformed_map_values<std::map<int, int>>(map, squareItem);
+        QCOMPARE(result, expected);
+    }
+
+    { // Simple version where result type is inferred.
+        std::map<int, int> expected{{1, 4}, {2, 9}, {3, 16}};
+        auto result = kdalgorithms::transformed_map_values(map, squareItem);
+        QCOMPARE(result, expected);
+    }
+
+    { // Transformed result type
+        std::map<int, std::string> expected{{1, "2"}, {2, "3"}, {3, "4"}};
+        auto toString = [](int i) { return std::to_string(i); };
+        auto result = kdalgorithms::transformed_map_values(map, toString);
+        QCOMPARE(result, expected);
+    }
+
+    { // Using QMap instead of std::map
+        QMap<int, int> map{{1, 2}, {2, 3}, {3, 4}};
+        QMap<int, QString> expected{{1, "2"}, {2, "3"}, {3, "4"}};
+        auto toString = [](int i) { return QString::number(i); };
+        auto result = kdalgorithms::transformed_map_values(std::move(map), toString);
+        QCOMPARE(result, expected);
+    }
+
+    { // Using QHash instead of std::map
+        QHash<int, int> map{{1, 2}, {2, 3}, {3, 4}};
+        QHash<int, QString> expected{{1, "2"}, {2, "3"}, {3, "4"}};
+        auto toString = [](int i) { return QString::number(i); };
+        auto result = kdalgorithms::transformed_map_values(map, toString);
+        QCOMPARE(result, expected);
+    }
+
+    { // Specifying a new return type
+        QMap<int, QString> expected{{1, "2"}, {2, "3"}, {3, "4"}};
+        auto toString = [](int i) { return QString::number(i); };
+        auto result = kdalgorithms::transformed_map_values<QMap<int, QString>>(map, toString);
+        QCOMPARE(result, expected);
+    }
+
+    { // Specifying a new return type
+        QMap<int, QString> expected{{1, "2"}, {2, "3"}, {3, "4"}};
+        auto toString = [](int i) { return QString::number(i); };
+        auto result = kdalgorithms::transformed_map_values<QMap>(map, toString);
+        QCOMPARE(result, expected);
+    }
+
+    { // Complex example
+        struct TimeOnProjects
+        {
+            int projectID;
+            int hours;
+        };
+        using TimeList = QList<TimeOnProjects>;
+
+        TimeList timeOnProjects{{1, 10}, {2, 20}, {1, 30}, {3, 40}, {2, 12}};
+        auto map = kdalgorithms::multi_partitioned(timeOnProjects, &TimeOnProjects::projectID);
+        auto sumList = [](const TimeList &list) {
+            return kdalgorithms::sum(list, &TimeOnProjects::hours);
+        };
+
+        auto time = kdalgorithms::transformed_map_values(map, sumList);
+
+        std::map<int, int> expected{{1, 40}, {2, 32}, {3, 40}};
+        QCOMPARE(time, expected);
     }
 }
 
@@ -2909,8 +2984,8 @@ void TestAlgorithms::sub_range()
         QCOMPARE(result, expected);
     }
 
-    { // With the sentinel being the end iterator it fails, and after changing multiple things, I
-      // gave up getting it to work.
+    { // With the sentinel being the end iterator it fails, and after changing multiple things,
+      // I gave up getting it to work.
         struct Sentinel
         {
             bool operator==(std::vector<int>::const_iterator Iter) const { return *Iter < 0; }
