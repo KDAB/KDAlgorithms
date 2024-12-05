@@ -239,4 +239,48 @@ auto filtered_transformed(InputContainer &&input, Transform &&transform,
         detail::to_function_object(std::forward<UnaryPredicate>(unaryPredicate)));
 }
 
+namespace detail {
+    template <typename ResultMap, typename Map, typename Transform>
+    auto transformed_map_values(Map &&input, Transform &&transform)
+    {
+        return transformed<ResultMap>(
+            std::forward<Map>(input),
+            [transform = std::forward<Transform>(transform)](auto &&pair) {
+                return std::make_pair(pair.first, transform(pair.second));
+            });
+    }
+
+    template <typename NewValue, template <typename...> class Map, typename Key, typename OldValue>
+    auto map_value(const Map<Key, OldValue> &) -> Map<remove_cvref_t<Key>, remove_cvref_t<NewValue>>
+    {
+    }
+}
+
+template <typename ResultMap, typename Map, typename Transform>
+auto transformed_map_values(Map &&input, Transform &&transform)
+{
+    return detail::transformed_map_values<ResultMap>(std::forward<Map>(input),
+                                                     std::forward<Transform>(transform));
+}
+
+template <typename Map, typename Transform>
+auto transformed_map_values(Map &&input, Transform &&transform)
+{
+    using ValueType = detail::invoke_result_t<Transform, typename remove_cvref_t<Map>::mapped_type>;
+    using ResultMap = decltype(detail::map_value<ValueType>(input));
+    return detail::transformed_map_values<ResultMap>(std::forward<Map>(input),
+                                                     std::forward<Transform>(transform));
+}
+
+template <template <typename...> class PartialResultMap, typename InputMap, typename Transform>
+auto transformed_map_values(InputMap &&input, Transform &&transform)
+{
+    using KeyType = typename remove_cvref_t<InputMap>::key_type;
+    using ValueType =
+        detail::invoke_result_t<Transform, typename remove_cvref_t<InputMap>::mapped_type>;
+    using ResultMap = PartialResultMap<KeyType, ValueType>;
+    return detail::transformed_map_values<ResultMap>(std::forward<InputMap>(input),
+                                                     std::forward<Transform>(transform));
+}
+
 } // namespace kdalgorithms

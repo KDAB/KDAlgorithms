@@ -8,6 +8,7 @@ Modifying algorithms
 - <a href="#filter">filter</a>
 - <a href="#transform">transform / transformed</a>
 - <a href="#filtered_transformed">filtered_transformed</a>
+- <a href="#transformed_map_values">transformed_map_values</a>
 - <a href="#reverse">reverse</a>
 - <a href="#sort">sort / sorted</a>
 - <a href="#sort_by">sort_by / sorted_by</a>
@@ -197,6 +198,37 @@ auto result = kdalgorithms::filtered_transformed(structVec, &Struct::sumPairs,
 
 ```
 auto result = kdalgorithms::filtered_transformed<std::deque>(intVector, squareItem, isOdd);
+```
+
+<a name="transformed_map_values">transformed_map_values</a>
+-----------------------------------------------------------
+Another special case of transforming is to only transform the values in a map, ie. not the keys.
+
+```
+std::map<int, int> map{{1, 2}, {2, 3}, {3, 4}};
+auto toString = [](int i) { return std::to_string(i); };
+auto result = kdalgorithms::transformed_map_values(map, toString);
+// result is now std::map<int, std::string>{{1, "2"}, {2, "3"}, {3, "4"}};
+```
+
+A more involving example would be this:
+
+```
+struct TimeOnProjects
+{
+    int projectID;
+    int hours;
+};
+using TimeList = QList<TimeOnProjects>;
+
+TimeList timeOnProjects{{1, 10}, {2, 20}, {1, 30}, {3, 40}, {2, 12}};
+
+auto map = kdalgorithms::multi_partitioned(timeOnProjects, &TimeOnProjects::projectID);
+auto sumList = [](const TimeList &list) {
+    return kdalgorithms::sum(list, &TimeOnProjects::hours);
+};
+auto result = kdalgorithms::transformed_map_values(map, sumList);
+// result is std::map<int, int>{{1, 40}, {2, 32}, {3, 40}};
 ```
 
 
